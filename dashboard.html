@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>My Account | International Credit Union</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="assest/css/dashboard.css" />
+  </head>
+
+  <body>
+    <!-- ===== HEADER ===== -->
+
+    <header class="dash-header">
+      <div class="container header-flex">
+        <img
+          src="assest/images/logo.jpeg"
+          alt="International Credit Union Logo"
+          class="site-logo"
+        />
+
+        <div class="user-area">
+          <span class="username">My Account</span>
+
+          <img
+            src="assest/images/profile.png"
+            class="profile-pic"
+            id="profileBtn"
+          />
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== MAIN DASHBOARD ===== -->
+
+    <main class="dashboard">
+      <div class="container">
+        <!-- ===== BALANCE CARD ===== -->
+
+        <section class="balance-card">
+          <div class="balance-info">
+            <h4>Total Balance</h4>
+
+            <h1>$0.00</h1>
+          </div>
+
+          <div class="quick-actions">
+            <a href="wire.html">Wire</a>
+            <a href="cards.html">Cards</a>
+            <a href="loans.html">Loans</a>
+          </div>
+        </section>
+
+        <!-- ===== ACCOUNT SUMMARY ===== -->
+
+        <section class="account-grid">
+          <div class="account-box">
+            <h5>Checking</h5>
+            <p>$0.00</p>
+          </div>
+
+          <div class="account-box">
+            <h5>Savings</h5>
+            <p>$0.00</p>
+          </div>
+
+          <div class="account-box">
+            <h5>Certificate of Deposit</h5>
+            <p>$0.00</p>
+          </div>
+
+          <div class="account-box">
+            <h5>Account Number</h5>
+            <p>— — — —</p>
+          </div>
+        </section>
+
+        <!-- ===== TRANSACTIONS ===== -->
+
+        <section class="transactions">
+          <div class="section-header">
+            <h3>Transactions</h3>
+
+            <a href="transactions.html">View All</a>
+          </div>
+
+          <div class="empty-box">
+            <p>No transactions available.</p>
+            <span>Your activity will appear here.</span>
+          </div>
+        </section>
+
+        <!-- ===== SERVICES ===== -->
+
+        <section class="service-panel">
+          <a href="invest.html" class="service-btn"> Invest </a>
+
+          <a href="deposit.html" class="service-btn"> Deposit Check </a>
+
+          <a href="credit.html" class="service-btn"> Credit Cards </a>
+
+          <a href="manage.html" class="service-btn"> Manage Accounts </a>
+
+          <!-- ===== ACCOUNT MANAGEMENT ===== -->
+
+          <section class="account-actions">
+            <!-- Manage Accounts -->
+            <div class="action-card">
+              <h4>Manage Accounts</h4>
+
+              <p>Update account details, preferences, and security settings.</p>
+
+              <a href="manage.html">Manage</a>
+            </div>
+
+            <!-- Link Account -->
+            <div class="action-card">
+              <h4>Link External Account</h4>
+
+              <p>
+                Connect accounts from other banks and financial institutions.
+              </p>
+
+              <a href="link-account.html">Link Now</a>
+            </div>
+          </section>
+        </section>
+
+        <!-- ===== BUSINESS SWITCH ===== -->
+
+        <section class="switch-box">
+          <p>Switch Account Type</p>
+
+          <button id="switchBtn">Switch to Business</button>
+        </section>
+      </div>
+    </main>
+
+    <script src="assest/js/dashboard.js"></script>
+    <!-- ===== BOTTOM NAV ===== -->
+
+    <nav class="bottom-nav">
+      <a href="transactions.html" class="nav-item">
+        <span>Transactions</span>
+      </a>
+
+      <a href="wire.html" class="nav-item">
+        <span>Wire / Pay</span>
+      </a>
+
+      <a href="dashboard.html" class="nav-item active">
+        <span>Home</span>
+      </a>
+
+      <a href="cards.html" class="nav-item">
+        <span>My Cards</span>
+      </a>
+
+      <a href="settings.html" class="nav-item">
+        <span>Settings</span>
+      </a>
+    </nav>
+  </body>
+</html>
