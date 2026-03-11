@@ -274,6 +274,11 @@ img {
   cursor: pointer;
   outline: none;
 }
+.filter-select.small {
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  border-radius: 6px;
+}
 .btn-dark {
   padding: 9px 20px;
   background: #0d1117;

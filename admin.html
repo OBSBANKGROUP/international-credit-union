@@ -165,7 +165,11 @@
               <div class="chart-legend">
                 <span class="legend-dot green"></span> Deposits
                 <span class="legend-dot blue"></span> Withdrawals
-                <span class="chart-period">Last 7 days</span>
+                <select class="filter-select small" id="chartPeriodFilter">
+                  <option value="7" selected>Last 7 days</option>
+                  <option value="30">Last 30 days</option>
+                  <option value="90">Last 90 days</option>
+                </select>
               </div>
             </div>
             <canvas id="summaryChart" height="260"></canvas>

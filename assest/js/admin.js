@@ -189,10 +189,11 @@
     setText("statMembers", users.length);
 
     // Total deposits = sum of all credit transactions
-    var allLogs = getLogs();
     var totalDeposits = 0;
-    allLogs.forEach(function (l) {
+    var totalWithdrawals = 0;
+    logs.forEach(function (l) {
       if (l.txnType === "credit" && l.amount) totalDeposits += l.amount;
+      if (l.txnType === "debit" && l.amount) totalWithdrawals += l.amount;
     });
     setText("statDeposits", "$" + formatNum(totalDeposits.toFixed(2)));
 
@@ -209,18 +210,25 @@
       users.length > 0 ? Math.round((multiLogin / users.length) * 100) : 0;
     setText("statLoginRate", loginRate + " %");
 
-    // Average balance (simulated per user)
-    var avgBal =
-      users.length > 0 ? Math.round(2412.23 + users.length * 123) : 0;
-    setText("statAvgBalance", "$" + formatNum(avgBal));
+    // Average balance (real calculation from user balances)
+    var avgBal = 0;
+    if (users.length > 0) {
+      var totalBal = 0;
+      users.forEach(function (u) {
+        totalBal += getUserBalance(u.id);
+      });
+      avgBal = Math.round(totalBal / users.length);
+    }
+    setText("statAvgBalance", "$" + formatNum(Math.abs(avgBal)));
 
-    // Conversion rate
+    // Conversion rate: users with at least one transaction / total users
+    var usersWithTxn = {};
+    logs.forEach(function (l) {
+      if (l.amount && l.userId) usersWithTxn[l.userId] = true;
+    });
     var convRate =
       users.length > 0
-        ? Math.min(
-            100,
-            (users.length / Math.max(users.length + 5, 10)) * 100,
-          ).toFixed(1)
+        ? ((Object.keys(usersWithTxn).length / users.length) * 100).toFixed(1)
         : 0;
     setText("statConversion", convRate + " %");
 
@@ -325,8 +333,10 @@
       }
     }
 
-    // Chart
-    renderChart(logs);
+    // Chart — use selected period
+    var chartPeriodEl = document.getElementById("chartPeriodFilter");
+    var chartDays = chartPeriodEl ? parseInt(chartPeriodEl.value, 10) : 7;
+    renderChart(logs, chartDays);
   };
 
   function actionBadge(action) {
@@ -1019,22 +1029,39 @@
      CHART (Dashboard)
      ========================================================== */
   var chartInstance = null;
-  function renderChart(logs) {
+  function renderChart(logs, numDays) {
     var ctx = document.getElementById("summaryChart");
     if (!ctx || typeof Chart === "undefined") return;
 
-    // Build last 7 days data from real logs
+    numDays = numDays || 7;
+
+    // Build data from real transaction logs
     var days = [];
     var deposits = [];
     var withdrawals = [];
     var now = new Date();
-    for (var i = 6; i >= 0; i--) {
+    for (var i = numDays - 1; i >= 0; i--) {
       var d = new Date(now);
       d.setDate(d.getDate() - i);
-      var dayStr = d.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
+      // Adjust label format based on period length
+      var dayStr;
+      if (numDays <= 7) {
+        dayStr = d.toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        });
+      } else if (numDays <= 30) {
+        dayStr = d.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      } else {
+        dayStr = d.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      }
       days.push(dayStr);
 
       var dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -1045,19 +1072,16 @@
         return t >= dayStart && t < dayEnd;
       });
 
-      // Count activities as simulated monetary values
-      var dep =
-        dayLogs.filter(function (l) {
-          return l.action === "Account Created" || l.action === "Deposit";
-        }).length * 1250;
-      var wth =
-        dayLogs.filter(function (l) {
-          return l.action === "Withdrawal" || l.action === "Logout";
-        }).length * 800;
+      // Sum actual transaction amounts
+      var dep = 0;
+      var wth = 0;
+      dayLogs.forEach(function (l) {
+        if (l.txnType === "credit" && l.amount) dep += l.amount;
+        if (l.txnType === "debit" && l.amount) wth += l.amount;
+      });
 
-      // Add baseline so chart isn't flat
-      deposits.push(dep + Math.floor(Math.random() * 2000 + 3000));
-      withdrawals.push(wth + Math.floor(Math.random() * 1500 + 2000));
+      deposits.push(dep);
+      withdrawals.push(wth);
     }
 
     if (chartInstance) chartInstance.destroy();
@@ -1452,6 +1476,17 @@
         document.getElementById("historyModal").classList.remove("show");
       });
   });
+
+  /* ==========================================================
+     CHART PERIOD FILTER
+     ========================================================== */
+  var chartPeriodEl = document.getElementById("chartPeriodFilter");
+  if (chartPeriodEl) {
+    chartPeriodEl.addEventListener("change", function () {
+      var logs = getLogs();
+      renderChart(logs, parseInt(this.value, 10));
+    });
+  }
 
   /* ==========================================================
      INITIAL RENDER — Dashboard
