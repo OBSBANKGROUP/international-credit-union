@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | International Credit Union</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assest/css/admin.css" />
+  </head>
+  <body>
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <img src="assest/images/logo.jpeg" alt="ICU" class="sidebar-logo" />
+        <span class="sidebar-brand">ICU Admin</span>
+        <button class="sidebar-toggle" id="sidebarToggle">
+          <span class="material-icons-outlined">menu</span>
+        </button>
+      </div>
+
+      <div class="sidebar-section-label">GENERAL</div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-link active" data-page="dashboard">
+          <span class="material-icons-outlined">dashboard</span> Dashboard
+        </a>
+        <a href="#" class="nav-link" data-page="users">
+          <span class="material-icons-outlined">people</span> Users
+        </a>
+        <a href="#" class="nav-link" data-page="accounts">
+          <span class="material-icons-outlined">account_balance</span> Accounts
+        </a>
+        <a href="#" class="nav-link" data-page="transactions">
+          <span class="material-icons-outlined">receipt_long</span> Transactions
+        </a>
+        <a href="#" class="nav-link" data-page="review">
+          <span class="material-icons-outlined">rate_review</span> Review
+          <span class="nav-badge" id="reviewBadge">0</span>
+        </a>
+        <a href="#" class="nav-link" data-page="payments">
+          <span class="material-icons-outlined">payments</span> Payments
+        </a>
+        <a href="#" class="nav-link" data-page="integration">
+          <span class="material-icons-outlined">extension</span> Integration
+        </a>
+      </nav>
+
+      <div class="sidebar-section-label">ACCOUNT</div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-link" data-page="settings">
+          <span class="material-icons-outlined">settings</span> Settings
+        </a>
+        <a href="#" class="nav-link" data-page="help">
+          <span class="material-icons-outlined">help_outline</span> Help
+        </a>
+        <a href="#" class="nav-link" data-page="manage">
+          <span class="material-icons-outlined">manage_accounts</span> Manage
+          Users
+        </a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <a href="#" class="nav-link" id="adminLogout">
+          <span class="material-icons-outlined">logout</span> Logout
+        </a>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN WRAP ============ -->
+    <div class="main-wrap">
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="search-wrap">
+          <span class="material-icons-outlined">search</span>
+          <input type="text" placeholder="Search" id="globalSearch" />
+        </div>
+        <div class="topbar-right">
+          <button class="icon-btn">
+            <span class="material-icons-outlined">notifications</span>
+          </button>
+          <button class="icon-btn">
+            <span class="material-icons-outlined">settings</span>
+          </button>
+          <div class="admin-avatar">
+            <img src="assest/images/profile.png" alt="Admin" />
+          </div>
+        </div>
+      </header>
+
+      <!-- ============================================================
+           PAGE: DASHBOARD
+           ============================================================ -->
+      <main class="content page-section active" id="page-dashboard">
+        <div class="welcome-row">
+          <div>
+            <h1 class="welcome-title">
+              Welcome Back, <span id="adminName">Admin</span>!
+            </h1>
+            <p class="welcome-sub">
+              Here's what's happening with your credit union today
+            </p>
+          </div>
+          <div class="welcome-actions">
+            <select class="filter-select" id="periodFilter">
+              <option>Previous Year</option>
+              <option selected>This Year</option>
+              <option>Last 30 Days</option>
+            </select>
+            <button class="btn-dark">View All Time</button>
+          </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stat-cards">
+          <div class="stat-card green-bg">
+            <p class="stat-label">Total Deposits</p>
+            <h2 class="stat-value" id="statDeposits">$0</h2>
+            <div class="stat-change up">
+              <span class="material-icons-outlined">trending_up</span> 14.9 %
+              <span class="stat-extra">(+43.21 %)</span>
+            </div>
+          </div>
+          <div class="stat-card blue-bg">
+            <p class="stat-label">New Members</p>
+            <h2 class="stat-value" id="statMembers">0</h2>
+            <div class="stat-change up">
+              <span class="material-icons-outlined">trending_up</span>
+              <span id="memberGrowth">0%</span>
+            </div>
+          </div>
+          <div class="stat-card purple-bg">
+            <p class="stat-label">Repeat Login Rate</p>
+            <h2 class="stat-value" id="statLoginRate">0 %</h2>
+            <div class="stat-change up">
+              <span class="material-icons-outlined">trending_up</span> 25.6 %
+            </div>
+          </div>
+          <div class="stat-card orange-bg">
+            <p class="stat-label">Average Balance</p>
+            <h2 class="stat-value" id="statAvgBalance">$0</h2>
+            <div class="stat-change up">
+              <span class="material-icons-outlined">trending_up</span> 35.2 %
+            </div>
+          </div>
+          <div class="stat-card red-bg">
+            <p class="stat-label">Conversion Rate</p>
+            <h2 class="stat-value" id="statConversion">0 %</h2>
+            <div class="stat-change down">
+              <span class="material-icons-outlined">trending_down</span> 12.42 %
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart + Active Accounts -->
+        <div class="grid-2-1">
+          <div class="card chart-card">
+            <div class="card-header">
+              <h3>Summary</h3>
+              <div class="chart-legend">
+                <span class="legend-dot green"></span> Deposits
+                <span class="legend-dot blue"></span> Withdrawals
+                <select class="filter-select small" id="chartPeriodFilter">
+                  <option value="7" selected>Last 7 days</option>
+                  <option value="30">Last 30 days</option>
+                  <option value="90">Last 90 days</option>
+                </select>
+              </div>
+            </div>
+            <canvas id="summaryChart" height="260"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Most Active Accounts</h3>
+              <button class="icon-btn small">
+                <span class="material-icons-outlined">more_horiz</span>
+              </button>
+            </div>
+            <ul class="product-list" id="activeAccounts"></ul>
+          </div>
+        </div>
+
+        <!-- Recent Activity + Top Members -->
+        <div class="grid-2-1">
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Activity</h3>
+              <a href="#" class="view-all" data-goto="transactions">View All</a>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Ref ID</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="recentActivity"></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Top Members</h3>
+              <button class="icon-btn small">
+                <span class="material-icons-outlined">more_horiz</span>
+              </button>
+            </div>
+            <ul class="customer-list" id="topMembers"></ul>
+          </div>
+        </div>
+      </main>
+
+      <!-- ============================================================
+           PAGE: USERS
+           ============================================================ -->
+      <section class="content page-section" id="page-users">
+        <div
+          class="page-top"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+          "
+        >
+          <div>
+            <h1 class="page-title">Users</h1>
+            <p class="page-desc">All registered users on the platform</p>
+          </div>
+          <button class="btn-dark" id="addUserBtn">
+            <span
+              class="material-icons-outlined"
+              style="
+                vertical-align: middle;
+                margin-right: 4px;
+                font-size: 1.1rem;
+              "
+              >person_add</span
+            >
+            Add User
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="table-filters">
+              <input
+                type="text"
+                class="table-search"
+                placeholder="Search users..."
+                id="userSearch"
+              />
+              <select class="filter-select" id="userStatusFilter">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
+            <span class="record-count" id="userCount">0 users</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="usersTable">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Joined</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="usersEmpty">
+            <span class="material-icons-outlined">people</span>
+            <p>No users yet</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           PAGE: ACCOUNTS
+           ============================================================ -->
+      <section class="content page-section" id="page-accounts">
+        <div
+          class="page-top"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+          "
+        >
+          <div>
+            <h1 class="page-title">Accounts</h1>
+            <p class="page-desc">Member bank accounts overview</p>
+          </div>
+          <button class="btn-dark" id="addTxnBtn">
+            <span
+              class="material-icons-outlined"
+              style="
+                vertical-align: middle;
+                margin-right: 4px;
+                font-size: 1.1rem;
+              "
+              >add_card</span
+            >
+            Add Transaction
+          </button>
+        </div>
+        <div class="stat-cards small">
+          <div class="stat-card green-bg">
+            <p class="stat-label">Total Accounts</p>
+            <h2 class="stat-value" id="acctTotal">0</h2>
+          </div>
+          <div class="stat-card blue-bg">
+            <p class="stat-label">Checking</p>
+            <h2 class="stat-value" id="acctChecking">0</h2>
+          </div>
+          <div class="stat-card purple-bg">
+            <p class="stat-label">Savings</p>
+            <h2 class="stat-value" id="acctSavings">0</h2>
+          </div>
+          <div class="stat-card orange-bg">
+            <p class="stat-label">Business</p>
+            <h2 class="stat-value" id="acctBusiness">0</h2>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>All Accounts</h3>
+            <span class="record-count" id="acctCount">0 accounts</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Account Holder</th>
+                  <th>Account #</th>
+                  <th>Type</th>
+                  <th>Balance</th>
+                  <th>Opened</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="accountsBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="accountsEmpty">
+            <span class="material-icons-outlined">account_balance</span>
+            <p>No accounts yet</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           PAGE: TRANSACTIONS
+           ============================================================ -->
+      <section class="content page-section" id="page-transactions">
+        <div class="page-top">
+          <h1 class="page-title">Transactions</h1>
+          <p class="page-desc">All activity and transaction logs</p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="table-filters">
+              <input
+                type="text"
+                class="table-search"
+                placeholder="Search transactions..."
+                id="txnSearch"
+              />
+              <select class="filter-select" id="txnTypeFilter">
+                <option value="">All Types</option>
+                <option value="Account Created">Account Created</option>
+                <option value="Login">Login</option>
+                <option value="Logout">Logout</option>
+                <option value="Deposit">Deposit</option>
+                <option value="Withdrawal">Withdrawal</option>
+              </select>
+            </div>
+            <span class="record-count" id="txnCount">0 entries</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Details</th>
+                  <th>Ref ID</th>
+                  <th>Date &amp; Time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="txnBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="txnEmpty">
+            <span class="material-icons-outlined">receipt_long</span>
+            <p>No transactions yet</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           PAGE: REVIEW
+           ============================================================ -->
+      <section class="content page-section" id="page-review">
+        <div class="page-top">
+          <h1 class="page-title">Review</h1>
+          <p class="page-desc">
+            Pending account applications and activity reviews
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Pending Reviews</h3>
+            <span class="record-count" id="reviewCount">0 pending</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Applicant</th>
+                  <th>Email</th>
+                  <th>Account Type</th>
+                  <th>Applied</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reviewBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="reviewEmpty">
+            <span class="material-icons-outlined">rate_review</span>
+            <p>No pending reviews</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           PAGE: PAYMENTS
+           ============================================================ -->
+      <section class="content page-section" id="page-payments">
+        <div class="page-top">
+          <h1 class="page-title">Payments</h1>
+          <p class="page-desc">Monitor all payment activities</p>
+        </div>
+        <div class="stat-cards small">
+          <div class="stat-card green-bg">
+            <p class="stat-label">Total Payments</p>
+            <h2 class="stat-value" id="payTotal">0</h2>
+          </div>
+          <div class="stat-card blue-bg">
+            <p class="stat-label">Completed</p>
+            <h2 class="stat-value" id="payCompleted">0</h2>
+          </div>
+          <div class="stat-card orange-bg">
+            <p class="stat-label">Pending</p>
+            <h2 class="stat-value" id="payPending">0</h2>
+          </div>
+          <div class="stat-card red-bg">
+            <p class="stat-label">Failed</p>
+            <h2 class="stat-value" id="payFailed">0</h2>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Payment History</h3>
+            <span class="record-count" id="payCount">0 payments</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="paymentsBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="paymentsEmpty">
+            <span class="material-icons-outlined">payments</span>
+            <p>No payments recorded yet</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           PAGE: INTEGRATION
+           ============================================================ -->
+      <section class="content page-section" id="page-integration">
+        <div class="page-top">
+          <h1 class="page-title">Integration</h1>
+          <p class="page-desc">Connect external services and APIs</p>
+        </div>
+        <div class="integration-grid">
+          <div class="integration-card">
+            <div class="integ-icon">
+              <span class="material-icons-outlined">email</span>
+            </div>
+            <h3>Email Service</h3>
+            <p>SendGrid SMTP integration for email notifications</p>
+            <div class="integ-status connected">
+              <span class="material-icons-outlined">check_circle</span>
+              Connected
+            </div>
+            <button class="btn-outline">Configure</button>
+          </div>
+          <div class="integration-card">
+            <div class="integ-icon">
+              <span class="material-icons-outlined">sms</span>
+            </div>
+            <h3>SMS Gateway</h3>
+            <p>Twilio integration for SMS alerts and 2FA</p>
+            <div class="integ-status disconnected">
+              <span class="material-icons-outlined">cancel</span> Disconnected
+            </div>
+            <button class="btn-outline">Connect</button>
+          </div>
+          <div class="integration-card">
+            <div class="integ-icon">
+              <span class="material-icons-outlined">credit_card</span>
+            </div>
+            <h3>Payment Gateway</h3>
+            <p>Stripe integration for card processing</p>
+            <div class="integ-status connected">
+              <span class="material-icons-outlined">check_circle</span>
+              Connected
+            </div>
+            <button class="btn-outline">Configure</button>
+          </div>
+          <div class="integration-card">
+            <div class="integ-icon">
+              <span class="material-icons-outlined">security</span>
+            </div>
+            <h3>KYC / AML Provider</h3>
+            <p>Identity verification and compliance checks</p>
+            <div class="integ-status connected">
+              <span class="material-icons-outlined">check_circle</span>
+              Connected
+            </div>
+            <button class="btn-outline">Configure</button>
+          </div>
+          <div class="integration-card">
+            <div class="integ-icon">
+              <span class="material-icons-outlined">analytics</span>
+            </div>
+            <h3>Analytics</h3>
+            <p>Google Analytics for website traffic and behavior</p>
+            <div class="integ-status disconnected">
+              <span class="material-icons-outlined">cancel</span> Disconnected
+            </div>
+            <button class="btn-outline">Connect</button>
+          </div>
+          <div class="integration-card">
+            <div class="integ-icon">
+              <span class="material-icons-outlined">cloud</span>
+            </div>
+            <h3>Cloud Backup</h3>
+            <p>AWS S3 automated daily backups</p>
+            <div class="integ-status connected">
+              <span class="material-icons-outlined">check_circle</span>
+              Connected
+            </div>
+            <button class="btn-outline">Configure</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           PAGE: SETTINGS
+           ============================================================ -->
+      <section class="content page-section" id="page-settings">
+        <div class="page-top">
+          <h1 class="page-title">Settings</h1>
+          <p class="page-desc">System configuration and preferences</p>
+        </div>
+        <div class="settings-grid">
+          <div class="card settings-card">
+            <h3>
+              <span class="material-icons-outlined">palette</span> Appearance
+            </h3>
+            <div class="setting-row">
+              <label>Theme</label
+              ><select class="filter-select">
+                <option>Light</option>
+                <option>Dark</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <label>Sidebar Compact</label
+              ><label class="switch"
+                ><input type="checkbox" id="compactSidebar" /><span
+                  class="slider"
+                ></span
+              ></label>
+            </div>
+          </div>
+          <div class="card settings-card">
+            <h3>
+              <span class="material-icons-outlined">notifications</span>
+              Notifications
+            </h3>
+            <div class="setting-row">
+              <label>Email Notifications</label
+              ><label class="switch"
+                ><input type="checkbox" checked /><span class="slider"></span
+              ></label>
+            </div>
+            <div class="setting-row">
+              <label>New User Alerts</label
+              ><label class="switch"
+                ><input type="checkbox" checked /><span class="slider"></span
+              ></label>
+            </div>
+            <div class="setting-row">
+              <label>Transaction Alerts</label
+              ><label class="switch"
+                ><input type="checkbox" checked /><span class="slider"></span
+              ></label>
+            </div>
+          </div>
+          <div class="card settings-card">
+            <h3>
+              <span class="material-icons-outlined">shield</span> Security
+            </h3>
+            <div class="setting-row">
+              <label>Two-Factor Auth</label
+              ><label class="switch"
+                ><input type="checkbox" /><span class="slider"></span
+              ></label>
+            </div>
+            <div class="setting-row">
+              <label>Session Timeout (min)</label
+              ><input type="number" class="setting-input" value="30" />
+            </div>
+            <div class="setting-row">
+              <label>IP Whitelisting</label
+              ><label class="switch"
+                ><input type="checkbox" /><span class="slider"></span
+              ></label>
+            </div>
+          </div>
+          <div class="card settings-card">
+            <h3><span class="material-icons-outlined">tune</span> General</h3>
+            <div class="setting-row">
+              <label>Currency</label
+              ><select class="filter-select">
+                <option>USD ($)</option>
+                <option>EUR (€)</option>
+                <option>GBP (£)</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <label>Date Format</label
+              ><select class="filter-select">
+                <option>MM/DD/YYYY</option>
+                <option>DD/MM/YYYY</option>
+                <option>YYYY-MM-DD</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <label>Timezone</label
+              ><select class="filter-select">
+                <option>UTC-5 (EST)</option>
+                <option>UTC-8 (PST)</option>
+                <option>UTC+0 (GMT)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <button class="btn-dark" id="saveSettings" style="margin-top: 24px">
+          Save Settings
+        </button>
+      </section>
+
+      <!-- ============================================================
+           PAGE: HELP
+           ============================================================ -->
+      <section class="content page-section" id="page-help">
+        <div class="page-top">
+          <h1 class="page-title">Help Center</h1>
+          <p class="page-desc">Guides and support documentation</p>
+        </div>
+        <div class="help-grid">
+          <div class="card help-card">
+            <span class="material-icons-outlined help-icon">menu_book</span>
+            <h3>Getting Started</h3>
+            <p>
+              Learn the basics of the admin dashboard, navigating tabs, and
+              managing users.
+            </p>
+            <a href="#" class="view-all">Read Guide</a>
+          </div>
+          <div class="card help-card">
+            <span class="material-icons-outlined help-icon">people</span>
+            <h3>User Management</h3>
+            <p>How to review, approve, suspend, and delete user accounts.</p>
+            <a href="#" class="view-all">Read Guide</a>
+          </div>
+          <div class="card help-card">
+            <span class="material-icons-outlined help-icon">receipt_long</span>
+            <h3>Transactions</h3>
+            <p>
+              Understanding the activity log, transaction types, and status
+              labels.
+            </p>
+            <a href="#" class="view-all">Read Guide</a>
+          </div>
+          <div class="card help-card">
+            <span class="material-icons-outlined help-icon">payments</span>
+            <h3>Payments</h3>
+            <p>How payments are tracked, processed, and reconciled.</p>
+            <a href="#" class="view-all">Read Guide</a>
+          </div>
+          <div class="card help-card">
+            <span class="material-icons-outlined help-icon">extension</span>
+            <h3>Integrations</h3>
+            <p>
+              Connecting third-party services like email, SMS, and payment
+              gateways.
+            </p>
+            <a href="#" class="view-all">Read Guide</a>
+          </div>
+          <div class="card help-card">
+            <span class="material-icons-outlined help-icon">support_agent</span>
+            <h3>Contact Support</h3>
+            <p>
+              Reach our technical team for urgent issues and custom requests.
+            </p>
+            <a href="mailto:admin@internationalcu.com" class="view-all"
+              >Email Support</a
+            >
+          </div>
+        </div>
+        <div class="card" style="margin-top: 24px">
+          <h3>Frequently Asked Questions</h3>
+          <div class="faq-list">
+            <details class="faq-item">
+              <summary>How do I reset a user's password?</summary>
+              <p>
+                Go to Manage Users, find the user, click Edit, enter a new
+                password and save.
+              </p>
+            </details>
+            <details class="faq-item">
+              <summary>How do I export user data?</summary>
+              <p>
+                On the Users page, click the Export button to download a CSV of
+                all registered members.
+              </p>
+            </details>
+            <details class="faq-item">
+              <summary>How do I change the admin password?</summary>
+              <p>
+                The admin credentials are set in the system configuration.
+                Contact the dev team to update.
+              </p>
+            </details>
+            <details class="faq-item">
+              <summary>What do the review statuses mean?</summary>
+              <p>
+                <b>Pending</b>: awaiting review. <b>Approved</b>: account
+                active. <b>Suspended</b>: account frozen.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           PAGE: MANAGE USERS
+           ============================================================ -->
+      <section class="content page-section" id="page-manage">
+        <div class="page-top">
+          <h1 class="page-title">Manage Users</h1>
+          <p class="page-desc">Edit, suspend, or remove user accounts</p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="table-filters">
+              <input
+                type="text"
+                class="table-search"
+                placeholder="Search users..."
+                id="manageSearch"
+              />
+            </div>
+            <span class="record-count" id="manageCount">0 users</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Account Type</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="manageBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="manageEmpty">
+            <span class="material-icons-outlined">manage_accounts</span>
+            <p>No users to manage</p>
+          </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div class="modal-overlay" id="editModal">
+          <div class="modal">
+            <div class="modal-header">
+              <h3>Edit User</h3>
+              <button class="icon-btn" id="closeModal">
+                <span class="material-icons-outlined">close</span>
+              </button>
+            </div>
+            <form id="editForm">
+              <input type="hidden" id="editUserId" />
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>First Name</label
+                  ><input type="text" id="editFirstName" required />
+                </div>
+                <div class="form-group">
+                  <label>Last Name</label
+                  ><input type="text" id="editLastName" required />
+                </div>
+                <div class="form-group">
+                  <label>Email</label
+                  ><input type="email" id="editEmail" required />
+                </div>
+                <div class="form-group">
+                  <label>Phone</label><input type="tel" id="editPhone" />
+                </div>
+                <div class="form-group">
+                  <label>Status</label
+                  ><select id="editStatus" class="filter-select">
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>New Password (leave blank to keep)</label
+                  ><input type="password" id="editPassword" />
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button type="button" class="btn-outline" id="cancelEdit">
+                  Cancel
+                </button>
+                <button type="submit" class="btn-dark">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===== ADD USER MODAL ===== -->
+    <div class="modal-overlay" id="addUserModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Add New User</h3>
+          <button class="icon-btn" id="closeAddUser">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+        <form id="addUserForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>First Name</label
+              ><input type="text" id="addFirstName" required />
+            </div>
+            <div class="form-group">
+              <label>Last Name</label
+              ><input type="text" id="addLastName" required />
+            </div>
+            <div class="form-group">
+              <label>Email</label><input type="email" id="addEmail" required />
+            </div>
+            <div class="form-group">
+              <label>Phone</label><input type="tel" id="addPhone" />
+            </div>
+            <div class="form-group">
+              <label>Account Type</label
+              ><select id="addAccountType" class="filter-select">
+                <option value="checking">Checking</option>
+                <option value="savings">Savings</option>
+                <option value="business">Business</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Initial Deposit ($)</label
+              ><input
+                type="number"
+                id="addDeposit"
+                min="0"
+                step="0.01"
+                value="0"
+              />
+            </div>
+            <div class="form-group">
+              <label>Password</label
+              ><input type="password" id="addPassword" required minlength="6" />
+            </div>
+            <div class="form-group">
+              <label>Confirm Password</label
+              ><input type="password" id="addConfirmPassword" required />
+            </div>
+          </div>
+          <p
+            id="addUserError"
+            style="
+              color: #e53935;
+              font-size: 0.85rem;
+              margin-top: 12px;
+              display: none;
+            "
+          ></p>
+          <div class="modal-actions">
+            <button type="button" class="btn-outline" id="cancelAddUser">
+              Cancel
+            </button>
+            <button type="submit" class="btn-dark">Create User</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== ADD TRANSACTION MODAL ===== -->
+    <div class="modal-overlay" id="addTxnModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Add Transaction</h3>
+          <button class="icon-btn" id="closeAddTxn">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+        <form id="addTxnForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Select User</label
+              ><select id="txnUserId" class="filter-select" required></select>
+            </div>
+            <div class="form-group">
+              <label>Type</label
+              ><select id="txnType" class="filter-select" required>
+                <option value="credit">Credit (Deposit)</option>
+                <option value="debit">Debit (Withdrawal)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Amount ($)</label
+              ><input
+                type="number"
+                id="txnAmount"
+                min="0.01"
+                step="0.01"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>Description</label
+              ><input
+                type="text"
+                id="txnDescription"
+                placeholder="e.g. Salary deposit"
+              />
+            </div>
+          </div>
+          <p
+            id="addTxnError"
+            style="
+              color: #e53935;
+              font-size: 0.85rem;
+              margin-top: 12px;
+              display: none;
+            "
+          ></p>
+          <div class="modal-actions">
+            <button type="button" class="btn-outline" id="cancelAddTxn">
+              Cancel
+            </button>
+            <button type="submit" class="btn-dark">Add Transaction</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== TRANSACTION HISTORY MODAL ===== -->
+    <div class="modal-overlay" id="historyModal">
+      <div class="modal" style="max-width: 660px">
+        <div class="modal-header">
+          <h3 id="historyTitle">Transaction History</h3>
+          <button class="icon-btn" id="closeHistory">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+        <div class="history-summary" id="historySummary"></div>
+        <div class="table-wrap" style="max-height: 400px; overflow-y: auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="historyEmpty" style="display: none">
+          <span class="material-icons-outlined">receipt_long</span>
+          <p>No transactions for this account</p>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="assest/js/admin.js"></script>
+  </body>
+</html>
