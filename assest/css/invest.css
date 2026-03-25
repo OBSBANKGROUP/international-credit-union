@@ -1,0 +1,160 @@
+body {
+  font-family: "Inter", sans-serif;
+  background: #f3f5f9;
+  color: #021633;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 0 20px;
+}
+
+/* HEADER */
+
+.page-header {
+  background: #021633;
+  color: #fff;
+  padding: 18px 0;
+}
+
+.page-header .container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.back-btn {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* PAGE */
+
+.invest-page {
+  padding: 40px 0;
+}
+
+/* PORTFOLIO CARD */
+
+.portfolio-card {
+  background: #fff;
+  padding: 35px;
+  border-radius: 16px;
+  text-align: center;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.portfolio-card h1 {
+  font-size: 48px;
+  margin: 10px 0;
+}
+
+.invest-btn {
+  margin-top: 15px;
+  padding: 12px 30px;
+  background: #4b38f5;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.invest-btn:hover {
+  background: #3726cc;
+}
+
+/* INVEST OPTIONS */
+
+.investment-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.invest-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.06);
+  transition: 0.3s;
+}
+
+.invest-card:hover {
+  transform: translateY(-5px);
+}
+
+.invest-card h4 {
+  margin-bottom: 8px;
+}
+
+/* PORTFOLIO */
+
+.empty-portfolio {
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.06);
+}
+
+/* ACTIVITY */
+
+.activity {
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.06);
+}
+
+.activity-box {
+  margin-top: 15px;
+  color: #777;
+}
+
+.investment-disclaimer {
+  margin-top: 50px;
+  padding: 30px;
+  background: #f7f7f7;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #555;
+}
+
+.investment-disclaimer h3 {
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.risk-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+}
+
+.risk-grid div {
+  padding: 15px;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  text-align: center;
+  font-weight: 600;
+  background: #f1f1f1;
+}
+
+.risk-grid div:nth-child(3n) {
+  border-right: none;
+}
+
+.agreement-link {
+  margin-bottom: 15px;
+}
+
+.agreement-link a {
+  color: #0046be;
+  text-decoration: underline;
+}

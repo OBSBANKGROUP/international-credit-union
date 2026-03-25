@@ -1,0 +1,141 @@
+body {
+  font-family: Arial;
+  background: #f4f6fb;
+  margin: 0;
+}
+
+.loan-container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 30px;
+}
+
+.loan-summary {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.loan-balance {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+.loan-title {
+  margin-bottom: 20px;
+}
+
+.loan-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.loan-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.loan-card h3 {
+  margin-bottom: 10px;
+}
+
+.loan-btn {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border: none;
+  background: #4b38f5;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.loan-back {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.back-btn {
+  background: #021633;
+  color: white;
+  padding: 14px 30px;
+  border-radius: 25px;
+  text-decoration: none;
+}
+
+.loan-form-section {
+  background: white;
+  padding: 30px;
+  margin-top: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.loan-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.loan-form input,
+.loan-form select,
+.loan-form textarea {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.submit-loan-btn {
+  margin-top: 15px;
+  padding: 14px;
+  background: #4b38f5;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.hidden {
+  display: none;
+}
+
+.loan-otp {
+  margin-top: 30px;
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.loan-otp input {
+  padding: 12px;
+  width: 220px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.verify-loan-btn {
+  margin-top: 15px;
+  padding: 12px 22px;
+  background: #4b38f5;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Business Banking | International Credit Union</title>
+
+    <link rel="stylesheet" href="assest/css/business-dashboard.css" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <!-- HEADER -->
+
+    <header class="business-header">
+      <div class="container header-flex">
+        <img src="assest/images/logo.jpeg" class="logo" />
+
+        <button id="switchPersonalBtn" class="switch-personal">
+          Switch to Personal
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN DASHBOARD -->
+
+    <main class="business-dashboard container">
+      <h1>Business Banking</h1>
+
+      <p class="subtitle">Manage your business accounts and payments.</p>
+
+      <!-- BUSINESS ACCOUNTS -->
+
+      <section class="accounts-section">
+        <h2>Your Business Accounts</h2>
+
+        <div id="businessAccounts" class="accounts-grid">
+          <!-- Accounts inserted by JS -->
+        </div>
+      </section>
+
+      <!-- QUICK ACTIONS -->
+
+      <section class="actions-section">
+        <h2>Quick Actions</h2>
+
+        <div class="actions-grid">
+          <a href="wire-transfer.html" class="action-card"> Wire Transfer </a>
+
+          <a href="transaction.html" class="action-card">
+            Transaction History
+          </a>
+
+          <a href="deposit-check.html" class="action-card"> Deposit Check </a>
+
+          <a href="card.html" class="action-card"> Business Cards </a>
+        </div>
+      </section>
+
+      <!-- BUSINESS TOOLS -->
+
+      <section class="tools-section">
+        <h2>Business Tools</h2>
+
+        <div class="tools-grid">
+          <div class="tool-card">
+            <h3>Payroll</h3>
+            <p>Pay employees securely.</p>
+          </div>
+
+          <div class="tool-card">
+            <h3>Invoices</h3>
+            <p>Create and manage invoices.</p>
+          </div>
+
+          <div class="tool-card">
+            <h3>Expense Reports</h3>
+            <p>Track business spending.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RECENT TRANSACTIONS -->
+
+      <section class="transactions-section">
+        <h2>Recent Transactions</h2>
+
+        <div id="businessTransactions" class="transactions-list">
+          <p class="no-transactions">No transactions yet.</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="assest/js/business-dashboard.js"></script>
+  </body>
+</html>

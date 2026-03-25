@@ -56,20 +56,18 @@
           <h3>Sign In</h3>
 
           <label>User ID</label>
-          <input type="text" id="loginUserId" />
+          <input type="text" />
 
           <label>Password</label>
-          <input type="password" id="loginPassword" />
+          <input type="password" />
 
-          <div class="save-id"><input type="checkbox" id="saveLogin" /> Save login info</div>
+          <div class="save-id"><input type="checkbox" /> Save login info</div>
 
-          <p id="loginError" style="color:#e53935;font-size:0.82rem;margin-bottom:10px;display:none;"></p>
-
-          <button class="login-btn" id="loginBtn">Log In</button>
+          <button class="login-btn">Log In</button>
 
           <div class="login-links">
-            <a href="#" id="forgotLink">Forgot ID / Password</a>
-            <a href="open-account.html">Enroll</a>
+            <a href="#">Forgot ID / Password</a>
+            <a href="#">Enroll</a>
           </div>
 
           <button class="open-btn"><a href="open-account.html">Open an Account</a></button>
@@ -230,7 +228,7 @@
           anytime, anywhere from your smartphone.
         </p>
 
-        <button class="info-btn white-btn">Explore our app</button>
+        <a href="" id="exploreAppBtn" class="green-btn"> <button class="info-btn white-btn">Explore our app</button> </a>
 
       </div>
 
@@ -272,7 +270,8 @@
             <div class="service-icon">🐾</div>
             <h3>Pet Insurance</h3>
             <p>Affordable protection for your beloved pets.</p>
-            <span class="service-arrow">→</span>
+
+            <a href="insurance.html#pet">  <span class="service-arrow">→</span> </a>
           </div>
 
           <!-- Card 2 -->
@@ -280,7 +279,7 @@
             <div class="service-icon">🏠</div>
             <h3>Home Insurance</h3>
             <p>Flexible coverage for homes and property.</p>
-            <span class="service-arrow">→</span>
+           <a href="insurance.html#home">  <span class="service-arrow">→</span> </a>
           </div>
 
           <!-- Card 3 -->
@@ -288,7 +287,7 @@
             <div class="service-icon">🏢</div>
             <h3>Business Insurance</h3>
             <p>Protection tailored for growing businesses.</p>
-            <span class="service-arrow">→</span>
+           <a href="insurance.html#business">  <span class="service-arrow">→</span> </a>
           </div>
 
           <!-- Card 4 -->
@@ -296,7 +295,7 @@
             <div class="service-icon">🎓</div>
             <h3>Student Insurance</h3>
             <p>Coverage designed for students and scholars.</p>
-            <span class="service-arrow">→</span>
+           <a href="insurance.html#student">  <span class="service-arrow">→</span> </a>
           </div>
 
           <!-- Card 5 -->
@@ -304,7 +303,7 @@
             <div class="service-icon">❤️</div>
             <h3>Health Insurance</h3>
             <p>Comprehensive healthcare protection.</p>
-            <span class="service-arrow">→</span>
+           <a href="insurance.html#health">  <span class="service-arrow">→</span> </a>
           </div>
 
           <!-- Card 6 -->
@@ -312,7 +311,7 @@
             <div class="service-icon">🛡️</div>
             <h3>Life Insurance</h3>
             <p>Financial security for your loved ones.</p>
-            <span class="service-arrow">→</span>
+           <a href="insurance.html#life">  <span class="service-arrow">→</span> </a>
           </div>
         </div>
       </div>
@@ -345,7 +344,7 @@
 
           <ul>
             <li><a href="index.html">Personal Banking</a></li>
-            <li><a href="#">Business Banking</a></li>
+            <li><a href="business.html">Business Banking</a></li>
             <li><a href="#">Loans</a></li>
             <li><a href="#">Investments</a></li>
             <li><a href="open-account.html">Open Account</a></li>
@@ -360,7 +359,7 @@
             <li><a href="#">Checking Accounts</a></li>
             <li><a href="#">Savings Accounts</a></li>
             <li><a href="#">Credit Cards</a></li>
-            <li><a href="#">Insurance</a></li>
+            <li><a href="insurance.html">Insurance</a></li>
             <li><a href="#">Mobile Banking</a></li>
           </ul>
         </div>
@@ -410,6 +409,29 @@
         </div>
       </div>
     </footer>
-    <script src="assest/js/auth.js"></script>
+
+    <!-- APP NOT AVAILABLE MODAL -->
+
+<div id="appModal" class="app-modal hidden">
+
+<div class="app-modal-box">
+
+<h2>Mobile App Unavailable</h2>
+
+<p>
+Our mobile app is currently not available in your region at this time.
+You can continue using our secure online banking platform on this website.
+</p>
+
+<button id="continueWebBtn" class="green-btn">
+Continue Using Website
+</button>
+
+</div>
+
+</div>
+
+    <!-- ================= JS ================= -->
+    <script src="assest/js/main.js"></script>
   </body>
 </html>

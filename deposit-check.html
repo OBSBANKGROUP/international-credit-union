@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Deposit Check | International Credit Union</title>
+
+    <link rel="stylesheet" href="assest/css/deposit-check.css" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <header class="deposit-header">
+      <div class="container">
+        <a href="dashboard.html" class="back-btn">← Back</a>
+
+        <h2>Mobile Check Deposit</h2>
+      </div>
+    </header>
+
+    <main class="deposit-page container">
+      <h1>Deposit a Check</h1>
+
+      <p class="subtitle">
+        Take photos of the front and back of your check to deposit.
+      </p>
+
+      <form id="depositForm" class="deposit-form">
+        <!-- ACCOUNT -->
+
+        <label>Deposit To</label>
+
+        <select id="depositAccount" required>
+          <option value="">Select Account</option>
+          <option>Checking • ****2841</option>
+          <option>Savings • ****8892</option>
+        </select>
+
+        <!-- AMOUNT -->
+
+        <label>Check Amount</label>
+
+        <input type="number" id="checkAmount" placeholder="$0.00" required />
+
+        <!-- FRONT CHECK -->
+
+        <label>Front of Check</label>
+
+        <input type="file" id="frontCheck" accept="image/*" required />
+
+        <!-- BACK CHECK -->
+
+        <label>Back of Check</label>
+
+        <input type="file" id="backCheck" accept="image/*" required />
+
+        <button type="submit" class="deposit-btn">Review Deposit</button>
+      </form>
+    </main>
+
+    <!-- REVIEW MODAL -->
+
+    <div id="reviewModal" class="review-modal">
+      <div class="review-box">
+        <h3>Confirm Deposit</h3>
+
+        <p><strong>Account:</strong> <span id="reviewAccount"></span></p>
+
+        <p><strong>Amount:</strong> $<span id="reviewAmount"></span></p>
+
+        <div class="review-images">
+          <img id="frontPreview" />
+          <img id="backPreview" />
+        </div>
+
+        <button id="confirmDeposit" class="confirm-btn">Submit Deposit</button>
+
+        <button id="cancelDeposit" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+
+    <div id="successDeposit" class="success-box hidden">
+      <h2>Deposit Submitted</h2>
+
+      <p>
+        Your deposit is being reviewed. Funds are typically available within
+        **1–2 business days**.
+      </p>
+
+      <button onclick="window.location.href = 'dashboard.html'">
+        Return to Dashboard
+      </button>
+    </div>
+
+    <script src="assest/js/deposit-check.js"></script>
+  </body>
+</html>

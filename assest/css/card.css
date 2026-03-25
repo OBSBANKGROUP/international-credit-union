@@ -1,0 +1,90 @@
+body {
+  font-family: Arial;
+  background: #f4f6fb;
+  margin: 0;
+}
+
+.cards-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 30px;
+}
+
+/* DEBIT CARD SECTION */
+
+.debit-card-section {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.card-box {
+  position: relative;
+  width: 380px;
+}
+
+.card-img {
+  width: 100%;
+  border-radius: 14px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* BALANCE OVERLAY */
+.card-balance {
+  position: absolute;
+
+  top: 15px;
+  right: 15px;
+
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+
+  background: rgba(0, 0, 0, 0.35);
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+/* CREDIT SECTION */
+
+.credit-title {
+  margin-top: 50px;
+}
+
+.credit-section {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  margin-top: 15px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.no-credit {
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.credit-btn {
+  background: #4b38f5;
+  color: white;
+  padding: 12px 25px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* BACK BUTTON */
+
+.back-section {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.back-btn {
+  background: #021633;
+  color: white;
+  padding: 14px 30px;
+  border-radius: 25px;
+  text-decoration: none;
+}

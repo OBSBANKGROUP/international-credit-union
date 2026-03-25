@@ -97,13 +97,13 @@
       </div>
 
 
-      <div class="toggle-row">
-        <span>Business Mode</span>
-        <label class="switch">
-          <input type="checkbox">
-          <span class="slider"></span>
-        </label>
-      </div>
+     <div class="toggle-row">
+  <span>Business Mode</span>
+
+  <button id="switchBtn" class="business-switch">
+    Switch
+  </button>
+</div>
 
     </div>
 
@@ -114,7 +114,7 @@
     <div class="panel-actions">
 
       <a href="dashboard.html">Home</a>
-      <a href="#">Manage Accounts</a>
+      <a href="Manage-account.html">Manage Accounts</a>
       <a href="creditcard.html">Credit Cards</a>
       <a href="wire.html">Wire / Pay</a>
       <a href="index.html" class="logout-btn">Logout</a>
@@ -141,8 +141,8 @@
 
           <div class="quick-actions">
             <a href="wire-transfer.html">Wire</a>
-            <a href="cards.html">Cards</a>
-            <a href="loans.html">Loans</a>
+            <a href="card.html">Cards</a>
+            <a href="Loan.html">Loans</a>
           </div>
         </section>
 
@@ -190,11 +190,11 @@
         <section class="service-panel">
           <a href="invest.html" class="service-btn"> Invest </a>
 
-          <a href="deposit.html" class="service-btn"> Deposit Check </a>
+          <a href="deposit-check.html" class="service-btn"> Deposit Check </a>
 
           <a href="creditcard.html" class="service-btn"> Credit Cards </a>
 
-          <a href="manage.html" class="service-btn"> Manage Accounts </a>
+          <a href="Manage-account.html" class="service-btn"> Manage Accounts </a>
         </section>
 
 <!-- ===== ACCOUNT CONTROL + CARDS ===== -->
@@ -212,31 +212,23 @@
         <h3>Manage Account</h3>
         <p>Update security, profile and access.</p>
 
-        <a href="#" class="acc-btn blue-btn">
+        <a href="Manage-account.html" class="acc-btn blue-btn">
           Open Manager
         </a>
       </div>
 
 
       <div class="account-box link-box">
-        <h3>Link External Account</h3>
-        <p>Connect accounts from other banks.</p>
+  <h3>Link External Account</h3>
+  <p>Connect accounts from other banks.</p>
 
-        <a href="#" class="acc-btn green-btn">
-          Link Account
-        </a>
-      </div>
-
-
-      <div class="account-box switch-box">
-        <h3>Switch Account</h3>
-        <p>Change between personal and business.</p>
-
-        <a href="#" class="acc-btn purple-btn">
-          Switch Account
-        </a>
-      </div>
-
+  <a href="#" id="linkAccountBtn" class="acc-btn green-btn">
+    Link Account
+  </a>
+</div>
+<button id="switchBtnCard" class="acc-btn purple-btn">
+  Switch Account
+</button>
     </div>
 
 
@@ -266,7 +258,7 @@
     <!-- ===== BOTTOM NAV ===== -->
 
     <nav class="bottom-nav">
-      <a href="transactions.html" class="nav-item">
+      <a href="transaction.html" class="nav-item">
         <span>Transactions</span>
       </a>
 
@@ -278,7 +270,7 @@
         <span>Home</span>
       </a>
 
-      <a href="cards.html" class="nav-item">
+      <a href="card.html" class="nav-item">
         <span>My Cards</span>
       </a>
 
@@ -288,6 +280,95 @@
     </nav>
 
 
+   <!-- LINK ACCOUNT MODAL -->
+
+<div id="linkAccountModal" class="modal hidden">
+
+<div class="modal-box">
+
+<h2>Link External Bank Account</h2>
+
+<!-- STEP 1 -->
+<div id="linkStep1">
+
+<p>Is the account Domestic or International?</p>
+
+<button class="regionBtn" data-type="domestic">
+Domestic (U.S.)
+</button>
+
+<button class="regionBtn" data-type="international">
+International
+</button>
+
+</div>
+
+
+<!-- STEP 2 -->
+
+<div id="linkStep2" class="hidden">
+
+<p>What type of account are you linking?</p>
+
+<button class="accountTypeBtn">
+My personal account at another bank
+</button>
+
+<button class="accountTypeBtn">
+Someone else's personal account
+</button>
+
+<button class="accountTypeBtn">
+Business account (mine or someone else's)
+</button>
+
+<button class="accountTypeBtn">
+Joint account
+</button>
+
+</div>
+
+
+<!-- STEP 3 TRIAL DEPOSIT -->
+
+<div id="trialDepositStep" class="hidden">
+
+<h3>Verify With Trial Deposit</h3>
+
+<input id="routingNumber" placeholder="Routing Number">
+
+<input id="accountNumber" placeholder="Account Number">
+
+<input id="confirmAccountNumber" placeholder="Re-enter Account Number">
+
+<select id="accountType">
+<option>Checking</option>
+<option>Savings</option>
+</select>
+
+<button id="sendTrialOtp">
+Continue
+</button>
+
+</div>
+
+
+<!-- STEP 4 OTP -->
+
+<div id="linkOtpStep" class="hidden">
+
+<p>Enter the verification code sent to your email</p>
+
+<input id="linkOtpInput" placeholder="OTP Code">
+
+<button id="verifyLinkOtp">
+Verify
+</button>
+
+</div>
+
+</div>
+</div>
     <script src="assest/js/dashboard.js"></script>
   </body>
 </html>

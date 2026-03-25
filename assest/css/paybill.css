@@ -1,0 +1,141 @@
+body {
+  font-family: "Inter", sans-serif;
+  background: #f3f5f9;
+  color: #021633;
+  margin: 0;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+.page-header {
+  background: #021633;
+  color: white;
+  padding: 18px 0;
+}
+
+.back-btn {
+  color: white;
+  text-decoration: none;
+  margin-right: 15px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+/* FORM CARD */
+
+.bill-form-card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  margin-bottom: 40px;
+}
+
+.bill-form-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.bill-form-card input,
+.bill-form-card select {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.pay-btn {
+  background: #4b38f5;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pay-btn:hover {
+  background: #3726cc;
+}
+
+/* SAVED BILLERS */
+
+.saved-billers {
+  margin-bottom: 40px;
+}
+
+.biller-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.biller-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.biller-card:hover {
+  transform: translateY(-4px);
+}
+
+/* HISTORY */
+
+.recent-payments {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}
+
+.no-history {
+  color: #777;
+}
+
+/* MODAL */
+
+.confirm-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.confirm-box {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.confirm-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #ddd;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 20px;
+  margin-left: 10px;
+}

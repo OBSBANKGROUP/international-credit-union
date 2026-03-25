@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Loans | International Credit Union</title>
+
+    <link rel="stylesheet" href="assest/css/Loan.css" />
+  </head>
+
+  <body>
+    <div class="loan-container">
+      <h1>Loans</h1>
+
+      <!-- ACTIVE LOAN SECTION -->
+
+      <div class="loan-summary">
+        <h2>Your Loan Balance</h2>
+
+        <div id="loanBalance" class="loan-balance">$0.00</div>
+
+        <p id="loanStatus">You currently have no active loans.</p>
+      </div>
+
+      <!-- LOAN OPTIONS -->
+
+      <h2 class="loan-title">Explore Loan Options</h2>
+
+      <div class="loan-options">
+        <div class="loan-card">
+          <h3>Personal Loan</h3>
+          <p>Flexible loans for personal expenses.</p>
+          <button class="loan-btn applyLoanBtn">Apply</button>
+        </div>
+
+        <div class="loan-card">
+          <h3>Auto Loan</h3>
+          <p>Finance new or used vehicles.</p>
+          <button class="loan-btn applyLoanBtn">Apply</button>
+        </div>
+
+        <div class="loan-card">
+          <h3>Home Mortgage</h3>
+          <p>Buy or refinance your home.</p>
+          <button class="loan-btn applyLoanBtn">Apply</button>
+        </div>
+
+        <div class="loan-card">
+          <h3>Business Loan</h3>
+          <p>Funding for your business growth.</p>
+          <button class="loan-btn applyLoanBtn">Apply</button>
+        </div>
+      </div>
+
+      <!-- BACK BUTTON -->
+
+      <div class="loan-back">
+        <a href="dashboard.html" class="back-btn"> Back to Dashboard </a>
+      </div>
+    </div>
+
+    <!-- ================= LOAN APPLICATION FORM ================= -->
+
+    <section id="loanApplication" class="loan-form-section hidden">
+      <h2>Loan Application</h2>
+      <p>Please complete the form below to apply for a loan.</p>
+
+      <form id="loanForm" class="loan-form">
+        <h3>Personal Information</h3>
+
+        <label>Full Name</label>
+        <input type="text" required />
+
+        <label>Date of Birth</label>
+        <input type="date" required />
+
+        <label>Phone Number</label>
+        <input type="tel" required />
+
+        <label>Email Address</label>
+        <input type="email" required />
+
+        <h3>Employment Information</h3>
+
+        <label>Employment Status</label>
+        <select required>
+          <option value="">Select</option>
+          <option>Employed</option>
+          <option>Self-Employed</option>
+          <option>Unemployed</option>
+          <option>Student</option>
+        </select>
+
+        <label>Employer Name</label>
+        <input type="text" />
+
+        <label>Monthly Income ($)</label>
+        <input type="number" required />
+
+        <h3>Loan Details</h3>
+
+        <label>Loan Type</label>
+        <select required>
+          <option>Personal Loan</option>
+          <option>Auto Loan</option>
+          <option>Home Mortgage</option>
+          <option>Business Loan</option>
+        </select>
+
+        <label>Loan Amount ($)</label>
+        <input type="number" required />
+
+        <label>Loan Purpose</label>
+        <textarea rows="3"></textarea>
+
+        <label>Loan Duration</label>
+        <select>
+          <option>12 Months</option>
+          <option>24 Months</option>
+          <option>36 Months</option>
+          <option>48 Months</option>
+          <option>60 Months</option>
+        </select>
+
+        <h3>Address Information</h3>
+
+        <label>Full Address</label>
+        <input type="text" required />
+
+        <label>City</label>
+        <input type="text" required />
+
+        <label>State</label>
+        <input type="text" required />
+
+        <label>Zip Code</label>
+        <input type="text" required />
+
+        <button type="submit" class="submit-loan-btn">
+          Submit Loan Application
+        </button>
+      </form>
+    </section>
+
+    <!-- ===== OTP VERIFICATION ===== -->
+
+    <div id="loanOtpSection" class="loan-otp hidden">
+      <h3>Verify Your Application</h3>
+
+      <p>
+        For security purposes, please enter the verification code sent to your
+        email.
+      </p>
+
+      <input type="text" id="loanOtpInput" placeholder="Enter OTP Code" />
+
+      <button id="verifyLoanOtpBtn" class="verify-loan-btn">
+        Verify & Submit
+      </button>
+    </div>
+
+    <script src="assest/js/Loan.js"></script>
+  </body>
+</html>

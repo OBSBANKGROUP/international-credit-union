@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Pay Bills | International Credit Union</title>
+
+    <link rel="stylesheet" href="assest/css/paybill.css" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <header class="page-header">
+      <div class="container">
+        <a href="dashboard.html" class="back-btn">← Back</a>
+
+        <h2>Bill Pay</h2>
+      </div>
+    </header>
+
+    <main class="bill-page container">
+      <h1>Pay a Bill</h1>
+
+      <p class="subtitle">Send payments to companies and service providers.</p>
+
+      <!-- PAY BILL FORM -->
+
+      <section class="bill-form-card">
+        <form id="billForm">
+          <label>Select Account</label>
+
+          <select id="payAccount" required>
+            <option value="">Choose Account</option>
+            <option>Checking • ****2841</option>
+            <option>Savings • ****8892</option>
+          </select>
+
+          <label>Biller Name</label>
+
+          <input
+            type="text"
+            id="billerName"
+            placeholder="Electric Company, Internet Provider..."
+            required
+          />
+
+          <label>Account Number</label>
+
+          <input
+            type="text"
+            id="billerAccount"
+            placeholder="Account number with biller"
+            required
+          />
+
+          <label>Payment Amount</label>
+
+          <input type="number" id="billAmount" placeholder="$0.00" required />
+
+          <label>Payment Date</label>
+
+          <input type="date" id="billDate" required />
+
+          <button type="submit" class="pay-btn">Review Payment</button>
+        </form>
+      </section>
+
+      <!-- SAVED BILLERS -->
+
+      <section class="saved-billers">
+        <h2>Saved Billers</h2>
+
+        <div class="biller-grid">
+          <div class="biller-card">
+            <h3>AT&T</h3>
+            <p>Internet</p>
+          </div>
+
+          <div class="biller-card">
+            <h3>Netflix</h3>
+            <p>Subscription</p>
+          </div>
+
+          <div class="biller-card">
+            <h3>Electric Company</h3>
+            <p>Utilities</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RECENT PAYMENTS -->
+
+      <section class="recent-payments">
+        <h2>Recent Payments</h2>
+
+        <div id="paymentHistory">
+          <p class="no-history">No recent payments yet.</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- CONFIRM PAYMENT MODAL -->
+
+    <div id="confirmModal" class="confirm-modal">
+      <div class="confirm-box">
+        <h3>Confirm Payment</h3>
+
+        <p><strong>Biller:</strong> <span id="confirmBiller"></span></p>
+
+        <p><strong>Amount:</strong> $<span id="confirmAmount"></span></p>
+
+        <p><strong>Date:</strong> <span id="confirmDate"></span></p>
+
+        <button id="confirmPay" class="confirm-btn">Confirm Payment</button>
+
+        <button id="cancelPay" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+    <!-- OTP VERIFICATION -->
+
+    <div id="otpModal" class="confirm-modal">
+      <div class="confirm-box">
+        <h3>Verify Payment</h3>
+
+        <p>Enter the verification code sent to your email.</p>
+
+        <input type="text" id="otpInput" placeholder="Enter OTP code" />
+
+        <br /><br />
+
+        <button id="verifyOtpBtn" class="confirm-btn">Verify & Pay</button>
+      </div>
+    </div>
+    <script src="assest/js/paybill.js"></script>
+  </body>
+</html>

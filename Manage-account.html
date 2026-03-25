@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Manage Accounts | International Credit Union</title>
+
+    <link rel="stylesheet" href="assest/css/Manage-account.css" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <header class="page-header">
+      <div class="container">
+        <h2>Manage Accounts</h2>
+      </div>
+    </header>
+
+    <main class="accounts-page container">
+      <!-- TOTAL BALANCE -->
+
+      <section class="total-balance">
+        <h3>Total Balance Across Accounts</h3>
+
+        <h1 id="totalBalance">$0.00</h1>
+      </section>
+
+      <!-- PERSONAL ACCOUNTS -->
+
+      <section class="accounts-section">
+        <h3>Personal Accounts</h3>
+
+        <div id="personalAccounts" class="accounts-grid"></div>
+      </section>
+
+      <!-- BUSINESS ACCOUNTS -->
+
+      <section class="accounts-section">
+        <h3>Business Accounts</h3>
+
+        <div id="businessAccounts" class="accounts-grid"></div>
+      </section>
+
+      <!-- ACTION BUTTONS -->
+
+      <div class="account-actions">
+        <a href="settings.html" class="action-btn"> Account Settings </a>
+
+        <a href="dashboard.html" class="action-btn secondary">
+          Back to Dashboard
+        </a>
+      </div>
+    </main>
+
+    <script src="assest/js/Manage-account.js"></script>
+  </body>
+</html>
