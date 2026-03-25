@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Wire Transfer | International Credit Union</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="assest/css/wire-transfer.css" />
+  </head>
+
+  <body>
+    <!-- ===== HEADER ===== -->
+
+    <header class="page-header">
+      <div class="container">
+        <a href="wire.html" class="back-btn">← Back</a>
+
+        <h2>Wire Transfer</h2>
+      </div>
+    </header>
+
+    <!-- ===== MAIN ===== -->
+
+    <main class="wire-form-page">
+      <div class="container">
+        <h1>Send a Wire Transfer</h1>
+
+        <p class="subtitle">Complete the form below to send money securely.</p>
+
+    <!-- ================= WIRE FORM ================= -->
+
+<form class="wire-form" id="wireForm">
+
+
+  <!-- From Account -->
+
+  <div class="form-group">
+    <label>From Account</label>
+
+    <select required>
+      <option value="">Select Account</option>
+      <option>Checking •••• 2841</option>
+      <option>Savings •••• 9472</option>
+    </select>
+  </div>
+
+
+
+  <!-- Recipient Bank -->
+
+  <div class="form-group">
+    <label>Recipient Bank</label>
+
+    <select id="bankSelect" required>
+
+      <option value="">Select Bank</option>
+
+      <!-- Major Banks -->
+      <option>JPMorgan Chase Bank</option>
+      <option>Bank of America</option>
+      <option>Wells Fargo Bank</option>
+      <option>Citibank</option>
+      <option>U.S. Bank</option>
+      <option>PNC Bank</option>
+      <option>Truist Bank</option>
+      <option>Capital One</option>
+      <option>TD Bank</option>
+      <option>Regions Bank</option>
+      <option>Fifth Third Bank</option>
+      <option>KeyBank</option>
+      <option>Huntington Bank</option>
+      <option>Ally Bank</option>
+      <option>Discover Bank</option>
+      <option>Charles Schwab Bank</option>
+      <option>Citizens Bank</option>
+      <option>HSBC USA</option>
+
+      <!-- Credit Unions -->
+      <option>Navy Federal Credit Union</option>
+      <option>PenFed Credit Union</option>
+      <option>Alliant Credit Union</option>
+
+      <!-- Your Bank -->
+      <option>International Credit Union</option>
+
+      <!-- Manual -->
+      <option value="other">Other (Type Manually)</option>
+
+    </select>
+  </div>
+
+
+
+  <!-- Manual Bank -->
+
+  <div class="form-group hidden" id="customBank">
+    <label>Enter Bank Name</label>
+
+    <input
+      type="text"
+      id="customBankInput"
+      placeholder="Enter bank name"
+    />
+  </div>
+
+
+
+  <!-- Routing -->
+
+  <div class="form-group">
+    <label>Routing Number</label>
+
+  <input
+  type="text"
+  id="routingNumber"
+  placeholder="123456789"
+  maxlength="9"
+  required
+/>
+
+  </div>
+
+
+
+  <!-- Account Number -->
+
+  <div class="form-group">
+    <label>Account Number</label>
+
+   <input
+  type="text"
+  id="accountNumber"
+  placeholder="Enter account number"
+  required
+/>
+
+  </div>
+
+
+
+  <!-- Beneficiary -->
+
+  <div class="form-group">
+    <label>Beneficiary Name</label>
+
+    <input
+      type="text"
+      id="beneficiaryName"
+      placeholder="Will appear automatically"
+      readonly
+    />
+
+    <small id="beneficiaryMsg" class="beneficiary-msg"></small>
+  </div>
+
+
+
+  <!-- Amount -->
+
+  <div class="form-group amount-group">
+    <label>Transfer Amount</label>
+
+    <div class="amount-box">
+
+      <span class="dollar-sign">$</span>
+
+      <input
+        type="text"
+        inputmode="decimal"
+        pattern="[0-9]*[.]?[0-9]{0,2}"
+        placeholder="0.00"
+        required
+        class="amount-input"
+      />
+
+    </div>
+  </div>
+
+
+
+  <!-- Purpose -->
+
+  <div class="form-group full">
+    <label>Purpose / Note</label>
+
+    <textarea
+      rows="3"
+      placeholder="Reason for transfer..."
+    ></textarea>
+  </div>
+
+
+
+  <!-- Submit -->
+
+  <button type="submit" class="submit-btn">
+    Submit Transfer
+  </button>
+
+
+</form>
+
+
+<!-- ================= LOADING SCREEN ================= -->
+
+<div class="loading-screen" id="loadingScreen">
+
+  <div class="loader-box">
+
+    <div class="spinner"></div>
+
+    <p>Processing transfer...</p>
+
+  </div>
+
+</div>
+
+
+
+<!-- ================= OTP MODAL ================= -->
+
+<div class="otp-modal" id="otpModal">
+
+  <div class="otp-box">
+
+    <h3>Email Verification</h3>
+
+    <p>
+      We sent a 6-digit verification code to your registered email.
+    </p>
+
+    <input
+      type="text"
+      id="otpInput"
+      placeholder="Enter OTP"
+      maxlength="6"
+    >
+
+    <button id="verifyOtpBtn">
+      Verify
+    </button>
+
+  </div>
+
+</div>
+<!-- ========== RECEIPT MODAL ========== -->
+
+<div class="receipt-modal" id="receiptModal">
+
+  <div class="receipt-card">
+
+    <!-- Header -->
+    <div class="receipt-header">
+
+      <img src="assest/images/logo.jpeg" class="receipt-logo" />
+
+      <div class="success-icon">✔</div>
+
+      <h2>Transfer Successful</h2>
+
+      <p class="receipt-note">
+        You will receive an email receipt from
+        <strong>support@internationalcu.com</strong>
+        confirming your wire transfer.
+      </p>
+
+    </div>
+
+
+    <!-- Details -->
+    <div class="receipt-details">
+
+      <h3>Transfer Details</h3>
+
+      <div class="detail-row">
+        <span>From Account</span>
+        <span id="receiptFrom"></span>
+      </div>
+
+      <div class="detail-row">
+        <span>Transfer Amount</span>
+        <span>$<span id="receiptAmount"></span></span>
+      </div>
+
+      <div class="detail-row">
+        <span>Transfer Fee</span>
+        <span>$25.00</span>
+      </div>
+
+      <div class="detail-row">
+        <span>Description</span>
+        <span id="receiptNote"></span>
+      </div>
+
+
+      <h3>Recipient Information</h3>
+
+      <div class="detail-row">
+        <span>Name</span>
+        <span id="receiptName"></span>
+      </div>
+
+      <div class="detail-row">
+        <span>Account Number</span>
+        <span id="receiptAccount"></span>
+      </div>
+
+      <div class="detail-row">
+        <span>Bank</span>
+        <span id="receiptBank"></span>
+      </div>
+
+      <div class="detail-row">
+        <span>Transaction ID</span>
+        <span id="receiptId"></span>
+      </div>
+
+      <div class="detail-row">
+        <span>Date</span>
+        <span id="receiptDate"></span>
+      </div>
+
+    </div>
+
+
+    <!-- Buttons -->
+    <div class="receipt-actions">
+
+      <button class="share-btn" id="shareReceiptBtn">
+        Share Receipt
+      </button>
+
+      <button class="done-btn" id="closeReceiptBtn">
+        Done
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+    <script src="assest/js/wire-transfer.js"></script>
+  </body>
+</html>

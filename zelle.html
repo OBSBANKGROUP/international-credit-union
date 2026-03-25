@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Zelle Transfer | International Credit Union</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="assest/css/zelle.css" />
+  </head>
+
+  <body>
+    <!-- HEADER -->
+
+    <header class="page-header">
+      <div class="container">
+        <a href="wire.html" class="back-btn">← Back</a>
+        <h2>Zelle Transfer</h2>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+
+    <main class="zelle-page">
+      <div class="container">
+        <h1>Send Money with Zelle</h1>
+
+        <p class="subtitle">Send money securely using an email address.</p>
+
+        <!-- FORM -->
+
+        <form id="zelleForm" class="zelle-form">
+          <!-- Email -->
+          <div class="form-group">
+            <label>Recipient Email</label>
+            <input
+              type="email"
+              id="email"
+              required
+              placeholder="example@email.com"
+            />
+          </div>
+
+          <!-- Name -->
+          <div class="form-group">
+            <label>Recipient Name</label>
+            <input type="text" id="name" required placeholder="Full name" />
+          </div>
+
+          <!-- Amount -->
+          <div class="form-group">
+            <label>Amount</label>
+
+            <div class="amount-box">
+              <span>$</span>
+              <input type="number" id="amount" min="1" step="0.01" required />
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="submit-btn">Continue</button>
+        </form>
+      </div>
+    </main>
+
+    <!-- CONFIRMATION MODAL -->
+
+    <div class="confirm-modal" id="confirmModal">
+      <div class="confirm-box">
+        <h3>Confirm Transfer</h3>
+
+        <p>Please review before sending:</p>
+
+        <div class="confirm-details">
+          <div>
+            <span>To</span>
+            <strong id="confirmName"></strong>
+          </div>
+
+          <div>
+            <span>Email</span>
+            <strong id="confirmEmail"></strong>
+          </div>
+
+          <div>
+            <span>Amount</span>
+            <strong>$<span id="confirmAmount"></span></strong>
+          </div>
+        </div>
+
+        <div class="confirm-actions">
+          <button id="cancelBtn" class="cancel-btn">Cancel</button>
+
+          <button id="confirmBtn" class="confirm-btn">
+            Confirm & Transfer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECURITY MODAL -->
+
+    <div class="security-modal" id="securityModal">
+      <div class="security-box">
+        <h3>Unusual Activity Detected</h3>
+
+        <p>For your security, we need to verify this transaction.</p>
+
+        <p class="warn-text">Please confirm it’s you.</p>
+
+        <button id="verifyBtn" class="verify-btn">Verify Identity</button>
+      </div>
+    </div>
+
+    <script src="assest/js/zelle.js"></script>
+  </body>
+</html>

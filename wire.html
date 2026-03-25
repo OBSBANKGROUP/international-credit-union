@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Send Money | International Credit Union</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="assest/css/wire.css" />
+  </head>
+
+  <body>
+    <!-- ===== HEADER ===== -->
+
+    <header class="page-header">
+      <div class="container">
+        <a href="dashboard.html" class="back-btn">← Back</a>
+        <h2>Send & Pay</h2>
+      </div>
+    </header>
+
+    <!-- ===== MAIN ===== -->
+
+    <main class="wire-page">
+      <div class="container">
+        <h1>Choose a Transfer Method</h1>
+
+        <p class="subtitle">
+          Select how you would like to send money or pay bills.
+        </p>
+
+        <!-- OPTIONS -->
+
+        <section class="wire-options">
+          <!-- Wire -->
+          <a href="wire-transfer.html" class="wire-card">
+            <h3>Wire Transfer</h3>
+            <p>Send money securely within the United States.</p>
+          </a>
+
+          <!-- International -->
+          <a href="international_wire.html" class="wire-card">
+            <h3>International Wire</h3>
+            <p>Transfer funds worldwide.</p>
+          </a>
+
+          <!-- CashApp / Zelle -->
+          <div class="wire-card pay-card">
+            <h3>Cash App / Zelle</h3>
+
+            <p>Send money instantly.</p>
+
+            <button id="openAppModal" class="pay-btn">Open</button>
+          </div>
+
+          <!-- Bills -->
+          <a href="pay-bills.html" class="wire-card">
+            <h3>Pay Bills</h3>
+            <p>Manage bill payments.</p>
+          </a>
+        </section>
+      </div>
+    </main>
+
+    <!-- ========== APP MODAL ========== -->
+
+    <div class="app-modal" id="appModal">
+      <div class="app-box">
+        <h3>Select Transfer App</h3>
+
+        <div class="app-options">
+          <!-- Cash App -->
+          <div class="app-card" id="cashAppBtn">
+            <img src="assest/images/cashapp.jpeg" alt="Cash App" />
+            <span>Cash App</span>
+          </div>
+
+          <!-- Zelle -->
+          <div class="app-card" id="zelleBtn">
+            <img src="assest/images/zelle.jpeg" alt="Zelle" />
+            <span>Zelle</span>
+          </div>
+        </div>
+
+        <button class="close-app" id="closeAppModal">Cancel</button>
+      </div>
+    </div>
+
+    <!-- JS -->
+    <script src="assest/js/wire.js"></script>
+  </body>
+</html>

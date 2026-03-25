@@ -12,34 +12,119 @@
     />
 
     <link rel="stylesheet" href="assest/css/dashboard.css" />
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
-      rel="stylesheet"
-    />
   </head>
 
   <body>
-    <!-- ===== HEADER ===== -->
+  <!-- ===== HEADER ===== -->
 
-    <header class="dash-header">
-      <div class="container header-flex">
+<header class="dash-header">
+
+  <!-- Notification Bar -->
+  <div id="notifyBar"></div>
+
+
+  <div class="container header-flex">
+
+    <!-- Left -->
+    <div class="header-left">
+
+      <button id="menuBtn" class="menu-btn">☰</button>
+
+      <img
+        src="assest/images/logo.jpeg"
+        class="site-logo"
+        alt="Logo"
+      />
+
+    </div>
+
+
+    <!-- Right -->
+    <div class="header-right">
+
+      <button id="notifyBtn" class="notify-btn">🔔</button>
+
+      <div class="user-area">
+
+        <span class="username">My Account</span>
+
         <img
-          src="assest/images/logo.jpeg"
-          alt="International Credit Union Logo"
-          class="site-logo"
-        />
+  src="assest/images/default-user.png"
+  class="profile-pic"
+  id="profileBtn"
+/>
 
-        <div class="user-area">
-          <span class="username">My Account</span>
 
-          <img
-            src="assest/images/profile.png"
-            class="profile-pic"
-            id="profileBtn"
-          />
-        </div>
       </div>
-    </header>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- DROPDOWN PANEL -->
+
+  <div class="menu-panel" id="menuPanel">
+
+    <div class="panel-top">
+
+      <h3>Account Balance</h3>
+
+      <p class="balance">$0.00</p>
+
+      <div class="panel-links">
+
+        <a href="transaction.html">Transactions</a>
+        <a href="wire.html">Wire</a>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- TOGGLES -->
+
+    <div class="panel-toggles">
+
+      <div class="toggle-row">
+        <span>Dark Mode</span>
+        <label class="switch">
+          <input type="checkbox" id="darkToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+
+      <div class="toggle-row">
+        <span>Business Mode</span>
+        <label class="switch">
+          <input type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+    </div>
+
+
+
+    <!-- ACTION BUTTONS -->
+
+    <div class="panel-actions">
+
+      <a href="dashboard.html">Home</a>
+      <a href="#">Manage Accounts</a>
+      <a href="creditcard.html">Credit Cards</a>
+      <a href="wire.html">Wire / Pay</a>
+      <a href="index.html" class="logout-btn">Logout</a>
+
+    </div>
+
+  </div>
+
+</header>
+
 
     <!-- ===== MAIN DASHBOARD ===== -->
 
@@ -51,11 +136,11 @@
           <div class="balance-info">
             <h4>Total Balance</h4>
 
-            <h1 id="totalBalance">$0.00</h1>
+            <h1>$0.00</h1>
           </div>
 
           <div class="quick-actions">
-            <a href="wire.html">Wire</a>
+            <a href="wire-transfer.html">Wire</a>
             <a href="cards.html">Cards</a>
             <a href="loans.html">Loans</a>
           </div>
@@ -66,22 +151,22 @@
         <section class="account-grid">
           <div class="account-box">
             <h5>Checking</h5>
-            <p id="checkingBal">$0.00</p>
+            <p>$0.00</p>
           </div>
 
           <div class="account-box">
             <h5>Savings</h5>
-            <p id="savingsBal">$0.00</p>
+            <p>$0.00</p>
           </div>
 
           <div class="account-box">
             <h5>Certificate of Deposit</h5>
-            <p id="cdBal">$0.00</p>
+            <p>$0.00</p>
           </div>
 
           <div class="account-box">
             <h5>Account Number</h5>
-            <p id="acctNumber">— — — —</p>
+            <p>— — — —</p>
           </div>
         </section>
 
@@ -91,12 +176,10 @@
           <div class="section-header">
             <h3>Transactions</h3>
 
-            <a href="#" id="viewAllTxns">View All</a>
+            <a href="transaction.html">View All</a>
           </div>
 
-          <div id="txnList" class="txn-list"></div>
-
-          <div class="empty-box" id="txnEmptyBox">
+          <div class="empty-box">
             <p>No transactions available.</p>
             <span>Your activity will appear here.</span>
           </div>
@@ -109,47 +192,77 @@
 
           <a href="deposit.html" class="service-btn"> Deposit Check </a>
 
-          <a href="credit.html" class="service-btn"> Credit Cards </a>
+          <a href="creditcard.html" class="service-btn"> Credit Cards </a>
 
           <a href="manage.html" class="service-btn"> Manage Accounts </a>
-
-          <!-- ===== ACCOUNT MANAGEMENT ===== -->
-
-          <section class="account-actions">
-            <!-- Manage Accounts -->
-            <div class="action-card">
-              <h4>Manage Accounts</h4>
-
-              <p>Update account details, preferences, and security settings.</p>
-
-              <a href="manage.html">Manage</a>
-            </div>
-
-            <!-- Link Account -->
-            <div class="action-card">
-              <h4>Link External Account</h4>
-
-              <p>
-                Connect accounts from other banks and financial institutions.
-              </p>
-
-              <a href="link-account.html">Link Now</a>
-            </div>
-          </section>
         </section>
 
-        <!-- ===== BUSINESS SWITCH ===== -->
+<!-- ===== ACCOUNT CONTROL + CARDS ===== -->
 
-        <section class="switch-box">
-          <p>Switch Account Type</p>
+<section class="account-area">
 
-          <button id="switchBtn">Switch to Business</button>
-        </section>
+  <div class="container account-layout">
+
+
+    <!-- LEFT SIDE -->
+
+    <div class="account-left">
+
+      <div class="account-box manage-box">
+        <h3>Manage Account</h3>
+        <p>Update security, profile and access.</p>
+
+        <a href="#" class="acc-btn blue-btn">
+          Open Manager
+        </a>
       </div>
-    </main>
 
-    <script src="assest/js/auth.js"></script>
-    <script src="assest/js/dashboard.js"></script>
+
+      <div class="account-box link-box">
+        <h3>Link External Account</h3>
+        <p>Connect accounts from other banks.</p>
+
+        <a href="#" class="acc-btn green-btn">
+          Link Account
+        </a>
+      </div>
+
+
+      <div class="account-box switch-box">
+        <h3>Switch Account</h3>
+        <p>Change between personal and business.</p>
+
+        <a href="#" class="acc-btn purple-btn">
+          Switch Account
+        </a>
+      </div>
+
+    </div>
+
+
+
+    <!-- RIGHT SIDE -->
+
+    <div class="account-cards">
+
+      <h2>My Debit Cards</h2>
+
+      <div class="cards-wrapper">
+
+        <img src="assest/images/personalatm.jpeg" alt="Card">
+
+        <img src="assest/images/businessatm.jpeg" alt="Card">
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+</section>
+
+    
     <!-- ===== BOTTOM NAV ===== -->
 
     <nav class="bottom-nav">
@@ -173,5 +286,8 @@
         <span>Settings</span>
       </a>
     </nav>
+
+
+    <script src="assest/js/dashboard.js"></script>
   </body>
 </html>

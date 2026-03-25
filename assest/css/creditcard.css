@@ -1,0 +1,417 @@
+/* ===== RESET ===== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background: #f3f5f9;
+  color: #021633;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 0 20px;
+}
+
+/* ===== HEADER ===== */
+
+.credit-header {
+  background: #021633;
+  color: white;
+  padding: 18px 0;
+}
+
+.credit-header .container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.back-btn {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ===== MAIN ===== */
+
+.credit-page {
+  padding: 50px 0;
+}
+
+/* ===== NO CARD ===== */
+
+.no-card {
+  background: white;
+  padding: 35px;
+  border-radius: 18px;
+
+  text-align: center;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+  margin-bottom: 40px;
+}
+
+.no-card h1 {
+  margin-bottom: 10px;
+}
+
+.no-card p {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.request-btn {
+  padding: 12px 28px;
+
+  background: #4b38f5;
+  color: white;
+
+  border: none;
+  border-radius: 25px;
+
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.request-btn:hover {
+  background: #3726cc;
+}
+
+/* ===== SCORE SECTION ===== */
+
+.score-section {
+  background: white;
+
+  padding: 35px;
+  border-radius: 18px;
+
+  text-align: center;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.score-section h2 {
+  letter-spacing: 2px;
+  font-size: 0.9rem;
+  color: #666;
+
+  margin-bottom: 10px;
+}
+
+/* Score Number */
+
+.score-value {
+  font-size: 52px;
+  font-weight: 700;
+
+  color: #28a745;
+
+  margin-bottom: 15px;
+}
+/* ===== CREDIT GAUGE ===== */
+
+.gauge-container {
+  display: flex;
+  justify-content: center;
+
+  margin: 25px 0;
+}
+
+.gauge {
+  position: relative;
+
+  width: 260px;
+  height: 130px;
+
+  overflow: hidden;
+}
+
+/* Colored Arcs */
+
+.arc {
+  position: absolute;
+
+  width: 260px;
+  height: 260px;
+
+  border-radius: 50%;
+
+  top: 0;
+  left: 0;
+}
+
+.arc.red {
+  background: conic-gradient(
+    from 180deg,
+    #dc3545 0deg 60deg,
+    transparent 60deg 180deg
+  );
+}
+
+.arc.orange {
+  background: conic-gradient(
+    from 180deg,
+    transparent 0deg 60deg,
+    #fd7e14 60deg 110deg,
+    transparent 110deg 180deg
+  );
+}
+
+.arc.green {
+  background: conic-gradient(
+    from 180deg,
+    transparent 0deg 110deg,
+    #28a745 110deg 180deg
+  );
+}
+
+/* Needle */
+
+.needle {
+  position: absolute;
+
+  width: 3px;
+  height: 90px;
+
+  background: #021633;
+
+  bottom: 0;
+  left: 50%;
+
+  transform-origin: bottom center;
+  transform: translateX(-50%) rotate(-90deg);
+
+  transition: transform 1.2s ease;
+
+  z-index: 10;
+}
+
+/* Center */
+
+.center-dot {
+  position: absolute;
+
+  width: 14px;
+  height: 14px;
+
+  background: #021633;
+
+  border-radius: 50%;
+
+  bottom: 0;
+  left: 50%;
+
+  transform: translate(-50%, 50%);
+
+  z-index: 20;
+}
+
+/* ===== LABELS ===== */
+
+.score-labels {
+  display: flex;
+  justify-content: space-between;
+
+  margin-top: 10px;
+
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* ===== MOBILE ===== */
+
+@media (max-width: 600px) {
+  .gauge-wrapper {
+    width: 220px;
+    height: 110px;
+  }
+
+  .gauge-bg {
+    width: 220px;
+    height: 220px;
+  }
+
+  .gauge-cut {
+    width: 220px;
+    height: 110px;
+  }
+
+  .score-value {
+    font-size: 44px;
+  }
+}
+
+/* ================= REQUEST FORM ================= */
+
+.request-section {
+  background: #fff;
+
+  padding: 35px;
+  border-radius: 18px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+  margin-top: 40px;
+}
+
+.request-section h2 {
+  margin-bottom: 5px;
+}
+
+.form-subtitle {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+/* Form Grid */
+
+.card-form {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 20px;
+}
+
+/* Fields */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+  padding: 11px 14px;
+
+  border-radius: 10px;
+  border: 1px solid #ccc;
+
+  font-size: 0.9rem;
+
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #4b38f5;
+}
+
+/* Checkbox */
+
+.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 0.9rem;
+}
+
+/* Submit */
+
+.submit-btn {
+  grid-column: 1 / -1;
+
+  padding: 14px;
+
+  background: #4b38f5;
+  color: white;
+
+  border: none;
+  border-radius: 25px;
+
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background: #3726cc;
+}
+
+/* ================= SUCCESS ================= */
+
+.success-section {
+  margin-top: 40px;
+}
+
+.success-card {
+  background: #fff;
+
+  padding: 40px 30px;
+
+  border-radius: 18px;
+
+  text-align: center;
+
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.success-card h2 {
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
+.success-card p {
+  line-height: 1.6;
+  color: #444;
+}
+
+.success-card .small-text {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Done Button */
+
+.done-btn {
+  margin-top: 25px;
+
+  padding: 12px 25px;
+
+  background: #021633;
+  color: white;
+
+  border: none;
+  border-radius: 25px;
+
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.done-btn:hover {
+  background: #000c22;
+}
+
+/* Hide */
+
+.hidden {
+  display: none;
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  .card-form {
+    grid-template-columns: 1fr;
+  }
+}

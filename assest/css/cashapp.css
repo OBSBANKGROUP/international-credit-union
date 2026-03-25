@@ -1,0 +1,142 @@
+/* ===== RESET ===== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background: #f3f5f9;
+  color: #021633;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 0 20px;
+}
+
+/* ===== HEADER ===== */
+
+.page-header {
+  background: #00d54b;
+  color: #fff;
+  padding: 18px 0;
+}
+
+.page-header .container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.back-btn {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ===== PAGE ===== */
+
+.cashapp-page {
+  padding: 70px 0;
+}
+
+/* ===== CARD ===== */
+
+.link-card {
+  background: #fff;
+
+  max-width: 450px;
+  margin: auto;
+
+  padding: 40px 30px;
+
+  border-radius: 18px;
+
+  text-align: center;
+
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo */
+
+.cashapp-logo {
+  width: 65px;
+  margin-bottom: 15px;
+}
+
+/* Text */
+
+.link-card h1 {
+  margin-bottom: 10px;
+}
+
+.link-card p {
+  color: #555;
+  line-height: 1.6;
+}
+
+.small-text {
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+/* Buttons */
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+
+  margin-top: 30px;
+}
+
+.action-buttons button {
+  flex: 1;
+
+  padding: 12px;
+
+  border: none;
+  border-radius: 25px;
+
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+/* Cancel */
+
+.cancel-btn {
+  background: #e9ecef;
+  color: #021633;
+}
+
+.cancel-btn:hover {
+  background: #dcdfe3;
+}
+
+/* Link */
+
+.link-btn {
+  background: #00d54b;
+  color: white;
+}
+
+.link-btn:hover {
+  background: #00b940;
+}
+
+/* Mobile */
+
+@media (max-width: 500px) {
+  .link-card {
+    padding: 30px 22px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}

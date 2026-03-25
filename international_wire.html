@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>International Transfer | International Credit Union</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="assest/css/international_wire.css" />
+  </head>
+
+  <body>
+    <!-- HEADER -->
+
+    <header class="page-header">
+      <div class="container">
+        <a href="wire.html" class="back-btn">← Back</a>
+        <h2>International Transfer</h2>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+
+    <main class="transfer-page">
+      <div class="container">
+        <h1>Send International Transfer</h1>
+
+        <p class="subtitle">Send money securely across borders.</p>
+
+        <!-- FORM -->
+
+        <form id="intlForm" class="transfer-form">
+          <!-- FROM -->
+
+          <div class="form-group">
+            <label>From Account</label>
+
+            <select required>
+              <option value="">Select Account</option>
+              <option>Checking •••• 2841</option>
+              <option>Savings •••• 9472</option>
+            </select>
+          </div>
+
+          <!-- BANK -->
+
+          <div class="form-group">
+            <label>Recipient Bank</label>
+
+            <input type="text" placeholder="Enter Bank Name" required />
+          </div>
+
+          <!-- BANK ADDRESS -->
+
+          <div class="form-group full">
+            <label>Bank Address</label>
+
+            <input
+              type="text"
+              id="bankAddress"
+              placeholder="Street, City, Country"
+              required
+            />
+          </div>
+
+          <!-- ROUTING -->
+
+          <div class="form-group">
+            <label>Routing / ABA</label>
+
+            <input
+              type="text"
+              id="routing"
+              maxlength="9"
+              placeholder="123456789"
+              required
+            />
+          </div>
+
+          <!-- ACCOUNT -->
+
+          <div class="form-group">
+            <label>Account Number / IBAN</label>
+
+            <input
+              type="text"
+              id="account"
+              placeholder="Account / IBAN"
+              required
+            />
+          </div>
+
+          <!-- SWIFT -->
+
+          <div class="form-group">
+            <label>SWIFT / BIC Code</label>
+
+            <input type="text" id="swift" placeholder="XXXXXXYY" required />
+          </div>
+
+          <!-- BENEFICIARY -->
+
+          <div class="form-group">
+            <label>Beneficiary Name</label>
+
+            <input
+              type="text"
+              id="beneficiary"
+              placeholder="Full Name"
+              required
+            />
+          </div>
+
+          <!-- AMOUNT -->
+
+          <div class="form-group amount-group">
+            <label>Amount (USD)</label>
+
+            <div class="amount-box">
+              <span>$</span>
+
+              <input
+                type="text"
+                class="amount-input"
+                placeholder="0.00"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- PURPOSE -->
+
+          <div class="form-group full">
+            <label>Transfer Note</label>
+
+            <textarea rows="3" placeholder="Purpose of transfer..."></textarea>
+          </div>
+
+          <!-- SUBMIT -->
+
+          <button type="submit" class="submit-btn">
+            Submit International Transfer
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <!-- LOADING -->
+
+    <div id="loadingScreen" class="loading-screen">
+      <div class="loader-box">
+        <div class="spinner"></div>
+
+        <p>Processing international transfer...</p>
+      </div>
+    </div>
+
+    <!-- OTP -->
+
+    <div id="otpModal" class="otp-modal">
+      <div class="otp-box">
+        <h3>Email Verification</h3>
+
+        <p>Enter the 6-digit code sent to your email.</p>
+
+        <input id="otpInput" maxlength="6" />
+
+        <button id="verifyOtpBtn">Verify</button>
+      </div>
+    </div>
+
+    <!-- RECEIPT -->
+
+    <div id="receiptModal" class="receipt-modal">
+      <div class="receipt-card">
+        <div class="receipt-header">
+          <img src="assest/images/logo.jpeg" class="receipt-logo" />
+
+          <div class="success-icon">✔</div>
+
+          <h2>Transfer Successful</h2>
+        </div>
+
+        <div class="receipt-details">
+          <h3>Transfer Details</h3>
+
+          <div class="detail-row">
+            <span>From</span>
+            <span id="rFrom"></span>
+          </div>
+
+          <div class="detail-row">
+            <span>Amount</span>
+            <span>$<span id="rAmount"></span></span>
+          </div>
+
+          <div class="detail-row">
+            <span>Fee</span>
+            <span>$45.00</span>
+          </div>
+
+          <h3>Recipient</h3>
+
+          <div class="detail-row">
+            <span>Name</span>
+            <span id="rName"></span>
+          </div>
+
+          <div class="detail-row">
+            <span>Account</span>
+            <span id="rAccount"></span>
+          </div>
+
+          <div class="detail-row">
+            <span>Bank</span>
+            <span id="rBank"></span>
+          </div>
+
+          <div class="detail-row">
+            <span>SWIFT</span>
+            <span id="rSwift"></span>
+          </div>
+
+          <div class="detail-row">
+            <span>Bank Address</span>
+            <span id="rAddress"></span>
+          </div>
+        </div>
+
+        <div class="receipt-actions">
+          <button id="doneBtn" class="done-btn">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="assest/js/international_wire.js"></script>
+  </body>
+</html>

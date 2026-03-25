@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Transaction History | International Credit Union</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="assest/css/transactions.css" />
+  </head>
+  <body>
+    <!-- ===== HEADER ===== -->
+
+    <header class="history-header">
+      <div class="container">
+        <a href="dashboard.html" class="back-btn">← Back</a>
+
+        <h2>Transaction History</h2>
+
+        <button class="print-btn" onclick="printPage()">Print Statement</button>
+      </div>
+    </header>
+
+    <!-- ===== MAIN ===== -->
+
+    <main class="history-page">
+      <div class="container">
+        <h1>Recent Transactions</h1>
+
+        <p class="subtitle">Showing your last 28 account activities</p>
+
+        <!-- Transactions -->
+
+        <div id="historyList" class="history-list">
+          <!-- JS fills here -->
+        </div>
+
+        <p id="emptyMsg" class="empty-msg">No transactions available.</p>
+      </div>
+    </main>
+
+    <script src="assest/js/transactions.js"></script>
+  </body>
+</html>

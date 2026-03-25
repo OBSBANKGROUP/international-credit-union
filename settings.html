@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Settings | International Credit Union</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="assest/css/settings.css" />
+  </head>
+
+  <body>
+    <!-- ===== HEADER ===== -->
+
+    <header class="settings-header">
+      <div class="container">
+        <a href="dashboard.html" class="back-btn">← Back</a>
+        <h2>Account Settings</h2>
+      </div>
+    </header>
+
+    <!-- ===== MAIN ===== -->
+
+    <main class="settings-page">
+      <div class="container">
+        <!-- ===== PROFILE SECTION ===== -->
+
+        <section class="profile-card">
+          <div class="profile-img-box">
+            <img
+              src="assest/images/profile.png"
+              id="profilePhoto"
+              alt="Profile"
+            />
+          </div>
+
+          <h3 id="fullName">Loading...</h3>
+          <p class="account-id">Account ID: <span id="accountId">----</span></p>
+        </section>
+
+        <!-- ===== PERSONAL INFO ===== -->
+
+        <section class="info-card">
+          <h3>Personal Information</h3>
+
+          <div class="info-grid">
+            <div>
+              <label>Full Name</label>
+              <input id="nameField" readonly />
+            </div>
+
+            <div>
+              <label>Date of Birth</label>
+              <input id="dobField" readonly />
+            </div>
+
+            <div>
+              <label>SSN</label>
+              <input id="ssnField" readonly />
+            </div>
+
+            <div>
+              <label>Phone</label>
+              <input id="phoneField" readonly />
+            </div>
+
+            <div>
+              <label>Email</label>
+              <input id="emailField" readonly />
+            </div>
+
+            <div>
+              <label>Address</label>
+              <input id="addressField" readonly />
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== BANK INFO ===== -->
+
+        <section class="info-card">
+          <h3>Bank Information</h3>
+
+          <div class="info-grid">
+            <div>
+              <label>Account Number</label>
+              <input id="accNumberField" readonly />
+            </div>
+
+            <div>
+              <label>Routing Number</label>
+              <input id="routingField" readonly />
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== SECURITY ===== -->
+
+        <section class="security-card">
+          <h3>Security</h3>
+
+          <div class="security-actions">
+            <button id="changePassBtn">Change Password</button>
+
+            <button id="changeEmailBtn">Change Email</button>
+
+            <button id="resetSecBtn">Reset Security Questions</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- ========== CHANGE PASSWORD MODAL ========== -->
+
+    <div class="modal-overlay" id="passwordModal">
+      <div class="modal-box">
+        <h3>Change Password</h3>
+
+        <!-- Password Form -->
+        <form id="passwordForm">
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="currentPass" required />
+          </div>
+
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="newPass" required />
+          </div>
+
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <input type="password" id="confirmPass" required />
+          </div>
+
+          <p class="error-msg" id="passError"></p>
+
+          <button type="submit" class="confirm-btn">Confirm Changes</button>
+        </form>
+
+        <!-- OTP SECTION -->
+
+        <div class="otp-section hidden" id="otpSection">
+          <p>Enter the 6-digit code sent to your email</p>
+
+          <input
+            type="text"
+            id="otpCode"
+            maxlength="6"
+            placeholder="Enter OTP"
+          />
+
+          <button id="verifyOtpBtn" class="confirm-btn">Verify & Update</button>
+        </div>
+
+        <button class="close-btn" id="closePassModal">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ========== CHANGE SECURITY QUESTIONS MODAL ========== -->
+
+    <div class="modal-overlay" id="securityQModal">
+      <div class="modal-box large">
+        <h3>Change Security Questions</h3>
+
+        <!-- VERIFY -->
+
+        <div id="verifySection">
+          <p>Verify your identity before continuing.</p>
+
+          <button id="sendVerifyOtpBtn" class="confirm-btn">
+            Send Verification Code
+          </button>
+        </div>
+
+        <!-- OTP -->
+
+        <div class="otp-section hidden" id="securityOtpSection">
+          <p>Enter the code sent to your email</p>
+
+          <input
+            type="text"
+            id="securityOtpInput"
+            maxlength="6"
+            placeholder="Enter OTP"
+          />
+
+          <button id="verifySecurityOtpBtn" class="confirm-btn">Verify</button>
+        </div>
+
+        <!-- FORM -->
+
+        <form id="securityQForm" class="hidden">
+          <div class="qa-group">
+            <input type="text" placeholder="New Question 1" required />
+            <input type="text" placeholder="New Answer" required />
+          </div>
+
+          <div class="qa-group">
+            <input type="text" placeholder="New Question 2" required />
+            <input type="text" placeholder="New Answer" required />
+          </div>
+
+          <div class="qa-group">
+            <input type="text" placeholder="New Question 3" required />
+            <input type="text" placeholder="New Answer" required />
+          </div>
+
+          <button type="submit" class="confirm-btn">Save Changes</button>
+        </form>
+
+        <button class="close-btn" id="closeSecurityQModal">Cancel</button>
+      </div>
+    </div>
+
+    <script src="assest/js/settings.js"></script>
+  </body>
+</html>
