@@ -247,11 +247,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function saveTransaction(data) {
+    // 1. Existing local history
     let history = JSON.parse(localStorage.getItem("transactionHistory")) || [];
-
-    history.unshift(data); // newest first
-
+    history.unshift(data);
     localStorage.setItem("transactionHistory", JSON.stringify(history));
+
+    // 2. Global activity log (for balance and sync)
+    const sessionStr = localStorage.getItem("icu_session");
+    if (sessionStr && window._logActivity) {
+      const session = JSON.parse(sessionStr);
+      window._logActivity(
+        session.id,
+        session.firstName + " " + session.lastName,
+        "Wire Transfer",
+        "Sent to " + data.name + " (" + data.bank + ")",
+        parseFloat(data.amount),
+        "debit"
+      );
+    }
   }
 
   /* ================= CLOSE RECEIPT ================= */
