@@ -1,25 +1,61 @@
 document.addEventListener("DOMContentLoaded", () => {
   /* ================= ELEMENTS ================= */
-
   const form = document.getElementById("wireForm");
-
   const bankSelect = document.getElementById("bankSelect");
   const customBank = document.getElementById("customBank");
   const customBankInput = document.getElementById("customBankInput");
-
   const routingInput = document.getElementById("routingNumber");
   const accountInput = document.getElementById("accountNumber");
-
   const beneficiaryInput = document.getElementById("beneficiaryName");
   const beneficiaryMsg = document.getElementById("beneficiaryMsg");
-
   const loadingScreen = document.getElementById("loadingScreen");
   const otpModal = document.getElementById("otpModal");
-
   const otpInput = document.getElementById("otpInput");
   const verifyOtpBtn = document.getElementById("verifyOtpBtn");
-
   const receiptModal = document.getElementById("receiptModal");
+
+  /* ================= LOAD SESSION ================= */
+  const USERS_KEY = "icu_users";
+  const SESSION_KEY = "icu_session";
+  const LOG_KEY = "icu_activity_log";
+
+  function getSession() {
+    const data = localStorage.getItem(SESSION_KEY);
+    return data ? JSON.parse(data) : null;
+  }
+
+  function getUsers() {
+    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+  }
+
+  const session = getSession();
+  if (!session) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  const users = getUsers();
+  const currentUser = users.find(u => u.id === session.id);
+  if (!currentUser) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  // Populate From Account
+  const fromAccSelect = form.querySelector("select");
+  if (fromAccSelect && currentUser.accounts) {
+    let options = '<option value="">Select Account</option>';
+    if (currentUser.accounts.checking) {
+      options += `<option value="checking">Checking •••• ${currentUser.accountNumber ? currentUser.accountNumber.slice(-4) : '2841'}</option>`;
+    }
+    if (currentUser.accounts.savings) {
+      options += `<option value="savings">Savings •••• ${currentUser.accountNumber ? (parseInt(currentUser.accountNumber) + 1).toString().slice(-4) : '9472'}</option>`;
+    }
+    if (currentUser.accounts.business) {
+        options += `<option value="business">Business •••• ${currentUser.accountNumber ? (parseInt(currentUser.accountNumber) + 2).toString().slice(-4) : '1011'}</option>`;
+    }
+    fromAccSelect.innerHTML = options;
+  }
 
   /* ================= DEMO DATABASE ================= */
 
@@ -163,9 +199,18 @@ document.addEventListener("DOMContentLoaded", () => {
   function sendOTP() {
     generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
-    console.log("OTP (Demo):", generatedOTP);
-
-    alert("Verification code sent to your email.");
+    if (window._sendOTP) {
+        window._sendOTP(currentUser.email, generatedOTP, currentUser.firstName)
+            .then(() => {
+                alert("Verification code sent to your email.");
+            })
+            .catch(() => {
+                alert("Error sending email. Please check your connection.");
+            });
+    } else {
+        console.log("OTP (Fallback):", generatedOTP);
+        alert("Verification code sent to your email.");
+    }
   }
 
   verifyOtpBtn.addEventListener("click", () => {
@@ -247,24 +292,75 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function saveTransaction(data) {
-    // 1. Existing local history
+    // 1. Local history for receipt
     let history = JSON.parse(localStorage.getItem("transactionHistory")) || [];
     history.unshift(data);
     localStorage.setItem("transactionHistory", JSON.stringify(history));
 
-    // 2. Global activity log (for balance and sync)
-    const sessionStr = localStorage.getItem("icu_session");
-    if (sessionStr && window._logActivity) {
-      const session = JSON.parse(sessionStr);
+    // 2. Global activity log & Email Alerts
+    const amountNum = parseFloat(data.amount);
+    const fee = 25.00;
+    
+    if (window._logActivity) {
+      // Main Transfer
       window._logActivity(
-        session.id,
-        session.firstName + " " + session.lastName,
+        currentUser.id,
+        currentUser.firstName + " " + currentUser.lastName,
         "Wire Transfer",
         "Sent to " + data.name + " (" + data.bank + ")",
-        parseFloat(data.amount),
-        "debit"
+        amountNum,
+        "debit",
+        data.from // Passing target account
+      );
+
+      // Service Fee
+      window._logActivity(
+        currentUser.id,
+        currentUser.firstName + " " + currentUser.lastName,
+        "Service Fee",
+        "Wire transfer processing charge",
+        fee,
+        "debit",
+        data.from
       );
     }
+
+    // 3. Send Debit Alert Email
+    if (window._sendDebitAlert) {
+      const newBalance = getAccBalance(currentUser.id, data.from); // This might be slightly stale but it's okay for demo
+      window._sendDebitAlert(
+        currentUser.email,
+        (amountNum + fee).toFixed(2),
+        "Wire Transfer to " + data.name,
+        newBalance.toFixed(2),
+        currentUser.firstName
+      );
+    }
+
+    // 4. Update Notifications (Simple implementation)
+    const notifications = JSON.parse(localStorage.getItem("icu_notifications") || "[]");
+    notifications.unshift({
+        id: Date.now(),
+        title: "Transfer Successful",
+        message: `You successfully sent $${data.amount} to ${data.name}. A service fee of $25.00 was applied.`,
+        date: new Date().toISOString(),
+        unread: true
+    });
+    localStorage.setItem("icu_notifications", JSON.stringify(notifications));
+  }
+
+  // Local helper for balance (simpler version for this file)
+  function getAccBalance(userId, type) {
+    const logs = JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
+    let bal = 0;
+    logs.forEach(l => {
+      if (l.userId === userId && l.amount) {
+        if (type && l.targetAccount !== type) return;
+        if (l.txnType === "credit") bal += parseFloat(l.amount);
+        else if (l.txnType === "debit") bal -= parseFloat(l.amount);
+      }
+    });
+    return bal;
   }
 
   /* ================= CLOSE RECEIPT ================= */

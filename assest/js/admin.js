@@ -101,11 +101,14 @@
   }
 
   /* ---------- Balance Calculator ---------- */
-  function getUserBalance(userId) {
+  function getUserBalance(userId, accountType) {
     var logs = getLogs();
     var balance = 0;
     logs.forEach(function (l) {
       if (l.userId === userId && l.amount) {
+        // If accountType specified, only count logs for that account
+        if (accountType && l.targetAccount !== accountType) return;
+        
         if (l.txnType === "credit") balance += l.amount;
         else if (l.txnType === "debit") balance -= l.amount;
       }
@@ -113,10 +116,12 @@
     return balance;
   }
 
-  function getUserTxns(userId) {
+  function getUserTxns(userId, accountType) {
     var logs = getLogs();
     return logs.filter(function (l) {
-      return l.userId === userId && l.amount;
+      if (l.userId !== userId || !l.amount) return false;
+      if (accountType && l.targetAccount !== accountType) return false;
+      return true;
     });
   }
 
@@ -464,44 +469,47 @@
 
     body.innerHTML = users
       .map(function (u) {
-        var type = capitalize(u.accountType || "Checking");
-        var balance = "$" + formatNum(getUserBalance(u.id).toFixed(2));
-        var st = u.status || "active";
-        return (
-          "<tr>" +
-          '<td><div class="user-cell"><div class="cl-avatar" style="width:34px;height:34px;font-size:.75rem">' +
-          initials(u) +
-          "</div>" +
-          "<strong>" +
-          esc(u.firstName + " " + u.lastName) +
-          "</strong></div></td>" +
-          "<td>" +
-          esc(genAcctNum(u.id)) +
-          "</td>" +
-          "<td>" +
-          esc(type) +
-          "</td>" +
-          "<td>" +
-          balance +
-          "</td>" +
-          "<td>" +
-          formatDate(u.createdAt) +
-          "</td>" +
-          '<td><span class="badge ' +
-          st +
-          '">' +
-          capitalize(st) +
-          "</span></td>" +
-          '<td><div class="action-btns">' +
-          '<button class="btn-sm green" onclick="window._adminAddTxn(' +
-          u.id +
-          ')">Add Txn</button>' +
-          '<button class="btn-sm blue" onclick="window._adminViewHistory(' +
-          u.id +
-          ')">History</button>' +
-          "</div></td>" +
-          "</tr>"
-        );
+        var accts = u.accounts || (u.accountType ? { [u.accountType]: true } : { checking: true });
+        return Object.keys(accts).map(function(type) {
+          var label = capitalize(type);
+          var balance = "$" + formatNum(getUserBalance(u.id, type).toFixed(2));
+          var st = u.status || "active";
+          return (
+            "<tr>" +
+            '<td><div class="user-cell"><div class="cl-avatar" style="width:34px;height:34px;font-size:.75rem">' +
+            initials(u) +
+            "</div>" +
+            "<strong>" +
+            esc(u.firstName + " " + u.lastName) +
+            "</strong></div></td>" +
+            "<td>" +
+            esc(genAcctNum(u.id)) +
+            "</td>" +
+            "<td>" +
+            esc(label) +
+            "</td>" +
+            "<td>" +
+            balance +
+            "</td>" +
+            "<td>" +
+            formatDate(u.createdAt) +
+            "</td>" +
+            '<td><span class="badge ' +
+            st +
+            '">' +
+            capitalize(st) +
+            "</span></td>" +
+            '<td><div class="action-btns">' +
+            '<button class="btn-sm green" onclick="window._adminAddTxn(' +
+            u.id +
+            ')">Add Txn</button>' +
+            '<button class="btn-sm blue" onclick="window._adminViewHistory(' +
+            u.id +
+            ')">History</button>' +
+            "</div></td>" +
+            "</tr>"
+          );
+        }).join("");
       })
       .join("");
   };
@@ -811,7 +819,7 @@
           esc(u.phone || "—") +
           "</td>" +
           "<td>" +
-          capitalize(u.accountType || "Checking") +
+          (Object.keys(u.accounts || {}).map(capitalize).join(", ") || capitalize(u.accountType || "Checking")) +
           "</td>" +
           '<td><span class="badge ' +
           st +
@@ -877,6 +885,16 @@
     document.getElementById("editStatus").value = u.status || "active";
     document.getElementById("editPassword").value = "";
 
+    // Set account checkboxes
+    var accts = u.accounts || {};
+    document.querySelectorAll('input[name="editAccountType"]').forEach(function(cb) {
+      cb.checked = !!accts[cb.value];
+    });
+
+    // Set card balances
+    document.getElementById("editCard1Balance").value = u.card1Balance || 0;
+    document.getElementById("editCard2Balance").value = u.card2Balance || 0;
+
     document.getElementById("editModal").classList.add("show");
   };
 
@@ -913,6 +931,17 @@
         .toLowerCase();
       users[idx].phone = document.getElementById("editPhone").value.trim();
       users[idx].status = document.getElementById("editStatus").value;
+
+      // Save account checkboxes
+      var selectedAccounts = {};
+      document.querySelectorAll('input[name="editAccountType"]:checked').forEach(function(cb) {
+        selectedAccounts[cb.value] = true;
+      });
+      users[idx].accounts = selectedAccounts;
+
+      // Save card balances
+      users[idx].card1Balance = parseFloat(document.getElementById("editCard1Balance").value) || 0;
+      users[idx].card2Balance = parseFloat(document.getElementById("editCard2Balance").value) || 0;
 
       var newPass = document.getElementById("editPassword").value;
       if (newPass) users[idx].password = newPass;
@@ -1209,7 +1238,7 @@
         var emailEl = document.getElementById("addEmail");
         var phoneEl = document.getElementById("addPhone");
         var dobEl = document.getElementById("addDOB");
-        var accountTypeEl = document.getElementById("addAccountType");
+        var accountTypeCheckboxes = document.querySelectorAll('input[name="accountType"]:checked');
         var depositEl = document.getElementById("addDeposit");
         var cardBalanceEl = document.getElementById("addCardBalance");
         var ssnEl = document.getElementById("addSSN");
@@ -1227,7 +1256,10 @@
         var email = emailEl.value.trim().toLowerCase();
         var phone = phoneEl ? phoneEl.value.trim() : "";
         var dob = dobEl ? dobEl.value : "";
-        var accountType = accountTypeEl ? accountTypeEl.value : "checking";
+        var selectedAccounts = {};
+        accountTypeCheckboxes.forEach(function(cb) {
+          selectedAccounts[cb.value] = true;
+        });
         var deposit = depositEl ? parseFloat(depositEl.value) || 0 : 0;
         var cardBalance = cardBalanceEl ? parseFloat(cardBalanceEl.value) || 0 : 0;
         var ssn = ssnEl ? ssnEl.value.trim() : "";
@@ -1282,8 +1314,9 @@
               ssn: ssn,
               address: address,
               password: password,
-              accountType: accountType,
-              cardBalance: cardBalance,
+              accounts: selectedAccounts,
+              card1Balance: cardBalance, // Using initial cardBalance as card1Balance
+              card2Balance: 0,
               profilePic: profilePicBase64 || null,
               status: "active",
               createdAt: new Date().toISOString(),
@@ -1295,11 +1328,12 @@
               newUser.id,
               firstName + " " + lastName,
               "Account Created",
-              "Admin created " + accountType + " account"
+              "Admin created accounts: " + Object.keys(selectedAccounts).join(", ")
             );
 
             if (deposit > 0) {
               var logs = getLogs();
+              var targetAccount = selectedAccounts.checking ? "checking" : (selectedAccounts.savings ? "savings" : "business");
               logs.push({
                 id: Date.now() + 1,
                 userId: newUser.id,
@@ -1308,6 +1342,7 @@
                 details: "Initial deposit",
                 amount: deposit,
                 txnType: "credit",
+                targetAccount: targetAccount,
                 timestamp: new Date().toISOString(),
                 status: "completed"
               });
@@ -1462,6 +1497,7 @@
 
       var userId = Number(document.getElementById("txnUserId").value);
       var txnType = document.getElementById("txnType").value;
+      var targetAccount = document.getElementById("txnAccountType").value;
       var amount = parseFloat(document.getElementById("txnAmount").value);
       var description = document.getElementById("txnDescription").value.trim();
 
@@ -1488,10 +1524,10 @@
 
       // Check sufficient balance for debit
       if (txnType === "debit") {
-        var currentBal = getUserBalance(userId);
+        var currentBal = getUserBalance(userId, targetAccount);
         if (amount > currentBal) {
           errEl.textContent =
-            "Insufficient balance. Current balance: $" + currentBal.toFixed(2);
+            "Insufficient balance in " + targetAccount + ". Current balance: $" + currentBal.toFixed(2);
           errEl.style.display = "block";
           return;
         }
@@ -1507,6 +1543,7 @@
         details: description || (txnType === "credit" ? "Credit" : "Debit"),
         amount: amount,
         txnType: txnType,
+        targetAccount: targetAccount,
         timestamp: new Date().toISOString(),
         status: "completed",
       });

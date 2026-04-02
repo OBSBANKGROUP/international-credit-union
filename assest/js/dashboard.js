@@ -53,17 +53,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ================= CALCULATE BALANCE ================= */
   const logs = getLogs();
-  const userLogs = logs.filter(l => l.userId === currentUser.id && l.amount);
-  
-  let totalBalance = 0;
-  userLogs.forEach(l => {
-    if (l.txnType === "credit") totalBalance += parseFloat(l.amount);
-    else if (l.txnType === "debit") totalBalance -= parseFloat(l.amount);
-  });
+  function getAccBalance(userId, type) {
+    let bal = 0;
+    logs.forEach(l => {
+      if (l.userId === userId && l.amount) {
+        if (type && l.targetAccount !== type) return;
+        if (l.txnType === "credit") bal += parseFloat(l.amount);
+        else if (l.txnType === "debit") bal -= parseFloat(l.amount);
+      }
+    });
+    return bal;
+  }
 
-  // Split: 60% Checking / 40% Savings (matches user example: $318k / $212k of $530k)
-  const checkingBalance = totalBalance * 0.6;
-  const savingsBalance = totalBalance * 0.4;
+  const totalBalance = getAccBalance(currentUser.id);
+  const checkingBalance = getAccBalance(currentUser.id, "checking");
+  const savingsBalance = getAccBalance(currentUser.id, "savings");
 
   // Update Balance Labels
   document.querySelectorAll(".balance").forEach(el => {
@@ -82,9 +86,32 @@ document.addEventListener("DOMContentLoaded", () => {
     accountBoxes[3].textContent = currentUser.accountNumber || "— — — —";
   }
 
+  /* ================= NOTIFICATIONS ================= */
+  const notifyBar = document.getElementById("notifyBar");
+  function updateNotifyBar() {
+    const notifications = JSON.parse(localStorage.getItem("icu_notifications") || "[]");
+    const unread = notifications.filter(n => n.unread);
+    if (notifyBar && unread.length > 0) {
+      const latest = unread[0];
+      notifyBar.innerHTML = `
+        <div class="notify-pill">
+          <span class="material-icons-outlined">notifications_active</span>
+          <p>${latest.title}: ${latest.message}</p>
+          <button onclick="this.parentElement.parentElement.style.display='none'">✕</button>
+        </div>
+      `;
+      notifyBar.style.display = "block";
+    } else if (notifyBar) {
+      notifyBar.style.display = "none";
+    }
+  }
+  updateNotifyBar();
+
   /* ================= RECENT TRANSACTIONS ================= */
   const transSection = document.querySelector(".transactions");
   if (transSection) {
+    const allLogs = getLogs();
+    const userLogs = allLogs.filter(l => l.userId === currentUser.id && l.amount);
     const recentLogs = userLogs.slice(-5).reverse();
     
     if (recentLogs.length > 0) {
@@ -197,8 +224,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log("Link Account OTP:", generatedOTP);
-      alert("Verification code sent to your email.");
+      
+      if (window._sendOTP) {
+          window._sendOTP(currentUser.email, generatedOTP, currentUser.firstName)
+              .then(() => alert("Verification code sent to your email."))
+              .catch(() => alert("Error sending code."));
+      } else {
+          console.log("Link Account OTP:", generatedOTP);
+          alert("Verification code sent to your email.");
+      }
+      
       step3.classList.add("hidden");
       step4.classList.remove("hidden");
     });
