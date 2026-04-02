@@ -53,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ================= CALCULATE BALANCE ================= */
   const logs = getLogs();
-  
   function getAccBalance(userId, type) {
     let bal = 0;
     logs.forEach(l => {
@@ -215,30 +214,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-    const sendOtpBtn = document.getElementById("sendTrialOtp");
-    if (sendOtpBtn) {
-      sendOtpBtn.addEventListener("click", () => {
-        const acc = document.getElementById("accountNumber").value;
-        const confirm = document.getElementById("confirmAccountNumber").value;
-        if (acc !== confirm) {
-          alert("Account numbers do not match");
-          return;
-        }
-        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-        
-        if (window._sendOTP) {
-            window._sendOTP(currentUser.email, generatedOTP, currentUser.firstName)
-                .then(() => alert("Verification code sent to your email."))
-                .catch(() => alert("Error sending code."));
-        } else {
-            console.log("Link Account OTP:", generatedOTP);
-            alert("Verification code sent to your email.");
-        }
-        
-        step3.classList.add("hidden");
-        step4.classList.remove("hidden");
-      });
-    }
+  const sendOtpBtn = document.getElementById("sendTrialOtp");
+  if (sendOtpBtn) {
+    sendOtpBtn.addEventListener("click", () => {
+      const acc = document.getElementById("accountNumber").value;
+      const confirm = document.getElementById("confirmAccountNumber").value;
+      if (acc !== confirm) {
+        alert("Account numbers do not match");
+        return;
+      }
+      generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      if (window._sendOTP) {
+          window._sendOTP(currentUser.email, generatedOTP, currentUser.firstName)
+              .then(() => alert("Verification code sent to your email."))
+              .catch(() => alert("Error sending code."));
+      } else {
+          console.log("Link Account OTP:", generatedOTP);
+          alert("Verification code sent to your email.");
+      }
+      
+      step3.classList.add("hidden");
+      step4.classList.remove("hidden");
+    });
+  }
 
   const verifyOtpBtn = document.getElementById("verifyLinkOtp");
   if (verifyOtpBtn) {
