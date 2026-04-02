@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+  if (window._initThemeToggle) {
+    window._initThemeToggle("darkToggle");
+  }
   /* ===================================================
      DEMO USER DATA (ADMIN / BACKEND LATER)
   =================================================== */
