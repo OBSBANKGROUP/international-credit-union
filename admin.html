@@ -13,6 +13,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="assest/css/admin.css" />
+    <script src="assest/js/theme.js"></script>
   </head>
   <body>
     <!-- ============ SIDEBAR ============ -->
@@ -81,6 +82,14 @@
           <input type="text" placeholder="Search" id="globalSearch" />
         </div>
         <div class="topbar-right">
+          <div class="theme-toggle-wrap">
+            <span class="material-icons-outlined">light_mode</span>
+            <label class="switch">
+              <input type="checkbox" id="darkToggle">
+              <span class="slider"></span>
+            </label>
+            <span class="material-icons-outlined">dark_mode</span>
+          </div>
           <button class="icon-btn">
             <span class="material-icons-outlined">notifications</span>
           </button>
@@ -172,7 +181,9 @@
                 </select>
               </div>
             </div>
-            <canvas id="summaryChart" height="260"></canvas>
+            <div class="chart-container" style="position: relative; height: 300px;">
+              <canvas id="summaryChart"></canvas>
+            </div>
           </div>
           <div class="card">
             <div class="card-header">

@@ -191,6 +191,99 @@ body {
     flex-direction: column;
   }
 }
+
+/* ============================================================
+   DARK MODE SUPPORT
+   ============================================================ */
+
+.dark-mode {
+  background: #020d1c !important;
+  color: #c9d1d9 !important;
+}
+
+.dark-mode .settings-header {
+  background: #010814;
+  border-bottom: 1px solid #30363d;
+}
+
+.dark-mode .profile-card,
+.dark-mode .info-card,
+.dark-mode .security-card,
+.dark-mode .modal-box {
+  background: #0d1117;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .info-grid input,
+.dark-mode .modal-box input {
+  background: #161b22;
+  border-color: #30363d;
+  color: #c9d1d9;
+}
+
+.dark-mode .account-id,
+.dark-mode .info-grid label,
+.dark-mode .modal-box label {
+  color: #8b949e;
+}
+
+.dark-mode .close-btn {
+  background: #30363d;
+  color: #f0f6fc;
+}
+
+.dark-mode .close-btn:hover {
+  background: #3d444d;
+}
+
+/* Theme Toggle Switch (Same as Admin) */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 22px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4b38f5;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
 /* ========== MODAL ========== */
 
 .modal-overlay {
@@ -346,3 +439,96 @@ body {
 .hidden {
   display: none;
 }
+
+/* ============================================================
+   DARK MODE SUPPORT
+   ============================================================ */
+
+.dark-mode {
+  background: #020d1c !important;
+  color: #c9d1d9 !important;
+}
+
+.dark-mode .settings-header {
+  background: #010814;
+  border-bottom: 1px solid #30363d;
+}
+
+.dark-mode .profile-card,
+.dark-mode .info-card,
+.dark-mode .security-card,
+.dark-mode .modal-box {
+  background: #0d1117;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .info-grid input,
+.dark-mode .modal-box input {
+  background: #161b22;
+  border-color: #30363d;
+  color: #c9d1d9;
+}
+
+.dark-mode .account-id,
+.dark-mode .info-grid label,
+.dark-mode .modal-box label {
+  color: #8b949e;
+}
+
+.dark-mode .close-btn {
+  background: #30363d;
+  color: #f0f6fc;
+}
+
+.dark-mode .close-btn:hover {
+  background: #3d444d;
+}
+
+/* Theme Toggle Switch (Same as Admin) */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 22px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4b38f5;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+

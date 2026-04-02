@@ -100,6 +100,13 @@
     return "ICU-" + ("00000000" + id).slice(-8);
   }
 
+  /* ---------- Initialization ---------- */
+  document.addEventListener("DOMContentLoaded", function () {
+    if (window._initThemeToggle) {
+      window._initThemeToggle("darkToggle");
+    }
+  });
+
   /* ---------- Balance Calculator ---------- */
   function getUserBalance(userId, accountType) {
     var logs = getLogs();

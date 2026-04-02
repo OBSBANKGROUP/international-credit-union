@@ -173,11 +173,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* DARK MODE */
-  const darkToggle = document.getElementById("darkToggle");
-  if (darkToggle) {
-    darkToggle.addEventListener("change", () => {
-      document.body.classList.toggle("dark-mode");
-    });
+  if (window._initThemeToggle) {
+    window._initThemeToggle("darkToggle");
   }
 });
 
