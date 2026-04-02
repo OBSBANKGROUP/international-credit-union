@@ -33,7 +33,7 @@
     localStorage.removeItem(SESSION_KEY);
   }
 
-  function logActivity(userId, userName, action, details) {
+  function logActivity(userId, userName, action, details, amount, txnType) {
     var logs = JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
     logs.push({
       id: Date.now(),
@@ -41,6 +41,8 @@
       userName: userName,
       action: action,
       details: details || "",
+      amount: amount || null,
+      txnType: txnType || null,
       timestamp: new Date().toISOString(),
       status: "completed",
     });
@@ -48,6 +50,7 @@
     if (logs.length > 500) logs = logs.slice(-500);
     localStorage.setItem(LOG_KEY, JSON.stringify(logs));
   }
+  window._logActivity = logActivity;
 
   /* ==========================================================
      1. REGISTRATION  (open-account.html)

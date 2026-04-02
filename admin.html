@@ -399,6 +399,7 @@
                   <th>Ref ID</th>
                   <th>Date &amp; Time</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="txnBody"></tbody>
@@ -860,6 +861,28 @@
                     <option value="suspended">Suspended</option>
                   </select>
                 </div>
+                <div class="form-group" style="grid-column: span 2">
+                  <label>Account Types</label>
+                  <div style="display: flex; gap: 16px; margin-top: 8px;">
+                    <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
+                      <input type="checkbox" name="editAccountType" value="checking"> Checking
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
+                      <input type="checkbox" name="editAccountType" value="savings"> Savings
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
+                      <input type="checkbox" name="editAccountType" value="business"> Business
+                    </label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Card 1 Balance ($)</label>
+                  <input type="number" id="editCard1Balance" step="0.01" />
+                </div>
+                <div class="form-group">
+                  <label>Card 2 Balance ($)</label>
+                  <input type="number" id="editCard2Balance" step="0.01" />
+                </div>
                 <div class="form-group">
                   <label>New Password (leave blank to keep)</label
                   ><input type="password" id="editPassword" />
@@ -903,12 +926,31 @@
               <label>Phone</label><input type="tel" id="addPhone" />
             </div>
             <div class="form-group">
-              <label>Account Type</label
-              ><select id="addAccountType" class="filter-select">
-                <option value="checking">Checking</option>
-                <option value="savings">Savings</option>
-                <option value="business">Business</option>
-              </select>
+              <label>Date of Birth</label
+              ><input type="date" id="addDOB" required />
+            </div>
+            <div class="form-group">
+              <label>Account Number</label
+              ><input
+                type="text"
+                id="addAccountNumber"
+                readonly
+                placeholder="Auto-generated"
+              />
+            </div>
+            <div class="form-group" style="grid-column: span 2">
+              <label>Account Types (Select all that apply)</label>
+              <div style="display: flex; gap: 16px; margin-top: 8px;">
+                <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
+                  <input type="checkbox" name="accountType" value="checking" checked> Checking
+                </label>
+                <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
+                  <input type="checkbox" name="accountType" value="savings"> Savings
+                </label>
+                <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
+                  <input type="checkbox" name="accountType" value="business"> Business
+                </label>
+              </div>
             </div>
             <div class="form-group">
               <label>Initial Deposit ($)</label
@@ -921,12 +963,52 @@
               />
             </div>
             <div class="form-group">
+              <label>Card Balance ($)</label
+              ><input
+                type="number"
+                id="addCardBalance"
+                min="0"
+                step="0.01"
+                value="0"
+              />
+            </div>
+            <div class="form-group">
+              <label>SSN</label
+              ><input
+                type="text"
+                id="addSSN"
+                placeholder="XXX-XX-XXXX"
+                required
+              />
+            </div>
+            <div class="form-group" style="grid-column: span 2">
+              <label>Full Address</label>
+              <textarea
+                id="addAddress"
+                rows="2"
+                required
+                style="
+                  width: 100%;
+                  padding: 9px 12px;
+                  border: 1px solid #d0d7de;
+                  border-radius: 8px;
+                  font-family: 'Inter', sans-serif;
+                  font-size: 0.88rem;
+                  outline: none;
+                "
+              ></textarea>
+            </div>
+            <div class="form-group">
               <label>Password</label
               ><input type="password" id="addPassword" required minlength="6" />
             </div>
             <div class="form-group">
               <label>Confirm Password</label
               ><input type="password" id="addConfirmPassword" required />
+            </div>
+            <div class="form-group" style="grid-column: span 2">
+              <label>Profile Picture</label>
+              <input type="file" id="addProfilePic" accept="image/*" />
             </div>
           </div>
           <p
@@ -971,6 +1053,14 @@
               </select>
             </div>
             <div class="form-group">
+              <label>Target Account</label>
+              <select id="txnAccountType" class="filter-select" required>
+                <option value="checking">Checking</option>
+                <option value="savings">Savings</option>
+                <option value="business">Business</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label>Amount ($)</label
               ><input
                 type="number"
@@ -987,6 +1077,10 @@
                 id="txnDescription"
                 placeholder="e.g. Salary deposit"
               />
+            </div>
+            <div class="form-group">
+              <label>Date & Time (Optional)</label>
+              <input type="datetime-local" id="addTxnDateTime" />
             </div>
           </div>
           <p
@@ -1008,7 +1102,50 @@
       </div>
     </div>
 
-    <!-- ===== TRANSACTION HISTORY MODAL ===== -->
+    <!-- ===== EDIT TRANSACTION MODAL ===== -->
+    <div class="modal-overlay" id="editTxnModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Edit Transaction</h3>
+          <button class="icon-btn" id="closeEditTxn">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+        <form id="editTxnForm">
+          <input type="hidden" id="editTxnLogId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label>User</label>
+              <input type="text" id="editTxnUserName" readonly />
+            </div>
+            <div class="form-group">
+              <label>Type</label>
+              <select id="editTxnType" class="filter-select" required>
+                <option value="credit">Credit (Deposit)</option>
+                <option value="debit">Debit (Withdrawal)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Amount ($)</label>
+              <input type="number" id="editTxnAmount" min="0.01" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" id="editTxnDescription" required />
+            </div>
+            <div class="form-group">
+              <label>Date & Time</label>
+              <input type="datetime-local" id="editTxnDateTime" required />
+            </div>
+          </div>
+          <p id="editTxnError" style="color:#e53935; font-size:0.85rem; margin-top:12px; display:none;"></p>
+          <div class="modal-actions">
+            <button type="button" class="btn-outline" id="cancelEditTxn">Cancel</button>
+            <button type="submit" class="btn-dark">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
     <div class="modal-overlay" id="historyModal">
       <div class="modal" style="max-width: 660px">
         <div class="modal-header">
@@ -1040,6 +1177,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="assest/js/emailjs-config.js"></script>
     <script src="assest/js/admin.js"></script>
   </body>
 </html>

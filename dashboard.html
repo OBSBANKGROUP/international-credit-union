@@ -10,6 +10,10 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
 
     <link rel="stylesheet" href="assest/css/dashboard.css" />
   </head>
@@ -150,22 +154,26 @@
 
         <section class="account-grid">
           <div class="account-box">
+            <div class="box-icon"><span class="material-icons-outlined">account_balance</span></div>
             <h5>Checking</h5>
             <p>$0.00</p>
           </div>
 
           <div class="account-box">
+            <div class="box-icon"><span class="material-icons-outlined">savings</span></div>
             <h5>Savings</h5>
             <p>$0.00</p>
           </div>
 
           <div class="account-box">
-            <h5>Certificate of Deposit</h5>
+            <div class="box-icon"><span class="material-icons-outlined">history_edu</span></div>
+            <h5>Cert. Deposit</h5>
             <p>$0.00</p>
           </div>
 
           <div class="account-box">
-            <h5>Account Number</h5>
+            <div class="box-icon"><span class="material-icons-outlined">credit_card</span></div>
+            <h5>Card Number</h5>
             <p>— — — —</p>
           </div>
         </section>
@@ -369,6 +377,9 @@ Verify
 
 </div>
 </div>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="assest/js/emailjs-config.js"></script>
     <script src="assest/js/dashboard.js"></script>
+    <script src="assest/js/auth.js"></script>
   </body>
 </html>

@@ -101,11 +101,14 @@
   }
 
   /* ---------- Balance Calculator ---------- */
-  function getUserBalance(userId) {
+  function getUserBalance(userId, accountType) {
     var logs = getLogs();
     var balance = 0;
     logs.forEach(function (l) {
       if (l.userId === userId && l.amount) {
+        // If accountType specified, only count logs for that account
+        if (accountType && l.targetAccount !== accountType) return;
+        
         if (l.txnType === "credit") balance += l.amount;
         else if (l.txnType === "debit") balance -= l.amount;
       }
@@ -113,10 +116,12 @@
     return balance;
   }
 
-  function getUserTxns(userId) {
+  function getUserTxns(userId, accountType) {
     var logs = getLogs();
     return logs.filter(function (l) {
-      return l.userId === userId && l.amount;
+      if (l.userId !== userId || !l.amount) return false;
+      if (accountType && l.targetAccount !== accountType) return false;
+      return true;
     });
   }
 
@@ -464,44 +469,47 @@
 
     body.innerHTML = users
       .map(function (u) {
-        var type = capitalize(u.accountType || "Checking");
-        var balance = "$" + formatNum(getUserBalance(u.id).toFixed(2));
-        var st = u.status || "active";
-        return (
-          "<tr>" +
-          '<td><div class="user-cell"><div class="cl-avatar" style="width:34px;height:34px;font-size:.75rem">' +
-          initials(u) +
-          "</div>" +
-          "<strong>" +
-          esc(u.firstName + " " + u.lastName) +
-          "</strong></div></td>" +
-          "<td>" +
-          esc(genAcctNum(u.id)) +
-          "</td>" +
-          "<td>" +
-          esc(type) +
-          "</td>" +
-          "<td>" +
-          balance +
-          "</td>" +
-          "<td>" +
-          formatDate(u.createdAt) +
-          "</td>" +
-          '<td><span class="badge ' +
-          st +
-          '">' +
-          capitalize(st) +
-          "</span></td>" +
-          '<td><div class="action-btns">' +
-          '<button class="btn-sm green" onclick="window._adminAddTxn(' +
-          u.id +
-          ')">Add Txn</button>' +
-          '<button class="btn-sm blue" onclick="window._adminViewHistory(' +
-          u.id +
-          ')">History</button>' +
-          "</div></td>" +
-          "</tr>"
-        );
+        var accts = u.accounts || (u.accountType ? { [u.accountType]: true } : { checking: true });
+        return Object.keys(accts).map(function(type) {
+          var label = capitalize(type);
+          var balance = "$" + formatNum(getUserBalance(u.id, type).toFixed(2));
+          var st = u.status || "active";
+          return (
+            "<tr>" +
+            '<td><div class="user-cell"><div class="cl-avatar" style="width:34px;height:34px;font-size:.75rem">' +
+            initials(u) +
+            "</div>" +
+            "<strong>" +
+            esc(u.firstName + " " + u.lastName) +
+            "</strong></div></td>" +
+            "<td>" +
+            esc(genAcctNum(u.id)) +
+            "</td>" +
+            "<td>" +
+            esc(label) +
+            "</td>" +
+            "<td>" +
+            balance +
+            "</td>" +
+            "<td>" +
+            formatDate(u.createdAt) +
+            "</td>" +
+            '<td><span class="badge ' +
+            st +
+            '">' +
+            capitalize(st) +
+            "</span></td>" +
+            '<td><div class="action-btns">' +
+            '<button class="btn-sm green" onclick="window._adminAddTxn(' +
+            u.id +
+            ')">Add Txn</button>' +
+            '<button class="btn-sm blue" onclick="window._adminViewHistory(' +
+            u.id +
+            ')">History</button>' +
+            "</div></td>" +
+            "</tr>"
+          );
+        }).join("");
       })
       .join("");
   };
@@ -573,6 +581,10 @@
           '">' +
           capitalize(l.status || "completed") +
           "</span></td>" +
+          '<td><div class="action-btns">' +
+          '<button class="btn-sm blue" onclick="window._adminEditTxn(' + l.id + ')">Edit</button>' +
+          '<button class="btn-sm red" onclick="window._adminDeleteTxn(' + l.id + ')">Delete</button>' +
+          '</div></td>' +
           "</tr>"
         );
       })
@@ -694,10 +706,9 @@
     body.innerHTML = payLogs
       .slice(0, 50)
       .map(function (l) {
-        var amount = "$" + formatNum(Math.floor(Math.random() * 5000 + 100));
-        var method = ["Wire", "ACH", "Card", "Internal"][
-          Math.floor(Math.random() * 4)
-        ];
+        var isCredit = l.txnType === "credit";
+        var amount = (isCredit ? "+" : "-") + "$" + formatNum(l.amount || 0);
+        var method = l.action === "Wire Transfer" ? "Wire" : (l.action === "Deposit" ? "Internal" : "Card");
         var badge =
           l.status === "completed"
             ? "completed"
@@ -724,6 +735,10 @@
           '">' +
           capitalize(l.status || "completed") +
           "</span></td>" +
+          '<td><div class="action-btns">' +
+          '<button class="btn-sm blue" onclick="window._adminEditTxn(' + l.id + ')">Edit</button>' +
+          '<button class="btn-sm red" onclick="window._adminDeleteTxn(' + l.id + ')">Delete</button>' +
+          '</div></td>' +
           "</tr>"
         );
       })
@@ -804,7 +819,7 @@
           esc(u.phone || "—") +
           "</td>" +
           "<td>" +
-          capitalize(u.accountType || "Checking") +
+          (Object.keys(u.accounts || {}).map(capitalize).join(", ") || capitalize(u.accountType || "Checking")) +
           "</td>" +
           '<td><span class="badge ' +
           st +
@@ -870,6 +885,16 @@
     document.getElementById("editStatus").value = u.status || "active";
     document.getElementById("editPassword").value = "";
 
+    // Set account checkboxes
+    var accts = u.accounts || {};
+    document.querySelectorAll('input[name="editAccountType"]').forEach(function(cb) {
+      cb.checked = !!accts[cb.value];
+    });
+
+    // Set card balances
+    document.getElementById("editCard1Balance").value = u.card1Balance || 0;
+    document.getElementById("editCard2Balance").value = u.card2Balance || 0;
+
     document.getElementById("editModal").classList.add("show");
   };
 
@@ -906,6 +931,17 @@
         .toLowerCase();
       users[idx].phone = document.getElementById("editPhone").value.trim();
       users[idx].status = document.getElementById("editStatus").value;
+
+      // Save account checkboxes
+      var selectedAccounts = {};
+      document.querySelectorAll('input[name="editAccountType"]:checked').forEach(function(cb) {
+        selectedAccounts[cb.value] = true;
+      });
+      users[idx].accounts = selectedAccounts;
+
+      // Save card balances
+      users[idx].card1Balance = parseFloat(document.getElementById("editCard1Balance").value) || 0;
+      users[idx].card2Balance = parseFloat(document.getElementById("editCard2Balance").value) || 0;
 
       var newPass = document.getElementById("editPassword").value;
       if (newPass) users[idx].password = newPass;
@@ -1171,6 +1207,13 @@
     addUserBtn.addEventListener("click", function () {
       document.getElementById("addUserForm").reset();
       document.getElementById("addUserError").style.display = "none";
+      
+      // Auto-generate account number for the new user
+      var users = getUsers();
+      var nextId = users.length > 0 ? Math.max.apply(Math, users.map(function(u) { return u.id; })) + 1 : 1001;
+      if (nextId < 1001) nextId = 1001; // start from 1001
+      document.getElementById("addAccountNumber").value = genAcctNum(nextId);
+      
       document.getElementById("addUserModal").classList.add("show");
     });
   }
@@ -1187,96 +1230,217 @@
     addUserForm.addEventListener("submit", function (e) {
       e.preventDefault();
       var errEl = document.getElementById("addUserError");
-      errEl.style.display = "none";
+      if (errEl) errEl.style.display = "none";
 
-      var firstName = document.getElementById("addFirstName").value.trim();
-      var lastName = document.getElementById("addLastName").value.trim();
-      var email = document
-        .getElementById("addEmail")
-        .value.trim()
-        .toLowerCase();
-      var phone = document.getElementById("addPhone").value.trim();
-      var accountType = document.getElementById("addAccountType").value;
-      var deposit =
-        parseFloat(document.getElementById("addDeposit").value) || 0;
-      var password = document.getElementById("addPassword").value;
-      var confirmPw = document.getElementById("addConfirmPassword").value;
+      try {
+        var firstNameEl = document.getElementById("addFirstName");
+        var lastNameEl = document.getElementById("addLastName");
+        var emailEl = document.getElementById("addEmail");
+        var phoneEl = document.getElementById("addPhone");
+        var dobEl = document.getElementById("addDOB");
+        var accountTypeCheckboxes = document.querySelectorAll('input[name="accountType"]:checked');
+        var depositEl = document.getElementById("addDeposit");
+        var cardBalanceEl = document.getElementById("addCardBalance");
+        var ssnEl = document.getElementById("addSSN");
+        var addressEl = document.getElementById("addAddress");
+        var passwordEl = document.getElementById("addPassword");
+        var confirmPwEl = document.getElementById("addConfirmPassword");
+        var profilePicEl = document.getElementById("addProfilePic");
 
-      if (!firstName || !lastName) {
-        errEl.textContent = "First and last name are required.";
-        errEl.style.display = "block";
-        return;
-      }
-      if (!email) {
-        errEl.textContent = "Email is required.";
-        errEl.style.display = "block";
-        return;
-      }
-      if (password.length < 6) {
-        errEl.textContent = "Password must be at least 6 characters.";
-        errEl.style.display = "block";
-        return;
-      }
-      if (password !== confirmPw) {
-        errEl.textContent = "Passwords do not match.";
-        errEl.style.display = "block";
-        return;
-      }
+        if (!firstNameEl || !lastNameEl || !emailEl || !passwordEl) {
+          throw new Error("Required form elements not found.");
+        }
 
-      var users = getUsers();
-      if (
-        users.find(function (u) {
-          return u.email === email;
-        })
-      ) {
-        errEl.textContent = "A user with this email already exists.";
-        errEl.style.display = "block";
-        return;
-      }
-
-      var newUser = {
-        id: Date.now(),
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        contactEmail: email,
-        phone: phone,
-        password: password,
-        accountType: accountType,
-        status: "active",
-        createdAt: new Date().toISOString(),
-      };
-      users.push(newUser);
-      saveUsers(users);
-
-      addLog(
-        newUser.id,
-        firstName + " " + lastName,
-        "Account Created",
-        "Admin created " + accountType + " account",
-      );
-
-      // Add initial deposit as a credit transaction
-      if (deposit > 0) {
-        var logs = getLogs();
-        logs.push({
-          id: Date.now() + 1,
-          userId: newUser.id,
-          userName: firstName + " " + lastName,
-          action: "Deposit",
-          details: "Initial deposit",
-          amount: deposit,
-          txnType: "credit",
-          timestamp: new Date().toISOString(),
-          status: "completed",
+        var firstName = firstNameEl.value.trim();
+        var lastName = lastNameEl.value.trim();
+        var email = emailEl.value.trim().toLowerCase();
+        var phone = phoneEl ? phoneEl.value.trim() : "";
+        var dob = dobEl ? dobEl.value : "";
+        var selectedAccounts = {};
+        accountTypeCheckboxes.forEach(function(cb) {
+          selectedAccounts[cb.value] = true;
         });
-        saveLogs(logs);
-      }
+        var deposit = depositEl ? parseFloat(depositEl.value) || 0 : 0;
+        var cardBalance = cardBalanceEl ? parseFloat(cardBalanceEl.value) || 0 : 0;
+        var ssn = ssnEl ? ssnEl.value.trim() : "";
+        var address = addressEl ? addressEl.value.trim() : "";
+        var password = passwordEl.value;
+        var confirmPw = confirmPwEl ? confirmPwEl.value : "";
+        var profilePicFile = (profilePicEl && profilePicEl.files) ? profilePicEl.files[0] : null;
 
-      document.getElementById("addUserModal").classList.remove("show");
-      refreshCurrentPage();
+        if (!firstName || !lastName) {
+          if (errEl) { errEl.textContent = "First and last name are required."; errEl.style.display = "block"; }
+          return;
+        }
+        if (!email) {
+          if (errEl) { errEl.textContent = "Email is required."; errEl.style.display = "block"; }
+          return;
+        }
+        if (password.length < 6) {
+          if (errEl) { errEl.textContent = "Password must be at least 6 characters."; errEl.style.display = "block"; }
+          return;
+        }
+        if (password !== confirmPw) {
+          if (errEl) { errEl.textContent = "Passwords do not match."; errEl.style.display = "block"; }
+          return;
+        }
+
+        var finalizeAddUser = function(profilePicBase64) {
+          try {
+            var users = getUsers();
+            if (users.find(function (u) { return u.email === email; })) {
+              if (errEl) { errEl.textContent = "A user with this email already exists."; errEl.style.display = "block"; }
+              return;
+            }
+
+            // Safer ID generation
+            var maxId = 1000;
+            for (var i = 0; i < users.length; i++) {
+              var uid = parseInt(users[i].id, 10);
+              if (!isNaN(uid) && uid > maxId) maxId = uid;
+            }
+            var nextId = maxId + 1;
+            if (nextId < 1001) nextId = 1001;
+
+            var newUser = {
+              id: nextId,
+              firstName: firstName,
+              lastName: lastName,
+              email: email,
+              contactEmail: email,
+              phone: phone,
+              dob: dob,
+              accountNumber: genAcctNum(nextId),
+              ssn: ssn,
+              address: address,
+              password: password,
+              accounts: selectedAccounts,
+              card1Balance: cardBalance, // Using initial cardBalance as card1Balance
+              card2Balance: 0,
+              profilePic: profilePicBase64 || null,
+              status: "active",
+              createdAt: new Date().toISOString(),
+            };
+            users.push(newUser);
+            saveUsers(users);
+
+            addLog(
+              newUser.id,
+              firstName + " " + lastName,
+              "Account Created",
+              "Admin created accounts: " + Object.keys(selectedAccounts).join(", ")
+            );
+
+            if (deposit > 0) {
+              var logs = getLogs();
+              var targetAccount = selectedAccounts.checking ? "checking" : (selectedAccounts.savings ? "savings" : "business");
+              logs.push({
+                id: Date.now() + 1,
+                userId: newUser.id,
+                userName: firstName + " " + lastName,
+                action: "Deposit",
+                details: "Initial deposit",
+                amount: deposit,
+                txnType: "credit",
+                targetAccount: targetAccount,
+                timestamp: new Date().toISOString(),
+                status: "completed"
+              });
+              saveLogs(logs);
+            }
+
+            document.getElementById("addUserModal").classList.remove("show");
+            if (typeof refreshCurrentPage === "function") refreshCurrentPage();
+          } catch (internalErr) {
+            console.error("Internal add user error:", internalErr);
+            if (errEl) { errEl.textContent = "Error saving user: " + internalErr.message; errEl.style.display = "block"; }
+          }
+        };
+
+        if (profilePicFile) {
+          var reader = new FileReader();
+          reader.onloadend = function () {
+            finalizeAddUser(reader.result);
+          };
+          reader.onerror = function() {
+            finalizeAddUser(null);
+          };
+          reader.readAsDataURL(profilePicFile);
+        } else {
+          finalizeAddUser(null);
+        }
+      } catch (err) {
+        console.error("Add user submission error:", err);
+        if (errEl) { errEl.textContent = "An error occurred: " + err.message; errEl.style.display = "block"; }
+      }
     });
   }
+
+  /* ========== EDIT TRANSACTION LOGIC ========== */
+  window._adminEditTxn = function(logId) {
+    var logs = getLogs();
+    var log = logs.find(function(l) { return l.id === logId; });
+    if (!log) return;
+
+    var form = document.getElementById("editTxnForm");
+    form.reset();
+    document.getElementById("editTxnError").style.display = "none";
+
+    document.getElementById("editTxnLogId").value = log.id;
+    document.getElementById("editTxnUserName").value = log.userName;
+    document.getElementById("editTxnType").value = log.txnType || (log.action === "Deposit" ? "credit" : "debit");
+    document.getElementById("editTxnAmount").value = log.amount || 0;
+    document.getElementById("editTxnDescription").value = log.details || log.action;
+    
+    // Format timestamp for datetime-local (YYYY-MM-DDTHH:mm)
+    var date = new Date(log.timestamp);
+    var pad = function(n) { return n < 10 ? '0' + n : n; };
+    var localTime = date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + 'T' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+    document.getElementById("editTxnDateTime").value = localTime;
+
+    document.getElementById("editTxnModal").classList.add("show");
+  };
+
+  window._adminDeleteTxn = function(logId) {
+    if (!confirm("Are you sure you want to delete this transaction? This will affect the user's balance.")) return;
+    var logs = getLogs();
+    var filtered = logs.filter(function(l) { return l.id !== logId; });
+    saveLogs(filtered);
+    refreshCurrentPage();
+  };
+
+  var editTxnForm = document.getElementById("editTxnForm");
+  if (editTxnForm) {
+    editTxnForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      var logId = parseInt(document.getElementById("editTxnLogId").value, 10);
+      var type = document.getElementById("editTxnType").value;
+      var amount = parseFloat(document.getElementById("editTxnAmount").value);
+      var details = document.getElementById("editTxnDescription").value;
+      var timestamp = document.getElementById("editTxnDateTime").value;
+
+      var logs = getLogs();
+      var idx = logs.findIndex(function(l) { return l.id === logId; });
+      if (idx > -1) {
+        logs[idx].txnType = type;
+        logs[idx].amount = amount;
+        logs[idx].details = details;
+        logs[idx].timestamp = timestamp ? new Date(timestamp).toISOString() : logs[idx].timestamp;
+        
+        saveLogs(logs);
+        document.getElementById("editTxnModal").classList.remove("show");
+        refreshCurrentPage();
+      }
+    });
+  }
+
+  ["closeEditTxn", "cancelEditTxn"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el)
+      el.addEventListener("click", function () {
+        document.getElementById("editTxnModal").classList.remove("show");
+      });
+  });
 
   /* ========== ADD TRANSACTION MODAL ========== */
   function openTxnModal(preselectedUserId) {
@@ -1333,6 +1497,7 @@
 
       var userId = Number(document.getElementById("txnUserId").value);
       var txnType = document.getElementById("txnType").value;
+      var targetAccount = document.getElementById("txnAccountType").value;
       var amount = parseFloat(document.getElementById("txnAmount").value);
       var description = document.getElementById("txnDescription").value.trim();
 
@@ -1359,10 +1524,10 @@
 
       // Check sufficient balance for debit
       if (txnType === "debit") {
-        var currentBal = getUserBalance(userId);
+        var currentBal = getUserBalance(userId, targetAccount);
         if (amount > currentBal) {
           errEl.textContent =
-            "Insufficient balance. Current balance: $" + currentBal.toFixed(2);
+            "Insufficient balance in " + targetAccount + ". Current balance: $" + currentBal.toFixed(2);
           errEl.style.display = "block";
           return;
         }
@@ -1378,6 +1543,7 @@
         details: description || (txnType === "credit" ? "Credit" : "Debit"),
         amount: amount,
         txnType: txnType,
+        targetAccount: targetAccount,
         timestamp: new Date().toISOString(),
         status: "completed",
       });

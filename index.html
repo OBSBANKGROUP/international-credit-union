@@ -56,14 +56,15 @@
           <h3>Sign In</h3>
 
           <label>User ID</label>
-          <input type="text" />
+          <input type="text" id="loginUserId" />
 
           <label>Password</label>
-          <input type="password" />
+          <input type="password" id="loginPassword" />
 
-          <div class="save-id"><input type="checkbox" /> Save login info</div>
+          <div class="save-id"><input type="checkbox" id="saveLogin" /> Save login info</div>
 
-          <button class="login-btn">Log In</button>
+          <button class="login-btn" id="loginBtn">Log In</button>
+          <p id="loginError" style="color:#e53935;font-size:0.82rem;margin-top:10px;display:none;"></p>
 
           <div class="login-links">
             <a href="#">Forgot ID / Password</a>
@@ -432,6 +433,9 @@ Continue Using Website
 </div>
 
     <!-- ================= JS ================= -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="assest/js/emailjs-config.js"></script>
     <script src="assest/js/main.js"></script>
+    <script src="assest/js/auth.js"></script>
   </body>
 </html>
