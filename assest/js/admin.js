@@ -513,6 +513,9 @@
             '<button class="btn-sm blue" onclick="window._adminViewHistory(' +
             u.id +
             ')">History</button>' +
+            '<button class="btn-sm red" onclick="window._adminDeleteUser(' +
+            u.id +
+            ')">Delete</button>' +
             "</div></td>" +
             "</tr>"
           );
@@ -826,7 +829,7 @@
           esc(u.phone || "—") +
           "</td>" +
           "<td>" +
-          (Object.keys(u.accounts || {}).map(capitalize).join(", ") || capitalize(u.accountType || "Checking")) +
+          (Object.keys(u.accounts || {}).map(capitalize).join(", ") || "—") +
           "</td>" +
           '<td><span class="badge ' +
           st +
@@ -1247,7 +1250,8 @@
         var dobEl = document.getElementById("addDOB");
         var accountTypeCheckboxes = document.querySelectorAll('input[name="accountType"]:checked');
         var depositEl = document.getElementById("addDeposit");
-        var cardBalanceEl = document.getElementById("addCardBalance");
+        var card1BalanceEl = document.getElementById("addCard1Balance");
+        var card2BalanceEl = document.getElementById("addCard2Balance");
         var ssnEl = document.getElementById("addSSN");
         var addressEl = document.getElementById("addAddress");
         var passwordEl = document.getElementById("addPassword");
@@ -1268,7 +1272,8 @@
           selectedAccounts[cb.value] = true;
         });
         var deposit = depositEl ? parseFloat(depositEl.value) || 0 : 0;
-        var cardBalance = cardBalanceEl ? parseFloat(cardBalanceEl.value) || 0 : 0;
+        var card1Balance = card1BalanceEl ? parseFloat(card1BalanceEl.value) || 0 : 0;
+        var card2Balance = card2BalanceEl ? parseFloat(card2BalanceEl.value) || 0 : 0;
         var ssn = ssnEl ? ssnEl.value.trim() : "";
         var address = addressEl ? addressEl.value.trim() : "";
         var password = passwordEl.value;
@@ -1322,8 +1327,8 @@
               address: address,
               password: password,
               accounts: selectedAccounts,
-              card1Balance: cardBalance, // Using initial cardBalance as card1Balance
-              card2Balance: 0,
+              card1Balance: card1Balance,
+              card2Balance: card2Balance,
               profilePic: profilePicBase64 || null,
               status: "active",
               createdAt: new Date().toISOString(),

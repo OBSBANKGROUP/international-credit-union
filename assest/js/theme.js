@@ -3,7 +3,7 @@
  * Persists user's choice in localStorage and applies it globally.
  */
 
-(function() {
+(function () {
   const THEME_KEY = "icu_theme"; // "dark" or "light"
 
   /**
@@ -28,7 +28,7 @@
    * Initializes a theme toggle element.
    * @param {string} id - The ID of the toggle element (default: "darkToggle")
    */
-  window._initThemeToggle = function(id = "darkToggle") {
+  window._initThemeToggle = function (id = "darkToggle") {
     const toggle = document.getElementById(id);
     if (!toggle) return;
 
@@ -50,7 +50,7 @@
   /**
    * Toggles the theme programmatically.
    */
-  window._toggleTheme = function() {
+  window._toggleTheme = function () {
     const current = localStorage.getItem(THEME_KEY) || "light";
     const next = current === "dark" ? "light" : "dark";
     localStorage.setItem(THEME_KEY, next);
@@ -63,3 +63,5 @@
   // Also run on DOMContentLoaded to ensure body class is set correctly
   document.addEventListener("DOMContentLoaded", applyTheme);
 })();
+
+

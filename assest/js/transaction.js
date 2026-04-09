@@ -20,48 +20,74 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ================= LOAD DATA ================= */
-  const session = getSession();
-  if (!session) {
-    window.location.href = "index.html";
-    return;
-  }
+  const typeFilter = document.getElementById("typeFilter");
+  const historySubtitle = document.getElementById("historySubtitle");
 
-  const allLogs = getLogs();
-  const userLogs = allLogs.filter(l => l.userId === session.id && l.amount).reverse();
+  function renderHistory() {
+    const session = getSession();
+    if (!session) {
+      window.location.href = "index.html";
+      return;
+    }
 
-  /* ================= DISPLAY ================= */
-  if (userLogs.length === 0) {
-    if (emptyMsg) emptyMsg.style.display = "block";
-    return;
-  }
-  if (emptyMsg) emptyMsg.style.display = "none";
-
-  userLogs.forEach((tx) => {
-    const card = document.createElement("div");
-    card.className = "history-card";
+    const allLogs = getLogs();
+    const filterType = typeFilter.value;
     
-    const isCredit = tx.txnType === "credit";
-    const sign = isCredit ? "+" : "-";
-    const amountClass = isCredit ? "received" : "sent";
+    // Filter by User. If filterType is not 'all', also filter by targetAccount.
+    let userLogs = allLogs.filter(l => l.userId === session.id && l.amount);
+    
+    if (filterType !== "all") {
+      userLogs = userLogs.filter(l => l.targetAccount === filterType);
+    }
 
-    card.innerHTML = `
-      <div class="history-left">
-        <h3>${tx.action}</h3>
-        <p>${tx.details || "Transaction"}</p>
-        <p>Ref: #${tx.id}</p>
-      </div>
-      <div class="history-right">
-        <div class="history-amount ${amountClass}">
-          ${sign}$${formatNum(tx.amount)}
-        </div>
-        <div class="history-date">
-          ${new Date(tx.timestamp).toLocaleDateString()}
-        </div>
-      </div>
-    `;
+    // Sort Newest First
+    userLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-    if (historyList) historyList.appendChild(card);
-  });
+    /* ================= DISPLAY ================= */
+    if (historyList) historyList.innerHTML = "";
+
+    if (userLogs.length === 0) {
+      if (emptyMsg) emptyMsg.style.display = "block";
+      if (historySubtitle) historySubtitle.textContent = "No activity found for this account.";
+      return;
+    }
+    if (emptyMsg) emptyMsg.style.display = "none";
+    if (historySubtitle) historySubtitle.textContent = `Showing ${userLogs.length} activity entries`;
+
+    userLogs.forEach((tx) => {
+      const card = document.createElement("div");
+      card.className = "history-card";
+      
+      const isCredit = tx.txnType === "credit";
+      const sign = isCredit ? "+" : "-";
+      const amountClass = isCredit ? "received" : "sent";
+
+      card.innerHTML = `
+        <div class="history-left">
+          <h3>${tx.action} ${tx.targetAccount ? '<span class="acct-tag">(' + tx.targetAccount + ")</span>" : ""}</h3>
+          <p>${tx.details || "Transaction"}</p>
+          <p>Ref: #${tx.id}</p>
+        </div>
+        <div class="history-right">
+          <div class="history-amount ${amountClass}">
+            ${sign}$${formatNum(tx.amount)}
+          </div>
+          <div class="history-date">
+            ${new Date(tx.timestamp).toLocaleDateString()}
+          </div>
+        </div>
+      `;
+
+      if (historyList) historyList.appendChild(card);
+    });
+  }
+
+  if (typeFilter) {
+    typeFilter.addEventListener("change", renderHistory);
+  }
+
+  // Initial render
+  renderHistory();
 });
 
 /* ================= BUTTONS ================= */

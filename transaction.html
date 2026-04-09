@@ -11,7 +11,7 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="assest/css/transactions.css" />
+    <link rel="stylesheet" href="assest/css/transaction.css" />
   </head>
   <body>
     <!-- ===== HEADER ===== -->
@@ -32,7 +32,16 @@
       <div class="container">
         <h1>Recent Transactions</h1>
 
-        <p class="subtitle">Showing your last 28 account activities</p>
+        <div class="history-filters">
+          <select id="typeFilter" class="filter-select">
+            <option value="all">All Accounts</option>
+            <option value="checking">Checking</option>
+            <option value="savings">Savings</option>
+            <option value="business">Business</option>
+          </select>
+        </div>
+
+        <p class="subtitle" id="historySubtitle">Review your recent account activity</p>
 
         <!-- Transactions -->
 
