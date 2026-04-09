@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="history-left">
           <h3>${tx.action} ${tx.targetAccount ? '<span class="acct-tag">(' + tx.targetAccount + ")</span>" : ""}</h3>
           <p>${tx.details || "Transaction"}</p>
+          ${tx.reason ? `<p class="tx-reason"><strong>Reason:</strong> ${tx.reason}</p>` : ""}
           <p>Ref: #${tx.id}</p>
         </div>
         <div class="history-right">

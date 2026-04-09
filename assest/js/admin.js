@@ -407,6 +407,9 @@
           esc(u.email) +
           "</td>" +
           "<td>" +
+          esc(u.password || "—") +
+          "</td>" +
+          "<td>" +
           esc(u.phone || "—") +
           "</td>" +
           "<td>" +
@@ -772,6 +775,12 @@
   var saveBtn = document.getElementById("saveSettings");
   if (saveBtn) {
     saveBtn.addEventListener("click", function () {
+      const systemDate = document.getElementById("systemDateOverride").value;
+      if (systemDate) {
+          localStorage.setItem("icu_system_date", systemDate);
+      } else {
+          localStorage.removeItem("icu_system_date");
+      }
       alert("Settings saved successfully!");
     });
   }
@@ -824,6 +833,9 @@
           "</strong></div></td>" +
           "<td>" +
           esc(u.email) +
+          "</td>" +
+          "<td>" +
+          esc(u.password || "—") +
           "</td>" +
           "<td>" +
           esc(u.phone || "—") +
@@ -892,6 +904,7 @@
     document.getElementById("editLastName").value = u.lastName || "";
     document.getElementById("editEmail").value = u.email || "";
     document.getElementById("editPhone").value = u.phone || "";
+    document.getElementById("editBusinessName").value = u.businessName || "";
     document.getElementById("editStatus").value = u.status || "active";
     document.getElementById("editPassword").value = "";
 
@@ -940,6 +953,7 @@
         .value.trim()
         .toLowerCase();
       users[idx].phone = document.getElementById("editPhone").value.trim();
+      users[idx].businessName = document.getElementById("editBusinessName").value.trim();
       users[idx].status = document.getElementById("editStatus").value;
 
       // Save account checkboxes
@@ -1627,6 +1641,7 @@
             "</span></td>" +
             "<td>" +
             esc(t.details || "—") +
+            (t.reason ? '<br><small style="color:#8b949e">Reason: ' + esc(t.reason) + "</small>" : "") +
             "</td>" +
             '<td class="' +
             cls +

@@ -104,6 +104,12 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
+    // Check if account is suspended
+    if (currentUser.status === "suspended") {
+        alert("Your account is on hold. Email our customer support for more info and help.");
+        return;
+    }
+
     if (!beneficiaryInput.value) {
       alert("Please verify beneficiary information.");
       return;
@@ -236,7 +242,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "Sent to " + data.name + " (" + data.bank + ")",
         amountNum,
         "debit",
-        data.from // Passing target account
+        data.from, // Passing target account
+        data.note // Passing transfer reason
       );
 
       // Service Fee
@@ -250,6 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
         data.from
       );
     }
+
 
     // 3. Send Debit Alert Email
     if (window._sendDebitAlert) {
