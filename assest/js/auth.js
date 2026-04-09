@@ -139,12 +139,28 @@
           " account opened",
       );
 
+      /* initial deposit log */
+      const initialDeposit = parseFloat(document.getElementById("initialDeposit")?.value) || 0;
+      if (initialDeposit > 0) {
+        logActivity(
+          newUser.id,
+          firstName + " " + lastName,
+          "Deposit",
+          "Initial account funding",
+          initialDeposit,
+          "credit",
+          newUser.accountType // using the account type selected
+        );
+      }
+
       /* auto-login & redirect */
       setSession({
         id: newUser.id,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         email: newUser.email,
+        accountNumber: newUser.accountNumber,
+        profilePic: newUser.profilePic || null
       });
 
       showFormAlert("Account created successfully! Redirecting…", "success");

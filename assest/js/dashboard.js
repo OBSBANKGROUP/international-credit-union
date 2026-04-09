@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (transSection) {
     const allLogs = getLogs();
     const userLogs = allLogs.filter(l => l.userId === currentUser.id && l.amount);
-    const recentLogs = userLogs.slice(-5).reverse();
+    const recentLogs = userLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 5);
     
     if (recentLogs.length > 0) {
       transSection.innerHTML = `

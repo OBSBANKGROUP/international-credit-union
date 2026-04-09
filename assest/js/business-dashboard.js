@@ -47,9 +47,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const businessAccounts = [
     {
-      name: hasBusiness ? (currentUser.firstName + " " + currentUser.lastName + " Business") : null,
-      balance: hasBusiness ? getAccBalance(currentUser.id, "business") : 0,
-      number: hasBusiness ? (currentUser.accountNumber || "ICU-BM-" + currentUser.id) : null,
+      name: hasBusiness ? (currentUser.firstName + " " + currentUser.lastName + " Business") : "nil",
+      balance: hasBusiness ? getAccBalance(currentUser.id, "business") : "nil",
+      number: hasBusiness ? (currentUser.accountNumber || "ICU-BM-" + currentUser.id) : "---- ----",
     }
   ];
 
@@ -59,25 +59,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   businessAccounts.forEach((account) => {
     const card = document.createElement("div");
-
     card.classList.add("account-card");
 
-    const name = account.name ? account.name : "nil";
-
-    const number = account.number ? account.number : "---- ----";
-
-    const balance = account.name ? 
-      ("$" + account.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })) : "nil";
-
     card.innerHTML = `
-
-<h3>${name}</h3>
-
-<div class="account-balance">${balance}</div>
-
-<p>Account • ${number}</p>
-
-`;
+      <h3>${account.name}</h3>
+      <div class="account-balance">${typeof account.balance === 'number' ? ("$" + account.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })) : account.balance}</div>
+      <p>Account • ${account.number}</p>
+    `;
 
     container.appendChild(card);
   });

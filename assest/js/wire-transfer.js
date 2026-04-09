@@ -57,23 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
     fromAccSelect.innerHTML = options;
   }
 
-  /* ================= DEMO DATABASE ================= */
-
-  const demoAccounts = [
-    { routing: "314074269", account: "6667838383", name: "Paul Lampard" },
-    {
-      routing: "255076753",
-      account: "8030166942",
-      name: "Knightsplash company LLC",
-    },
-    { routing: "072000996", account: "375022688698", name: "Jackson Cole" },
-    { routing: "054001725", account: "4441467861", name: "Yen Tran" },
-    { routing: "113193532", account: "40503099518", name: "Debra Levrie" },
-  ];
-
   /* ================= STATE ================= */
 
-  let manualMode = false;
   let generatedOTP = "";
 
   /* ================= BANK SELECT ================= */
@@ -99,74 +84,15 @@ document.addEventListener("DOMContentLoaded", () => {
     resetManualMode();
   }
 
-  routingInput.addEventListener("input", clearBeneficiary);
-  accountInput.addEventListener("input", clearBeneficiary);
+  routingInput.addEventListener("input", function() {});
+  accountInput.addEventListener("input", function() {});
 
-  /* ================= LOOKUP ================= */
+  // Removed lookup logic as requested. Users must type details manually.
 
-  routingInput.addEventListener("blur", lookupBeneficiary);
-  accountInput.addEventListener("blur", lookupBeneficiary);
-
-  function lookupBeneficiary() {
-    const routing = routingInput.value.trim();
-    const account = accountInput.value.trim();
-
-    resetManualMode();
-
-    // Wait for complete input
-    if (routing.length !== 9 || account.length < 8) return;
-
-    const match = demoAccounts.find(
-      (acc) => acc.routing === routing && acc.account === account,
-    );
-
-    if (match) {
-      beneficiaryInput.value = match.name;
-      hideMessage();
-    } else {
-      promptManualEntry();
-    }
-  }
-
-  /* ================= MANUAL MODE ================= */
-
-  function promptManualEntry() {
-    beneficiaryMsg.innerText = "Beneficiary not found. Enter manually?";
-
-    beneficiaryMsg.style.display = "block";
-
-    setTimeout(() => {
-      const confirmManual = confirm(
-        "Beneficiary verification failed.\n\nDo you want to enter the name manually?",
-      );
-
-      if (confirmManual) {
-        enableManualMode();
-      }
-    }, 200);
-  }
-
-  function enableManualMode() {
-    manualMode = true;
-
-    beneficiaryInput.removeAttribute("readonly");
-
-    beneficiaryInput.classList.add("manual-input");
-
-    beneficiaryInput.placeholder = "Enter full name";
-
-    beneficiaryInput.focus();
-  }
-
-  function resetManualMode() {
-    manualMode = false;
-
-    beneficiaryInput.setAttribute("readonly", true);
-
-    beneficiaryInput.classList.remove("manual-input");
-
-    beneficiaryInput.placeholder = "Will appear automatically";
-  }
+  /* ================= BENEFICIARY ENTRY ================= */
+  // Always allow manual entry
+  beneficiaryInput.removeAttribute("readonly");
+  beneficiaryInput.placeholder = "Enter full beneficiary name";
 
   function hideMessage() {
     beneficiaryMsg.style.display = "none";
