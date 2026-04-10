@@ -281,6 +281,7 @@
                 <tr>
                   <th>User</th>
                   <th>Email</th>
+                  <th>Password</th>
                   <th>Phone</th>
                   <th>Joined</th>
                   <th>Status</th>
@@ -695,6 +696,10 @@
                 <option>UTC+0 (GMT)</option>
               </select>
             </div>
+            <div class="setting-row">
+              <label>System Date Override</label>
+              <input type="datetime-local" id="systemDateOverride" class="setting-input">
+            </div>
           </div>
         </div>
         <button class="btn-dark" id="saveSettings" style="margin-top: 24px">
@@ -822,6 +827,7 @@
                 <tr>
                   <th>User</th>
                   <th>Email</th>
+                  <th>Password</th>
                   <th>Phone</th>
                   <th>Account Type</th>
                   <th>Status</th>
@@ -863,6 +869,9 @@
                 </div>
                 <div class="form-group">
                   <label>Phone</label><input type="tel" id="editPhone" />
+                </div>
+                <div class="form-group">
+                  <label>Business Name</label><input type="text" id="editBusinessName" placeholder="e.g. Acme Corp" />
                 </div>
                 <div class="form-group">
                   <label>Status</label

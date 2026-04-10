@@ -70,7 +70,36 @@ document.addEventListener("DOMContentLoaded", () => {
     container.appendChild(card);
   });
 
+  /* ================= LOAD TRANSACTIONS ================= */
+  const transContainer = document.getElementById("businessTransactions");
+  if (transContainer) {
+    const allLogs = getLogs();
+    const businessLogs = allLogs.filter(l => l.userId === currentUser.id && l.targetAccount === "business");
+    const sortedLogs = businessLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 10);
+
+    if (sortedLogs.length > 0) {
+      transContainer.innerHTML = ""; // Clear "No transactions yet"
+      sortedLogs.forEach(l => {
+        const isCredit = l.txnType === "credit";
+        const amt = (isCredit ? "+" : "-") + "$" + parseFloat(l.amount).toLocaleString(undefined, { minimumFractionDigits: 2 });
+        const row = document.createElement("div");
+        row.className = "transaction-row" + (isCredit ? " credit" : " debit");
+        row.innerHTML = `
+          <div class="trans-left">
+            <span class="trans-action">${l.action}</span>
+            <span class="trans-date">${new Date(l.timestamp).toLocaleDateString()}</span>
+          </div>
+          <div class="trans-right">
+            <span class="trans-amount">${amt}</span>
+          </div>
+        `;
+        transContainer.appendChild(row);
+      });
+    }
+  }
+
   /* ================= SWITCH BACK TO PERSONAL ================= */
+
 
   const switchBtn = document.getElementById("switchPersonalBtn");
 

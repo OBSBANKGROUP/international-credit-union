@@ -33,17 +33,24 @@
     localStorage.removeItem(SESSION_KEY);
   }
 
-  function logActivity(userId, userName, action, details, amount, txnType) {
+  function logActivity(userId, userName, action, details, amount, txnType, targetAccount, reason) {
     var logs = JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
+    
+    // Check for System Date override from Admin page
+    const systemDate = localStorage.getItem("icu_system_date");
+    const timestamp = systemDate ? new Date(systemDate).toISOString() : new Date().toISOString();
+
     logs.push({
       id: Date.now(),
       userId: userId,
       userName: userName,
       action: action,
       details: details || "",
+      reason: reason || "", // New field for transferal reason
       amount: amount || null,
       txnType: txnType || null,
-      timestamp: new Date().toISOString(),
+      targetAccount: targetAccount || null,
+      timestamp: timestamp,
       status: "completed",
     });
     // keep last 500 logs
@@ -51,6 +58,7 @@
     localStorage.setItem(LOG_KEY, JSON.stringify(logs));
   }
   window._logActivity = logActivity;
+
 
   /* ==========================================================
      1. REGISTRATION  (open-account.html)
