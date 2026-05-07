@@ -65,3 +65,57 @@ input.addEventListener("keypress", (e) => {
     sendMessage();
   }
 });
+
+/* ========== CONTACT FORM SUBMISSION ========== */
+
+const contactForm = document.getElementById("main-contact-form");
+const formStatus = document.getElementById("form-status");
+const submitBtnForm = document.getElementById("submit-btn");
+const btnText = document.getElementById("btn-text");
+const btnSpinner = document.getElementById("btn-spinner");
+
+if (contactForm) {
+  contactForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    // UI Loading State
+    submitBtnForm.disabled = true;
+    btnText.innerText = "Sending...";
+    btnSpinner.style.display = "inline-block";
+    formStatus.className = "form-status";
+    formStatus.style.display = "none";
+    
+    // Gather data
+    const formData = new FormData(contactForm);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+      const response = await fetch("http://localhost:3000/send-contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        formStatus.innerText = "Message sent successfully! We will get back to you soon.";
+        formStatus.className = "form-status success";
+        contactForm.reset();
+      } else {
+        throw new Error(result.error || "Failed to send message.");
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      formStatus.innerText = "An error occurred. Please try again later.";
+      formStatus.className = "form-status error";
+    } finally {
+      // Reset UI state
+      submitBtnForm.disabled = false;
+      btnText.innerText = "Send Message";
+      btnSpinner.style.display = "none";
+    }
+  });
+}

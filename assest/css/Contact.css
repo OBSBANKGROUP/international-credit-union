@@ -83,6 +83,149 @@ nav a:hover {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
+/* ========== CONTACT FORM ========== */
+
+.contact-form-section {
+  padding: 0 0 70px 0;
+  background: #fff;
+}
+
+.form-container {
+  display: flex;
+  justify-content: center;
+}
+
+.form-wrapper {
+  background: #f6f9ff;
+  padding: 40px;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.form-wrapper h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #021633;
+  text-align: center;
+}
+
+.form-wrapper p {
+  color: #555;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.half-width {
+  flex: 1;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.3s;
+  background-color: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #0a2f7a;
+}
+
+.submit-btn {
+  background: #0a2f7a;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.submit-btn:hover {
+  background: #021633;
+}
+
+.submit-btn:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.form-status {
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  display: none;
+}
+
+.form-status.success {
+  background-color: #e6ffed;
+  color: #22863a;
+  display: block;
+}
+
+.form-status.error {
+  background-color: #ffeef0;
+  color: #cb2431;
+  display: block;
+}
+
+/* ========== RESPONSIVE FORM ========== */
+@media (max-width: 600px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
 /* ========== CHAT BUTTON ========== */
 
 #chat-btn {
