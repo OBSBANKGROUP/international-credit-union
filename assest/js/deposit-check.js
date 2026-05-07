@@ -1,53 +1,119 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("depositForm");
-
-  const modal = document.getElementById("reviewModal");
-
-  const confirmBtn = document.getElementById("confirmDeposit");
-
-  const cancelBtn = document.getElementById("cancelDeposit");
-
-  const successBox = document.getElementById("successDeposit");
-
-  const reviewAccount = document.getElementById("reviewAccount");
-
-  const reviewAmount = document.getElementById("reviewAmount");
-
-  const frontPreview = document.getElementById("frontPreview");
-
-  const backPreview = document.getElementById("backPreview");
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const account = document.getElementById("depositAccount").value;
-
-    const amount = document.getElementById("checkAmount").value;
-
-    const frontFile = document.getElementById("frontCheck").files[0];
-
-    const backFile = document.getElementById("backCheck").files[0];
-
-    reviewAccount.innerText = account;
-
-    reviewAmount.innerText = amount;
-
-    frontPreview.src = URL.createObjectURL(frontFile);
-
-    backPreview.src = URL.createObjectURL(backFile);
-
-    modal.style.display = "flex";
+document.addEventListener("DOMContentLoaded", function () {
+  var session = JSON.parse(localStorage.getItem("icu_session") || "null");
+  if (!session) {
+    window.location.href = "index.html";
+    return;
+  }
+  var users = JSON.parse(localStorage.getItem("icu_users") || "[]");
+  var user = users.find(function (u) {
+    return u.id === session.id;
   });
 
-  cancelBtn.addEventListener("click", () => {
-    modal.style.display = "none";
+  function previewFile(input, previewEl, zoneEl, iconEl) {
+    input.addEventListener("change", function () {
+      var file = input.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        previewEl.src = e.target.result;
+        previewEl.style.display = "block";
+        iconEl.style.display = "none";
+        zoneEl.classList.add("has-image");
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  previewFile(
+    document.getElementById("frontCheck"),
+    document.getElementById("frontPreview"),
+    document.getElementById("frontZone"),
+    document.querySelector("#frontZone .z-icon"),
+  );
+  previewFile(
+    document.getElementById("backCheck"),
+    document.getElementById("backPreview"),
+    document.getElementById("backZone"),
+    document.querySelector("#backZone .z-icon"),
+  );
+
+  document.getElementById("reviewBtn").addEventListener("click", function () {
+    var acc = document.getElementById("depositAccount").value;
+    var amt = parseFloat(document.getElementById("checkAmount").value);
+    var front = document.getElementById("frontCheck").files[0];
+    var back = document.getElementById("backCheck").files[0];
+    if (!acc) {
+      alert("Please select a deposit account.");
+      return;
+    }
+    if (!amt || amt < 0.01) {
+      alert("Please enter a valid check amount.");
+      return;
+    }
+    if (!front) {
+      alert("Please upload the front of the check.");
+      return;
+    }
+    if (!back) {
+      alert("Please upload the back of the check.");
+      return;
+    }
+    document.getElementById("rvAccount").textContent =
+      acc.charAt(0).toUpperCase() + acc.slice(1) + " Account";
+    document.getElementById("rvAmount").textContent =
+      "$" + amt.toLocaleString("en-US", { minimumFractionDigits: 2 });
+    document.getElementById("rvFront").src =
+      document.getElementById("frontPreview").src;
+    document.getElementById("rvBack").src =
+      document.getElementById("backPreview").src;
+    document.getElementById("step1").style.display = "none";
+    document.getElementById("step2").style.display = "block";
   });
 
-  confirmBtn.addEventListener("click", () => {
-    modal.style.display = "none";
+  document.getElementById("backBtn").addEventListener("click", function () {
+    document.getElementById("step2").style.display = "none";
+    document.getElementById("step1").style.display = "block";
+  });
 
-    document.querySelector(".deposit-page").style.display = "none";
-
-    successBox.classList.remove("hidden");
+  document.getElementById("submitBtn").addEventListener("click", function () {
+    var acc = document.getElementById("depositAccount").value;
+    var amt = parseFloat(document.getElementById("checkAmount").value);
+    if (window._logActivity) {
+      window._logActivity(
+        session.id,
+        user.firstName + " " + user.lastName,
+        "Check Deposit",
+        "Mobile check deposit (pending review)",
+        amt,
+        "credit",
+        acc,
+      );
+    } else {
+      var allLogs = JSON.parse(
+        localStorage.getItem("icu_activity_log") || "[]",
+      );
+      allLogs.push({
+        id: Date.now(),
+        userId: session.id,
+        userName: user.firstName + " " + user.lastName,
+        action: "Check Deposit",
+        details: "Mobile check deposit (pending review)",
+        amount: amt,
+        txnType: "credit",
+        targetAccount: acc,
+        timestamp: new Date().toISOString(),
+        status: "pending",
+      });
+      localStorage.setItem("icu_activity_log", JSON.stringify(allLogs));
+    }
+    document.getElementById("depositSummary").textContent =
+      "$" +
+      amt.toLocaleString("en-US", { minimumFractionDigits: 2 }) +
+      " deposited to " +
+      acc.charAt(0).toUpperCase() +
+      acc.slice(1) +
+      " Account";
+    document.getElementById("step2").style.display = "none";
+    document.getElementById("step3").style.display = "block";
   });
 });

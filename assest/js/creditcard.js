@@ -1,202 +1,89 @@
-document.addEventListener("DOMContentLoaded", () => {
-  /* ================= CREDIT SCORE ================= */
+var selectedCard = "";
+function openApplication(cardName) {
+  selectedCard = cardName;
+  document.getElementById("applyLabel").textContent = "Apply for " + cardName;
+  document.getElementById("applySection").classList.add("open");
+  document
+    .getElementById("applySection")
+    .scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
-  const needle = document.getElementById("needle");
-  const scoreValue = document.getElementById("scoreValue");
+document.addEventListener("DOMContentLoaded", function () {
+  var session = JSON.parse(localStorage.getItem("icu_session") || "null");
+  if (!session) {
+    window.location.href = "index.html";
+    return;
+  }
+  var users = JSON.parse(localStorage.getItem("icu_users") || "[]");
+  var user = users.find(function (u) {
+    return u.id === session.id;
+  });
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
 
-  // Demo Score (later from backend)
-  const score = 789; // 0 - 1000
+  var logs = JSON.parse(localStorage.getItem("icu_activity_log") || "[]");
+  var txnCount = logs.filter(function (l) {
+    return l.userId === session.id;
+  }).length;
+  var seed = (user.id % 200) + txnCount * 3;
+  var score = Math.min(850, Math.max(580, 650 + (seed % 180)));
+  document.getElementById("scoreNum").textContent = score;
+  var lbl =
+    score >= 800
+      ? "Excellent"
+      : score >= 740
+        ? "Very Good"
+        : score >= 670
+          ? "Good"
+          : score >= 580
+            ? "Fair"
+            : "Poor";
+  document.getElementById("scoreLbl").textContent =
+    lbl +
+    " — " +
+    (score >= 670
+      ? "You likely qualify for most cards."
+      : "You may qualify for select cards.");
+  var deg = ((score - 300) / 550) * 180 - 90;
+  setTimeout(function () {
+    document.getElementById("gaugeNeedle").style.transform =
+      "rotate(" + deg + "deg)";
+  }, 200);
 
-  // Animate Score Number
-  animateScore(0, score, 1500);
+  document.getElementById("appFirst").value = user.firstName || "";
+  document.getElementById("appLast").value = user.lastName || "";
+  document.getElementById("appPhone").value = user.phone || "";
 
-  // Rotate Needle (-90deg to +90deg)
-  const angle = (score / 1000) * 180 - 90;
-
-  setTimeout(() => {
-    if (needle) {
-      needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-    }
-  }, 300);
-
-  function animateScore(start, end, duration) {
-    let startTime = null;
-
-    function step(time) {
-      if (!startTime) startTime = time;
-
-      const progress = time - startTime;
-
-      const value = Math.min(
-        start + (progress / duration) * (end - start),
-        end,
-      );
-
-      if (scoreValue) {
-        scoreValue.innerText = Math.floor(value);
+  document
+    .getElementById("submitAppBtn")
+    .addEventListener("click", function () {
+      var first = document.getElementById("appFirst").value.trim();
+      var last = document.getElementById("appLast").value.trim();
+      var employ = document.getElementById("appEmploy").value;
+      var income = document.getElementById("appIncome").value;
+      var terms = document.getElementById("appTerms").checked;
+      if (!first || !last) {
+        alert("Please enter your full name.");
+        return;
       }
-
-      if (progress < duration) {
-        requestAnimationFrame(step);
+      if (!employ) {
+        alert("Please select your employment status.");
+        return;
       }
-    }
-
-    requestAnimationFrame(step);
-  }
-
-  /* ================= CREDIT CARD REQUEST ================= */
-
-  const requestBtn = document.querySelector(".request-btn");
-
-  const requestSection = document.getElementById("requestSection");
-
-  const cardForm = document.getElementById("cardForm");
-
-  const successSection = document.getElementById("successSection");
-
-  const doneBtn = document.getElementById("doneBtn");
-
-  /* Show Request Form */
-
-  if (requestBtn && requestSection) {
-    requestBtn.addEventListener("click", () => {
-      requestSection.classList.remove("hidden");
-
-      requestSection.scrollIntoView({
-        behavior: "smooth",
-      });
-    });
-  }
-
-  /* Submit Application */
-
-  if (cardForm && successSection) {
-    cardForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      // Hide form
-      requestSection.classList.add("hidden");
-
-      // Show success message
-      successSection.classList.remove("hidden");
-
-      successSection.scrollIntoView({
-        behavior: "smooth",
-      });
-    });
-  }
-
-  /* Done Button */
-
-  if (doneBtn) {
-    doneBtn.addEventListener("click", () => {
-      window.location.href = "dashboard.html";
-    });
-  }
-
-  /* ============ CHANGE SECURITY QUESTIONS ============ */
-
-  const securityQBtn = document.getElementById("securityQBtn");
-
-  const securityQModal = document.getElementById("securityQModal");
-
-  const closeSecurityQModalBtn = document.getElementById("closeSecurityQModal");
-
-  const verifySection = document.getElementById("verifySection");
-
-  const sendVerifyOtpBtn = document.getElementById("sendVerifyOtpBtn");
-
-  const otpSection = document.getElementById("securityOtpSection");
-
-  const otpInput = document.getElementById("securityOtpInput");
-
-  const verifyOtpBtn = document.getElementById("verifySecurityOtpBtn");
-
-  const securityQForm = document.getElementById("securityQForm");
-
-  let securityOTP = "";
-
-  /* Open */
-
-  if (securityQBtn) {
-    securityQBtn.addEventListener("click", () => {
-      securityQModal.style.display = "flex";
-
-      resetSecurityModal();
-    });
-  }
-
-  /* Close */
-
-  if (closeSecurityQModalBtn) {
-    closeSecurityQModalBtn.addEventListener("click", closeSecurityModal);
-  }
-
-  function closeSecurityModal() {
-    securityQModal.style.display = "none";
-
-    resetSecurityModal();
-  }
-
-  /* Reset */
-
-  function resetSecurityModal() {
-    verifySection.classList.remove("hidden");
-
-    otpSection.classList.add("hidden");
-
-    securityQForm.classList.add("hidden");
-
-    otpInput.value = "";
-
-    if (securityQForm) securityQForm.reset();
-  }
-
-  /* Send OTP */
-
-  if (sendVerifyOtpBtn) {
-    sendVerifyOtpBtn.addEventListener("click", () => {
-      sendSecurityOTP();
-
-      verifySection.classList.add("hidden");
-
-      otpSection.classList.remove("hidden");
-    });
-  }
-
-  function sendSecurityOTP() {
-    securityOTP = Math.floor(100000 + Math.random() * 900000).toString();
-
-    console.log("Security OTP (Demo):", securityOTP);
-
-    alert("Verification code sent to your email.");
-  }
-
-  /* Verify OTP */
-
-  if (verifyOtpBtn) {
-    verifyOtpBtn.addEventListener("click", () => {
-      if (otpInput.value === securityOTP) {
-        otpSection.classList.add("hidden");
-
-        securityQForm.classList.remove("hidden");
-      } else {
-        alert("Invalid verification code.");
+      if (!income) {
+        alert("Please enter your annual income.");
+        return;
       }
+      if (!terms) {
+        alert("Please accept the Terms & Conditions.");
+        return;
+      }
+      document.getElementById("applySection").style.display = "none";
+      document.getElementById("successCard").style.display = "block";
+      document
+        .getElementById("successCard")
+        .scrollIntoView({ behavior: "smooth" });
     });
-  }
-
-  /* Save New Questions */
-
-  if (securityQForm) {
-    securityQForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      alert("Security questions updated successfully.");
-
-      // Later: Send to backend
-
-      closeSecurityModal();
-    });
-  }
 });

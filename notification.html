@@ -2,29 +2,40 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Notifications | International Credit Union</title>
-
-    <link rel="stylesheet" href="assest/css/notification.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/notification.css" />
+    <script src="assets/js/theme.js"></script>
   </head>
-
   <body>
-    <header class="page-header">
-      <div class="container">
-        <a href="dashboard.html" class="back-btn">← Back</a>
-        <h2>Notifications</h2>
+    <header class="notif-header">
+      <div class="hc">
+        <div class="notif-header-left">
+          <a href="dashboard.html" class="back-btn">&#8592; Back</a>
+          <h2>Notifications</h2>
+        </div>
+        <button class="mark-all-btn" id="markAllBtn">Mark all read</button>
       </div>
     </header>
-
-    <main class="notifications-page">
-      <div class="container">
-        <h1>All Notifications</h1>
-
-        <div id="notificationList" class="notification-list"></div>
+    <div class="page-body">
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="transaction">
+          Transactions
+        </button>
+        <button class="filter-tab" data-filter="security">Security</button>
+        <button class="filter-tab" data-filter="info">Updates</button>
       </div>
-    </main>
-
-    <script src="assest/js/notification.js"></script>
+      <div id="notifList"></div>
+    </div>
+    <script src="assets/js/notification.js"></script>
   </body>
 </html>

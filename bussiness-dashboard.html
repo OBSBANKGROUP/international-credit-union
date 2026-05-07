@@ -2,100 +2,188 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Business Banking | International Credit Union</title>
-
-    <link rel="stylesheet" href="assest/css/business-dashboard.css" />
-
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assest/css/business-dashboard.css" />
+    <script src="assest/js/theme.js"></script>
   </head>
-
   <body>
-    <!-- HEADER -->
-
-    <header class="business-header">
-      <div class="container header-flex">
-        <img src="assest/images/logo.jpeg" class="logo" />
-
-        <button id="switchPersonalBtn" class="switch-personal">
-          Switch to Personal
-        </button>
+    <header class="biz-header">
+      <div class="hc">
+        <div class="biz-header-left">
+          <img src="assest/images/logo.jpeg" alt="Logo" />
+          <h2>Business Banking</h2>
+        </div>
+        <a href="dashboard.html" class="switch-btn">&#8592; Personal</a>
       </div>
     </header>
-
-    <!-- MAIN DASHBOARD -->
-
-    <main class="business-dashboard container">
-      <h1>Business Banking</h1>
-
-      <p class="subtitle">Manage your business accounts and payments.</p>
-
-      <!-- BUSINESS ACCOUNTS -->
-
-      <section class="accounts-section">
-        <h2>Your Business Accounts</h2>
-
-        <div id="businessAccounts" class="accounts-grid">
-          <!-- Accounts inserted by JS -->
+    <div class="page-body">
+      <div class="container">
+        <div class="biz-hero">
+          <div class="biz-hero-text">
+            <h4>Business Account</h4>
+            <h1 id="bizBalance">$0.00</h1>
+            <p id="bizMember">Loading...</p>
+          </div>
+          <div class="biz-hero-actions">
+            <a href="wire-transfer.html" class="hero-btn white"
+              >Wire Transfer</a
+            >
+            <a href="paybill.html" class="hero-btn outline">Pay Bills</a>
+          </div>
         </div>
-      </section>
-
-      <!-- QUICK ACTIONS -->
-
-      <section class="actions-section">
-        <h2>Quick Actions</h2>
-
+        <div class="section-label">Account Overview</div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="s-icon blue">
+              <span class="material-icons-outlined">account_balance</span>
+            </div>
+            <h5>Business Balance</h5>
+            <div class="s-val" id="bizBalStat">$0.00</div>
+            <div class="s-sub">Current balance</div>
+          </div>
+          <div class="stat-card">
+            <div class="s-icon green">
+              <span class="material-icons-outlined">trending_up</span>
+            </div>
+            <h5>Credits (30 days)</h5>
+            <div class="s-val" id="credits30">$0.00</div>
+            <div class="s-sub">Inbound</div>
+          </div>
+          <div class="stat-card">
+            <div class="s-icon red">
+              <span class="material-icons-outlined">trending_down</span>
+            </div>
+            <h5>Debits (30 days)</h5>
+            <div class="s-val" id="debits30">$0.00</div>
+            <div class="s-sub">Outbound</div>
+          </div>
+          <div class="stat-card">
+            <div class="s-icon orange">
+              <span class="material-icons-outlined">receipt_long</span>
+            </div>
+            <h5>Transactions</h5>
+            <div class="s-val" id="txnCount">0</div>
+            <div class="s-sub">This month</div>
+          </div>
+        </div>
+        <div class="section-label">Quick Actions</div>
         <div class="actions-grid">
-          <a href="wire-transfer.html" class="action-card"> Wire Transfer </a>
-
-          <a href="transaction.html" class="action-card">
-            Transaction History
+          <a href="wire-transfer.html" class="action-card">
+            <div class="ac-icon blue">
+              <span class="material-icons-outlined">swap_horiz</span>
+            </div>
+            <h4>Wire Transfer</h4>
+            <p>Send funds</p>
           </a>
-
-          <a href="deposit-check.html" class="action-card"> Deposit Check </a>
-
-          <a href="card.html" class="action-card"> Business Cards </a>
+          <a href="transaction.html" class="action-card">
+            <div class="ac-icon green">
+              <span class="material-icons-outlined">history</span>
+            </div>
+            <h4>Transactions</h4>
+            <p>View history</p>
+          </a>
+          <a href="deposit-check.html" class="action-card">
+            <div class="ac-icon orange">
+              <span class="material-icons-outlined">add_a_photo</span>
+            </div>
+            <h4>Deposit Check</h4>
+            <p>Mobile deposit</p>
+          </a>
+          <a href="card.html" class="action-card">
+            <div class="ac-icon purple">
+              <span class="material-icons-outlined">credit_card</span>
+            </div>
+            <h4>Business Cards</h4>
+            <p>Manage cards</p>
+          </a>
+          <a href="paybill.html" class="action-card">
+            <div class="ac-icon blue">
+              <span class="material-icons-outlined">receipt</span>
+            </div>
+            <h4>Pay Bills</h4>
+            <p>Vendor payments</p>
+          </a>
+          <a href="Loan.html" class="action-card">
+            <div class="ac-icon green">
+              <span class="material-icons-outlined"
+                >account_balance_wallet</span
+              >
+            </div>
+            <h4>Business Loans</h4>
+            <p>Apply for credit</p>
+          </a>
         </div>
-      </section>
-
-      <!-- BUSINESS TOOLS -->
-
-      <section class="tools-section">
-        <h2>Business Tools</h2>
-
+        <div class="section-label">Business Tools</div>
         <div class="tools-grid">
-          <div class="tool-card">
-            <h3>Payroll</h3>
-            <p>Pay employees securely.</p>
+          <div
+            class="tool-card"
+            onclick="alert('Payroll Manager coming soon.')"
+          >
+            <div class="tool-icon orange">
+              <span class="material-icons-outlined">people</span>
+            </div>
+            <div class="tool-body">
+              <h4>Payroll Manager</h4>
+              <p>
+                Pay employees directly from your business account with scheduled
+                disbursements.
+              </p>
+              <span class="cs-tag">Coming Soon</span>
+            </div>
           </div>
-
-          <div class="tool-card">
-            <h3>Invoices</h3>
-            <p>Create and manage invoices.</p>
+          <div
+            class="tool-card"
+            onclick="alert('Invoice Manager coming soon.')"
+          >
+            <div class="tool-icon blue">
+              <span class="material-icons-outlined">description</span>
+            </div>
+            <div class="tool-body">
+              <h4>Invoice Manager</h4>
+              <p>
+                Create, send, and track invoices. Receive payments directly to
+                your ICU account.
+              </p>
+              <span class="cs-tag">Coming Soon</span>
+            </div>
           </div>
-
-          <div class="tool-card">
-            <h3>Expense Reports</h3>
-            <p>Track business spending.</p>
+          <div
+            class="tool-card"
+            onclick="alert('Expense Tracker coming soon.')"
+          >
+            <div class="tool-icon green">
+              <span class="material-icons-outlined">bar_chart</span>
+            </div>
+            <div class="tool-body">
+              <h4>Expense Tracker</h4>
+              <p>
+                Categorize and monitor business spending. Export reports for tax
+                purposes.
+              </p>
+              <span class="cs-tag">Coming Soon</span>
+            </div>
           </div>
         </div>
-      </section>
-
-      <!-- RECENT TRANSACTIONS -->
-
-      <section class="transactions-section">
-        <h2>Recent Transactions</h2>
-
-        <div id="businessTransactions" class="transactions-list">
-          <p class="no-transactions">No transactions yet.</p>
+        <div class="txn-section">
+          <h3>
+            Recent Business Transactions <a href="transaction.html">View All</a>
+          </h3>
+          <div id="bizTxns">
+            <p class="empty-txn">No business transactions yet.</p>
+          </div>
         </div>
-      </section>
-    </main>
-
+      </div>
+    </div>
+    <script src="assest/js/auth.js"></script>
     <script src="assest/js/business-dashboard.js"></script>
   </body>
 </html>

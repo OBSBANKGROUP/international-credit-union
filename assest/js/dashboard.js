@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const users = getUsers();
-  const currentUser = users.find(u => u.id === session.id);
+  const currentUser = users.find((u) => u.id === session.id);
   if (!currentUser) {
     localStorage.removeItem(SESSION_KEY);
     window.location.href = "index.html";
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Update Profile Name and Picture
   const usernameEls = document.querySelectorAll(".username");
-  usernameEls.forEach(el => {
+  usernameEls.forEach((el) => {
     el.textContent = currentUser.firstName + " " + currentUser.lastName;
   });
 
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const logs = getLogs();
   function getAccBalance(userId, type) {
     let bal = 0;
-    logs.forEach(l => {
+    logs.forEach((l) => {
       if (l.userId === userId && l.amount) {
         if (type && l.targetAccount !== type) return;
         if (l.txnType === "credit") bal += parseFloat(l.amount);
@@ -70,15 +70,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const savingsBalance = getAccBalance(currentUser.id, "savings");
 
   // Update Balance Labels
-  document.querySelectorAll(".balance").forEach(el => {
+  document.querySelectorAll(".balance").forEach((el) => {
     el.textContent = formatCurrency(totalBalance);
   });
-  
+
   const mainBalanceH1 = document.querySelector(".balance-card h1");
   if (mainBalanceH1) mainBalanceH1.textContent = formatCurrency(totalBalance);
 
   // Update Account Boxes
-  const accountBoxes = document.querySelectorAll(".account-grid .account-box p");
+  const accountBoxes = document.querySelectorAll(
+    ".account-grid .account-box p",
+  );
   if (accountBoxes.length >= 4) {
     accountBoxes[0].textContent = formatCurrency(checkingBalance);
     accountBoxes[1].textContent = formatCurrency(savingsBalance);
@@ -89,8 +91,10 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ================= NOTIFICATIONS ================= */
   const notifyBar = document.getElementById("notifyBar");
   function updateNotifyBar() {
-    const notifications = JSON.parse(localStorage.getItem("icu_notifications") || "[]");
-    const unread = notifications.filter(n => n.unread);
+    const notifications = JSON.parse(
+      localStorage.getItem("icu_notifications") || "[]",
+    );
+    const unread = notifications.filter((n) => n.unread);
     if (notifyBar && unread.length > 0) {
       const latest = unread[0];
       notifyBar.innerHTML = `
@@ -111,9 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const transSection = document.querySelector(".transactions");
   if (transSection) {
     const allLogs = getLogs();
-    const userLogs = allLogs.filter(l => l.userId === currentUser.id && l.amount);
-    const recentLogs = userLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 5);
-    
+    const userLogs = allLogs.filter(
+      (l) => l.userId === currentUser.id && l.amount,
+    );
+    const recentLogs = userLogs
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 5);
+
     if (recentLogs.length > 0) {
       transSection.innerHTML = `
         <div class="section-header">
@@ -122,9 +130,9 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <div class="txn-list"></div>
       `;
-      
+
       const listContainer = transSection.querySelector(".txn-list");
-      recentLogs.forEach(l => {
+      recentLogs.forEach((l) => {
         const isCredit = l.txnType === "credit";
         const sign = isCredit ? "+" : "-";
         const amtClass = isCredit ? "txn-credit" : "txn-debit";
@@ -160,7 +168,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const switchBtn = document.getElementById("switchBtn");
   const switchBtnCard = document.getElementById("switchBtnCard");
-  const goToBusiness = () => window.location.href = "bussiness-dashboard.html";
+  const goToBusiness = () =>
+    (window.location.href = "bussiness-dashboard.html");
   if (switchBtn) switchBtn.addEventListener("click", goToBusiness);
   if (switchBtnCard) switchBtnCard.addEventListener("click", goToBusiness);
 
@@ -179,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* LINK ACCOUNT MODAL */
-(function() {
+(function () {
   const linkBtn = document.getElementById("linkAccountBtn");
   const modal = document.getElementById("linkAccountModal");
   if (!modal) return;
@@ -221,16 +230,17 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-      
+
       if (window._sendOTP) {
-          window._sendOTP(currentUser.email, generatedOTP, currentUser.firstName)
-              .then(() => alert("Verification code sent to your email."))
-              .catch(() => alert("Error sending code."));
+        window
+          ._sendOTP(currentUser.email, generatedOTP, currentUser.firstName)
+          .then(() => alert("Verification code sent to your email."))
+          .catch(() => alert("Error sending code."));
       } else {
-          console.log("Link Account OTP:", generatedOTP);
-          alert("Verification code sent to your email.");
+        console.log("Link Account OTP:", generatedOTP);
+        alert("Verification code sent to your email.");
       }
-      
+
       step3.classList.add("hidden");
       step4.classList.remove("hidden");
     });
@@ -241,7 +251,9 @@ document.addEventListener("DOMContentLoaded", () => {
     verifyOtpBtn.addEventListener("click", () => {
       const input = document.getElementById("linkOtpInput").value;
       if (input === generatedOTP) {
-        alert("Trial transaction initiated. It will take 2-3 working days to complete.");
+        alert(
+          "Trial transaction initiated. It will take 2-3 working days to complete.",
+        );
         modal.classList.add("hidden");
       } else {
         alert("Invalid verification code");

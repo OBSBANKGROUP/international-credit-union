@@ -2,62 +2,123 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>Cash App | International Credit Union</title>
-
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Cash App Transfer | International Credit Union</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
-
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="assest/css/cashapp.css" />
+    <script src="assest/js/theme.js"></script>
   </head>
-
   <body>
-    <!-- ===== HEADER ===== -->
-
-    <header class="page-header">
-      <div class="container">
-        <a href="wire.html" class="back-btn">← Back</a>
-
+    <header class="ca-header">
+      <div class="hc">
+        <a href="wire.html" class="back-btn">&#8592; Back</a>
         <h2>Cash App Transfer</h2>
       </div>
     </header>
-
-    <!-- ===== MAIN ===== -->
-
-    <main class="cashapp-page">
+    <div class="page-body" id="mainContent">
       <div class="container">
-        <div class="link-card">
-          <img
-            src="assest/images/cashapp.jpeg"
-            class="cashapp-logo"
-            alt="Cash App"
-          />
-
-          <h1>No Cash App Linked</h1>
-
-          <p>
-            You currently do not have a Cash App account connected to your
-            International Credit Union profile.
-          </p>
-
-          <p class="small-text">
-            Link your Cash App to start sending and receiving money.
-          </p>
-
-          <!-- Buttons -->
-
-          <div class="action-buttons">
-            <button class="cancel-btn" id="cancelBtn">Cancel</button>
-
-            <button class="link-btn" id="linkBtn">Link Cash App</button>
+        <div class="bal-pill">
+          <div>
+            <div class="lbl">Available Balance</div>
+            <div class="amt" id="availBal">$0.00</div>
           </div>
+          <select id="fromAccount">
+            <option value="checking">Checking</option>
+            <option value="savings">Savings</option>
+          </select>
+        </div>
+        <div class="form-card">
+          <h3>
+            <img src="assest/images/cashapp.jpeg" alt="" />Send via Cash App
+          </h3>
+          <div class="form-group">
+            <label>Recipient $Cashtag or Phone</label>
+            <input
+              type="text"
+              id="cashtag"
+              placeholder="$username or phone number"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Recipient Name (optional)</label>
+            <input type="text" id="recipientName" placeholder="Full name" />
+          </div>
+          <div class="form-group">
+            <label>Amount</label>
+            <div class="amount-wrap">
+              <span>$</span>
+              <input
+                type="number"
+                id="amount"
+                placeholder="0.00"
+                min="1"
+                max="2500"
+                step="0.01"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Note (optional)</label>
+            <input type="text" id="noteField" placeholder="What's it for?" />
+          </div>
+          <button class="submit-btn" id="reviewBtn">Review Transfer</button>
+        </div>
+        <div class="info-box">
+          <strong>Cash App Transfer Info</strong>
+          Transfers via Cash App are instant. The daily limit is $2,500. Funds
+          leave your ICU account immediately upon confirmation.
         </div>
       </div>
-    </main>
-
+    </div>
+    <div class="success-screen" id="successScreen">
+      <div class="big-check">
+        <span class="material-icons-outlined">check</span>
+      </div>
+      <h2>Transfer Sent!</h2>
+      <p id="successMsg">
+        Your Cash App transfer has been submitted successfully.
+      </p>
+      <button
+        class="done-btn"
+        onclick="window.location.href = 'dashboard.html'"
+      >
+        Back to Dashboard
+      </button>
+    </div>
+    <div class="modal-overlay" id="confirmModal">
+      <div class="modal-box">
+        <div class="check-icon">
+          <span class="material-icons-outlined">send</span>
+        </div>
+        <h3>Confirm Transfer</h3>
+        <p>Please review before sending.</p>
+        <div class="detail-row">
+          <span>To</span><strong id="cfTo">—</strong>
+        </div>
+        <div class="detail-row">
+          <span>Amount</span><strong id="cfAmt">—</strong>
+        </div>
+        <div class="detail-row">
+          <span>From</span><strong id="cfFrom">—</strong>
+        </div>
+        <div class="detail-row">
+          <span>Note</span><strong id="cfNote">—</strong>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn confirm" id="confirmBtn">Send Money</button>
+          <button class="modal-btn cancel" id="cancelBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <script src="assest/js/cashapp.js"></script>
     <script src="assest/js/cashapp.js"></script>
   </body>
 </html>

@@ -2,96 +2,139 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>Send Money | International Credit Union</title>
-
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Send & Pay | International Credit Union</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
-
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="assest/css/wire.css" />
+    <script src="assets/js/theme.js"></script>
   </head>
-
   <body>
-    <!-- ===== HEADER ===== -->
-
-    <header class="page-header">
-      <div class="container">
-        <a href="dashboard.html" class="back-btn">← Back</a>
-        <h2>Send & Pay</h2>
+    <header class="wire-header">
+      <div class="hc">
+        <a href="dashboard.html" class="back-btn">&#8592; Back</a>
+        <h2>Send &amp; Pay</h2>
       </div>
     </header>
-
-    <!-- ===== MAIN ===== -->
-
-    <main class="wire-page">
+    <div class="page-body">
       <div class="container">
-        <h1>Choose a Transfer Method</h1>
-
-        <p class="subtitle">
-          Select how you would like to send money or pay bills.
-        </p>
-
-        <!-- OPTIONS -->
-
-        <section class="wire-options">
-          <!-- Wire -->
-          <a href="wire-transfer.html" class="wire-card">
-            <h3>Wire Transfer</h3>
-            <p>Send money securely within the United States.</p>
-          </a>
-
-          <!-- International -->
-          <a href="international_wire.html" class="wire-card">
-            <h3>International Wire</h3>
-            <p>Transfer funds worldwide.</p>
-          </a>
-
-          <!-- CashApp / Zelle -->
-          <div class="wire-card pay-card">
-            <h3>Cash App / Zelle</h3>
-
-            <p>Send money instantly.</p>
-
-            <button id="openAppModal" class="pay-btn">Open</button>
+        <div class="bal-bar">
+          <div>
+            <div class="bal-lbl">Available to Transfer</div>
+            <div class="bal-amt" id="availBal">$0.00</div>
+            <div class="bal-sub">Across all your accounts</div>
           </div>
-
-          <!-- Bills -->
-          <a href="paybill.html" class="wire-card">
-            <h3>Pay Bills</h3>
-            <p>Manage bill payments.</p>
+          <div class="bal-bar-icon">
+            <span
+              class="material-icons-outlined"
+              style="color: white; font-size: 1.6rem"
+              >swap_horiz</span
+            >
+          </div>
+        </div>
+        <div class="section-label">Transfer Methods</div>
+        <div class="method-grid">
+          <a href="wire-transfer.html" class="method-card">
+            <div class="method-icon blue">
+              <span class="material-icons-outlined">account_balance</span>
+            </div>
+            <h3>Domestic Wire</h3>
+            <p>Send money securely to any US bank account.</p>
+            <span class="fee-tag">$25 fee</span>
           </a>
-        </section>
+          <a href="international_wire.html" class="method-card">
+            <div class="method-icon orange">
+              <span class="material-icons-outlined">public</span>
+            </div>
+            <h3>International Wire</h3>
+            <p>Transfer funds to bank accounts worldwide.</p>
+            <span class="fee-tag">$45 fee</span>
+          </a>
+          <div class="method-card" id="openAppModal">
+            <div class="method-icon green">
+              <span class="material-icons-outlined">send</span>
+            </div>
+            <h3>Zelle / Cash App</h3>
+            <p>Instant peer-to-peer money transfers.</p>
+            <span class="fee-tag free">Free</span>
+          </div>
+          <a href="paybill.html" class="method-card">
+            <div class="method-icon teal">
+              <span class="material-icons-outlined">receipt_long</span>
+            </div>
+            <h3>Pay Bills</h3>
+            <p>Pay utilities, subscriptions and service bills.</p>
+            <span class="fee-tag free">Free</span>
+          </a>
+          <a href="deposit-check.html" class="method-card">
+            <div class="method-icon purple">
+              <span class="material-icons-outlined">add_a_photo</span>
+            </div>
+            <h3>Deposit Check</h3>
+            <p>Snap a photo to deposit your check instantly.</p>
+            <span class="fee-tag free">Free</span>
+          </a>
+        </div>
+        <div class="section-label">Transfer Limits</div>
+        <div class="limits-box">
+          <h4>Your current transfer limits</h4>
+          <table class="limits-table">
+            <thead>
+              <tr>
+                <th>Transfer Type</th>
+                <th>Per Transaction</th>
+                <th>Daily Limit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Domestic Wire</td>
+                <td>$500 – $50,000</td>
+                <td>$50,000</td>
+              </tr>
+              <tr>
+                <td>International Wire</td>
+                <td>$100 – $25,000</td>
+                <td>$25,000</td>
+              </tr>
+              <tr>
+                <td>Zelle</td>
+                <td>Up to $2,500</td>
+                <td>$5,000</td>
+              </tr>
+              <tr>
+                <td>Bill Pay</td>
+                <td>Up to $10,000</td>
+                <td>$20,000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </main>
-
-    <!-- ========== APP MODAL ========== -->
-
-    <div class="app-modal" id="appModal">
-      <div class="app-box">
-        <h3>Select Transfer App</h3>
-
+    </div>
+    <div class="modal-overlay" id="appModal">
+      <div class="modal-box">
+        <h3>Choose Transfer App</h3>
         <div class="app-options">
-          <!-- Cash App -->
-          <div class="app-card" id="cashAppBtn">
+          <div class="app-card" onclick="window.location.href = 'cashapp.html'">
             <img src="assest/images/cashapp.jpeg" alt="Cash App" />
             <span>Cash App</span>
           </div>
-
-          <!-- Zelle -->
-          <div class="app-card" id="zelleBtn">
+          <div class="app-card" onclick="window.location.href = 'zelle.html'">
             <img src="assest/images/zelle.jpeg" alt="Zelle" />
             <span>Zelle</span>
           </div>
         </div>
-
-        <button class="close-app" id="closeAppModal">Cancel</button>
+        <button class="close-modal" id="closeModal">Cancel</button>
       </div>
     </div>
-
-    <!-- JS -->
+    <script src="assest/js/wire.js"></script>
     <script src="assest/js/wire.js"></script>
   </body>
 </html>

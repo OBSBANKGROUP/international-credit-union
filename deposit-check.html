@@ -2,103 +2,171 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Deposit Check | International Credit Union</title>
-
-    <link rel="stylesheet" href="assest/css/deposit-check.css" />
-
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assest/css/deposit-check.css" />
+    <script src="assest/js/theme.js"></script>
   </head>
-
   <body>
-    <header class="deposit-header">
-      <div class="container">
-        <a href="dashboard.html" class="back-btn">← Back</a>
-
+    <header class="dep-header">
+      <div class="hc">
+        <a href="dashboard.html" class="back-btn">&#8592; Back</a>
         <h2>Mobile Check Deposit</h2>
       </div>
     </header>
-
-    <main class="deposit-page container">
-      <h1>Deposit a Check</h1>
-
-      <p class="subtitle">
-        Take photos of the front and back of your check to deposit.
-      </p>
-
-      <form id="depositForm" class="deposit-form">
-        <!-- ACCOUNT -->
-
-        <label>Deposit To</label>
-
-        <select id="depositAccount" required>
-          <option value="">Select Account</option>
-          <option>Checking • ****2841</option>
-          <option>Savings • ****8892</option>
-        </select>
-
-        <!-- AMOUNT -->
-
-        <label>Check Amount</label>
-
-        <input type="number" id="checkAmount" placeholder="$0.00" required />
-
-        <!-- FRONT CHECK -->
-
-        <label>Front of Check</label>
-
-        <input type="file" id="frontCheck" accept="image/*" required />
-
-        <!-- BACK CHECK -->
-
-        <label>Back of Check</label>
-
-        <input type="file" id="backCheck" accept="image/*" required />
-
-        <button type="submit" class="deposit-btn">Review Deposit</button>
-      </form>
-    </main>
-
-    <!-- REVIEW MODAL -->
-
-    <div id="reviewModal" class="review-modal">
-      <div class="review-box">
-        <h3>Confirm Deposit</h3>
-
-        <p><strong>Account:</strong> <span id="reviewAccount"></span></p>
-
-        <p><strong>Amount:</strong> $<span id="reviewAmount"></span></p>
-
-        <div class="review-images">
-          <img id="frontPreview" />
-          <img id="backPreview" />
+    <!-- STEP 1 -->
+    <div class="page-body" id="step1">
+      <div class="container">
+        <div class="steps-bar">
+          <div class="step active">
+            <div class="step-num">1</div>
+            <div class="step-lbl">Details</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-lbl">Review</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-lbl">Done</div>
+          </div>
         </div>
-
-        <button id="confirmDeposit" class="confirm-btn">Submit Deposit</button>
-
-        <button id="cancelDeposit" class="cancel-btn">Cancel</button>
+        <div class="form-card">
+          <h3>Check Details</h3>
+          <p class="form-sub">
+            Fill in the deposit information, then upload photos of your check.
+          </p>
+          <div class="form-group">
+            <label>Deposit To</label>
+            <select id="depositAccount">
+              <option value="">Select Account</option>
+              <option value="checking">Checking Account</option>
+              <option value="savings">Savings Account</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Check Amount</label>
+            <div class="amount-wrap">
+              <span>$</span>
+              <input
+                type="number"
+                id="checkAmount"
+                placeholder="0.00"
+                min="0.01"
+                step="0.01"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Check Photos</label>
+            <div class="photo-grid">
+              <div class="photo-zone" id="frontZone">
+                <input type="file" id="frontCheck" accept="image/*" />
+                <img class="preview" id="frontPreview" alt="" />
+                <span class="material-icons-outlined z-icon">add_a_photo</span>
+                <div class="z-label">Front of Check</div>
+                <div class="z-sub">Tap to upload</div>
+              </div>
+              <div class="photo-zone" id="backZone">
+                <input type="file" id="backCheck" accept="image/*" />
+                <img class="preview" id="backPreview" alt="" />
+                <span class="material-icons-outlined z-icon">flip_to_back</span>
+                <div class="z-label">Back of Check</div>
+                <div class="z-sub">Tap to upload</div>
+              </div>
+            </div>
+          </div>
+          <button class="next-btn" id="reviewBtn">Review Deposit</button>
+        </div>
+        <div class="tips-card">
+          <strong>Tips for a successful deposit</strong>
+          <ul>
+            <li>Place the check on a flat, well-lit surface</li>
+            <li>Make sure all four corners are visible</li>
+            <li>Endorse the back and write "For ICU Mobile Deposit"</li>
+            <li>Keep the physical check for 14 days after deposit</li>
+          </ul>
+        </div>
       </div>
     </div>
-
-    <!-- SUCCESS -->
-
-    <div id="successDeposit" class="success-box hidden">
-      <h2>Deposit Submitted</h2>
-
-      <p>
-        Your deposit is being reviewed. Funds are typically available within
-        **1–2 business days**.
-      </p>
-
-      <button onclick="window.location.href = 'dashboard.html'">
-        Return to Dashboard
-      </button>
+    <!-- STEP 2 -->
+    <div class="page-body" id="step2" style="display: none">
+      <div class="container">
+        <div class="steps-bar">
+          <div class="step done">
+            <div class="step-num">
+              <span class="material-icons-outlined" style="font-size: 0.9rem"
+                >check</span
+              >
+            </div>
+            <div class="step-lbl">Details</div>
+          </div>
+          <div class="step active">
+            <div class="step-num">2</div>
+            <div class="step-lbl">Review</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-lbl">Done</div>
+          </div>
+        </div>
+        <div class="review-card">
+          <h3>Confirm Deposit</h3>
+          <div class="review-row">
+            <span>Deposit To</span><strong id="rvAccount">—</strong>
+          </div>
+          <div class="review-row">
+            <span>Amount</span><strong id="rvAmount">—</strong>
+          </div>
+          <div class="review-row">
+            <span>Availability</span><strong>1–2 Business Days</strong>
+          </div>
+          <div class="check-previews">
+            <img id="rvFront" alt="Front of check" />
+            <img id="rvBack" alt="Back of check" />
+          </div>
+          <div class="review-actions">
+            <button class="btn-back" id="backBtn">&#8592; Edit</button>
+            <button class="btn-submit" id="submitBtn">Submit Deposit</button>
+          </div>
+        </div>
+      </div>
     </div>
-
+    <!-- STEP 3 -->
+    <div class="page-body" id="step3" style="display: none">
+      <div class="container">
+        <div class="success-section">
+          <div class="big-check">
+            <span class="material-icons-outlined">check</span>
+          </div>
+          <h2>Deposit Submitted!</h2>
+          <p>Your check deposit is being reviewed by our team.</p>
+          <div class="avail-note">
+            &#10003; Funds typically available within 1–2 business days
+          </div>
+          <p
+            id="depositSummary"
+            style="font-size: 0.85rem; color: #888; margin-top: 8px"
+          ></p>
+          <br />
+          <button
+            class="done-btn"
+            onclick="window.location.href = 'dashboard.html'"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="assest/js/auth.js"></script>
     <script src="assest/js/deposit-check.js"></script>
   </body>
 </html>

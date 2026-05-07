@@ -2,121 +2,143 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Zelle Transfer | International Credit Union</title>
-
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
-
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="assest/css/zelle.css" />
+    <script src="assest/js/theme.js"></script>
   </head>
-
   <body>
-    <!-- HEADER -->
-
-    <header class="page-header">
-      <div class="container">
-        <a href="wire.html" class="back-btn">← Back</a>
+    <header class="z-header">
+      <div class="hc">
+        <a href="wire.html" class="back-btn">&#8592; Back</a>
         <h2>Zelle Transfer</h2>
       </div>
     </header>
-
-    <!-- MAIN -->
-
-    <main class="zelle-page">
+    <div class="page-body" id="mainContent">
       <div class="container">
-        <h1>Send Money with Zelle</h1>
-
-        <p class="subtitle">Send money securely using an email address.</p>
-
-        <!-- FORM -->
-
-        <form id="zelleForm" class="zelle-form">
-          <!-- Email -->
+        <div class="bal-pill">
+          <div>
+            <div class="lbl">Available Balance</div>
+            <div class="amt" id="availBal">$0.00</div>
+          </div>
+          <select id="fromAccount">
+            <option value="checking">Checking</option>
+            <option value="savings">Savings</option>
+          </select>
+        </div>
+        <div class="form-card">
+          <h3>Send with Zelle <span class="zelle-pill">Instant</span></h3>
+          <p class="form-sub">
+            Enter the recipient's email or US phone number enrolled with Zelle.
+          </p>
           <div class="form-group">
-            <label>Recipient Email</label>
+            <label>Recipient Email or Phone</label>
             <input
-              type="email"
-              id="email"
+              type="text"
+              id="recipient"
+              placeholder="email@example.com or (555) 000-0000"
               required
-              placeholder="example@email.com"
             />
           </div>
-
-          <!-- Name -->
           <div class="form-group">
             <label>Recipient Name</label>
-            <input type="text" id="name" required placeholder="Full name" />
+            <input
+              type="text"
+              id="recipientName"
+              placeholder="Full name"
+              required
+            />
           </div>
-
-          <!-- Amount -->
           <div class="form-group">
             <label>Amount</label>
-
-            <div class="amount-box">
+            <div class="amount-wrap">
               <span>$</span>
-              <input type="number" id="amount" min="1" step="0.01" required />
+              <input
+                type="number"
+                id="amount"
+                placeholder="0.00"
+                min="1"
+                max="2500"
+                step="0.01"
+              />
             </div>
           </div>
-
-          <!-- Submit -->
-          <button type="submit" class="submit-btn">Continue</button>
-        </form>
-      </div>
-    </main>
-
-    <!-- CONFIRMATION MODAL -->
-
-    <div class="confirm-modal" id="confirmModal">
-      <div class="confirm-box">
-        <h3>Confirm Transfer</h3>
-
-        <p>Please review before sending:</p>
-
-        <div class="confirm-details">
-          <div>
-            <span>To</span>
-            <strong id="confirmName"></strong>
+          <div class="form-group">
+            <label>Memo (optional)</label>
+            <input type="text" id="memo" placeholder="What's it for?" />
           </div>
-
-          <div>
-            <span>Email</span>
-            <strong id="confirmEmail"></strong>
-          </div>
-
-          <div>
-            <span>Amount</span>
-            <strong>$<span id="confirmAmount"></span></strong>
-          </div>
+          <button class="submit-btn" id="reviewBtn">Continue</button>
         </div>
-
-        <div class="confirm-actions">
-          <button id="cancelBtn" class="cancel-btn">Cancel</button>
-
-          <button id="confirmBtn" class="confirm-btn">
-            Confirm & Transfer
-          </button>
+        <div class="info-box">
+          <strong>Zelle Transfer Info</strong>
+          Money sent with Zelle is typically available within minutes. Up to
+          $2,500 per transaction, $5,000 per day. Zelle transfers cannot be
+          cancelled once sent.
         </div>
       </div>
     </div>
-
-    <!-- SECURITY MODAL -->
-
-    <div class="security-modal" id="securityModal">
-      <div class="security-box">
-        <h3>Unusual Activity Detected</h3>
-
-        <p>For your security, we need to verify this transaction.</p>
-
-        <p class="warn-text">Please confirm it’s you.</p>
-
-        <button id="verifyBtn" class="verify-btn">Verify Identity</button>
+    <div class="success-screen" id="successScreen">
+      <div class="big-check">
+        <span class="material-icons-outlined">check_circle</span>
+      </div>
+      <h2>Transfer Sent!</h2>
+      <p id="successMsg">Your Zelle transfer has been sent successfully.</p>
+      <button
+        class="done-btn"
+        onclick="window.location.href = 'dashboard.html'"
+      >
+        Back to Dashboard
+      </button>
+    </div>
+    <div class="modal-overlay" id="confirmModal">
+      <div class="modal-box">
+        <h3>Confirm Zelle Transfer</h3>
+        <p>Review your transfer before sending.</p>
+        <div class="detail-row">
+          <span>To</span><strong id="cfTo">—</strong>
+        </div>
+        <div class="detail-row">
+          <span>Contact</span><strong id="cfContact">—</strong>
+        </div>
+        <div class="detail-row">
+          <span>Amount</span><strong id="cfAmt">—</strong>
+        </div>
+        <div class="detail-row">
+          <span>From</span><strong id="cfFrom">—</strong>
+        </div>
+        <button class="verify-btn" id="confirmBtn">Send Money</button>
+        <button class="cancel-link" id="cancelBtn">Cancel</button>
       </div>
     </div>
-
+    <div class="modal-overlay" id="otpModal">
+      <div class="modal-box">
+        <h3>Verify Transfer</h3>
+        <p>
+          Enter the 6-digit code sent to your registered email to authorize this
+          transfer.
+        </p>
+        <input
+          type="text"
+          class="otp-input"
+          id="otpInput"
+          maxlength="6"
+          placeholder="——————"
+        />
+        <button class="verify-btn" id="verifyBtn">Verify &amp; Send</button>
+        <button class="cancel-link" id="cancelOtpBtn">Cancel</button>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="assest/js/emailjs-config.js"></script>
+    <script src="assest/js/auth.js"></script>
     <script src="assest/js/zelle.js"></script>
   </body>
 </html>
