@@ -1,53 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const TAX_RATE = 0.02;
-  const USERS_KEY = "icu_users";
-  const SESSION_KEY = "icu_session";
-  const LOG_KEY = "icu_activity_log";
-
-  function getSession() {
-    return JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
-  }
-  function getUsers() {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-  }
-  function getLogs() {
-    return JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
-  }
-  function saveLogs(l) {
-    localStorage.setItem(LOG_KEY, JSON.stringify(l));
-  }
-  function fmt(n) {
-    return parseFloat(n || 0).toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  }
-
-  const session = getSession();
-  if (!session) return (window.location.href = "index.html");
-  const users = getUsers();
-  const currentUser = users.find((u) => u.id === session.id);
-  if (!currentUser) return (window.location.href = "index.html");
-
-  /* ----------------------------------------------------------
-     BALANCE — counts every log for user+account
-     Logs with no targetAccount fall back to user's primary type
-  ---------------------------------------------------------- */
-  function calcBalance(accountType) {
-    const primary = (currentUser.accountType || "checking").toLowerCase();
-    let bal = 0;
-    getLogs()
-      .filter((l) => l.userId === session.id && l.amount != null)
-      .forEach((l) => {
-        const acct = (l.targetAccount || primary).toLowerCase();
-        if (acct !== accountType.toLowerCase()) return;
-        if (l.txnType === "credit") bal += parseFloat(l.amount);
-        else if (l.txnType === "debit") bal -= parseFloat(l.amount);
-      });
-    return bal;
-  }
-
-  /* ---- DOM ---- */
+  /* ================= ELEMENTS ================= */
   const form = document.getElementById("wireForm");
   const bankSelect = document.getElementById("bankSelect");
   const customBank = document.getElementById("customBank");
@@ -61,47 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const otpInput = document.getElementById("otpInput");
   const verifyOtpBtn = document.getElementById("verifyOtpBtn");
   const receiptModal = document.getElementById("receiptModal");
-  const fromAccSelect = form ? form.querySelector("select") : null;
 
-  /* ---- Build account dropdown from admin-set accounts object ---- */
-  function buildDropdown() {
-    if (!fromAccSelect) return;
-    const accts = currentUser.accounts || {
-      [currentUser.accountType || "checking"]: true,
-    };
-    const last4 = currentUser.accountNumber
-      ? String(currentUser.accountNumber).slice(-4)
-      : "****";
-    let html = '<option value="">Select Account</option>';
-    if (accts.checking)
-      html += `<option value="checking">Checking ••••${last4}</option>`;
-    if (accts.savings)
-      html += `<option value="savings">Savings ••••${last4}</option>`;
-    if (accts.business)
-      html += `<option value="business">Business ••••${last4}</option>`;
-    fromAccSelect.innerHTML = html;
-    updateBal();
-  }
-  buildDropdown();
-
-  /* ---- Live balance display ---- */
-  const balTag = document.createElement("p");
-  balTag.style.cssText = "font-size:.83rem;font-weight:700;margin-top:7px";
-  if (fromAccSelect) fromAccSelect.parentNode.appendChild(balTag);
-
-  function updateBal() {
-    const acc = fromAccSelect ? fromAccSelect.value : "";
-    if (!acc) {
-      balTag.textContent = "";
-      return;
-    }
-    const b = calcBalance(acc);
-    balTag.textContent = "Available: $" + fmt(b);
-    balTag.style.color = b <= 0 ? "#e53935" : "#2e7d32";
-  }
-  if (fromAccSelect) fromAccSelect.addEventListener("change", updateBal);
-
-  /* ---- External accounts database ---- */
+  /* ================= DATABASE ================= */
   const externalAccounts = [
     {
       bank: "Chase Bank",
@@ -159,40 +72,126 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   ];
 
-  /* ---- Auto beneficiary lookup ---- */
+  /* ================= SESSION ================= */
+  const USERS_KEY = "icu_users";
+  const SESSION_KEY = "icu_session";
+  const LOG_KEY = "icu_activity_log";
+  const TAX_RATE = 0.02;
+
+  function getSession() {
+    return JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+  }
+  function getUsers() {
+    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+  }
+  function getLogs() {
+    return JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
+  }
+  function saveLogs(l) {
+    localStorage.setItem(LOG_KEY, JSON.stringify(l));
+  }
+  function fmt(n) {
+    return parseFloat(n || 0).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  const session = getSession();
+  if (!session) return (window.location.href = "index.html");
+
+  const users = getUsers();
+  const currentUser = users.find((u) => u.id === session.id);
+  if (!currentUser) return (window.location.href = "index.html");
+
+  /* ================= BALANCE ================= */
+  function calcBalance(accountType) {
+    const primary = (currentUser.accountType || "checking").toLowerCase();
+    let bal = 0;
+    getLogs().forEach((l) => {
+      if (l.userId !== session.id || l.amount == null) return;
+      const acct = (l.targetAccount || primary).toLowerCase();
+      if (acct !== accountType.toLowerCase()) return;
+      if (l.txnType === "credit") bal += parseFloat(l.amount);
+      else if (l.txnType === "debit") bal -= parseFloat(l.amount);
+    });
+    return bal;
+  }
+
+  /* ================= POPULATE ACCOUNT DROPDOWN ================= */
+  // Uses form.querySelector("select") — works because from-account is FIRST select in form
+  const fromAccSelect = form.querySelector("select");
+  if (fromAccSelect) {
+    const accts = currentUser.accounts || {};
+    accts[currentUser.accountType || "checking"] = true;
+    const last4 = currentUser.accountNumber
+      ? String(currentUser.accountNumber).slice(-4)
+      : "****";
+    let options = '<option value="">Select Account</option>';
+    if (accts.checking)
+      options += `<option value="checking">Checking •••• ${last4}</option>`;
+    if (accts.savings)
+      options += `<option value="savings">Savings •••• ${last4}</option>`;
+    if (accts.business)
+      options += `<option value="business">Business •••• ${last4}</option>`;
+    fromAccSelect.innerHTML = options;
+
+    // Live balance display
+    const balTag = document.createElement("p");
+    balTag.style.cssText = "font-size:.84rem;font-weight:700;margin-top:6px";
+    fromAccSelect.parentNode.appendChild(balTag);
+    const updateBal = () => {
+      const acc = fromAccSelect.value;
+      if (!acc) {
+        balTag.textContent = "";
+        return;
+      }
+      const b = calcBalance(acc);
+      balTag.textContent = "Available: $" + fmt(b);
+      balTag.style.color = b <= 0 ? "#e53935" : "#2e7d32";
+    };
+    fromAccSelect.addEventListener("change", updateBal);
+    updateBal();
+  }
+
+  /* ================= ACCOUNT LOOKUP ================= */
   function lookupBeneficiary() {
-    const r = routingInput.value.trim();
-    const a = accountInput.value.trim();
-    if (r.length < 5 || a.length < 5) {
+    const routing = routingInput.value.trim();
+    const account = accountInput.value.trim();
+
+    if (routing.length < 5 || account.length < 5) {
       resetBeneficiary();
       return;
     }
 
-    // Check internal ICU users first
-    const internal = users.find(
-      (u) => String(u.routingNumber) === r && String(u.accountNumber) === a,
+    // 1. Check internal ICU users
+    const foundUser = users.find(
+      (u) =>
+        String(u.routingNumber) === routing &&
+        String(u.accountNumber) === account,
     );
 
-    // Match on routing number OR wire routing number + account number
-    const external = externalAccounts.find(
-      (x) => (x.routing === r || x.wire === r) && x.account === a,
+    // 2. Check external database — match routing OR wire routing
+    const externalMatch = externalAccounts.find(
+      (x) =>
+        (x.routing === routing || x.wire === routing) && x.account === account,
     );
 
-    if (internal) {
-      beneficiaryInput.value = internal.firstName + " " + internal.lastName;
+    if (foundUser) {
+      beneficiaryInput.value = `${foundUser.firstName} ${foundUser.lastName}`;
       beneficiaryInput.setAttribute("readonly", true);
-      showMsg("✓ Account verified — ICU Member", "#2e7d32");
-    } else if (external) {
-      beneficiaryInput.value = external.name;
+      showMsg("✓ Account found (ICU Member)", "green");
+    } else if (externalMatch) {
+      beneficiaryInput.value = externalMatch.name;
       beneficiaryInput.setAttribute("readonly", true);
-      showMsg("✓ Account verified — " + external.bank, "#2e7d32");
-    } else if (r.length >= 9 && a.length >= 8) {
-      // Enough digits entered but no match found — show red error
+      showMsg("✓ Account found (" + externalMatch.bank + ")", "green");
+    } else if (routing.length >= 9 && account.length >= 8) {
       beneficiaryInput.value = "";
       beneficiaryInput.removeAttribute("readonly");
+      beneficiaryInput.placeholder = "Enter beneficiary name manually";
       showMsg(
         "❌ Name generation failed — account not in database. Enter name manually.",
-        "#e53935",
+        "red",
       );
     } else {
       resetBeneficiary();
@@ -205,62 +204,73 @@ document.addEventListener("DOMContentLoaded", () => {
   function resetBeneficiary() {
     beneficiaryInput.value = "";
     beneficiaryInput.removeAttribute("readonly");
-    if (beneficiaryMsg) {
-      beneficiaryMsg.style.display = "none";
-    }
+    beneficiaryInput.placeholder = "Will appear automatically";
+    beneficiaryMsg.style.display = "none";
+    beneficiaryMsg.textContent = "";
   }
+
   function showMsg(text, color) {
-    if (!beneficiaryMsg) return;
-    if (!text) {
-      beneficiaryMsg.style.display = "none";
-      return;
-    }
     beneficiaryMsg.style.display = "block";
-    beneficiaryMsg.style.color = color;
-    beneficiaryMsg.style.fontWeight = color === "#e53935" ? "700" : "600";
-    beneficiaryMsg.style.fontSize = ".83rem";
+    beneficiaryMsg.style.color = color === "red" ? "#e53935" : "#2e7d32";
+    beneficiaryMsg.style.fontWeight = "600";
     beneficiaryMsg.style.marginTop = "6px";
-    beneficiaryMsg.style.padding = color === "#e53935" ? "8px 12px" : "0";
-    beneficiaryMsg.style.background =
-      color === "#e53935" ? "#ffebee" : "transparent";
-    beneficiaryMsg.style.borderRadius = color === "#e53935" ? "8px" : "0";
+    if (color === "red") {
+      beneficiaryMsg.style.background = "#ffebee";
+      beneficiaryMsg.style.padding = "8px 12px";
+      beneficiaryMsg.style.borderRadius = "8px";
+      beneficiaryMsg.style.border = "1px solid #ffcdd2";
+    } else {
+      beneficiaryMsg.style.background = "transparent";
+      beneficiaryMsg.style.padding = "0";
+      beneficiaryMsg.style.border = "none";
+    }
     beneficiaryMsg.innerText = text;
   }
 
+  /* ================= BANK SELECT ================= */
   bankSelect.addEventListener("change", () => {
-    const isOther = bankSelect.value === "other";
-    customBank.classList.toggle("hidden", !isOther);
-    customBankInput.required = isOther;
-    if (!isOther) customBankInput.value = "";
+    if (bankSelect.value === "other") {
+      customBank.classList.remove("hidden");
+      customBankInput.required = true;
+    } else {
+      customBank.classList.add("hidden");
+      customBankInput.required = false;
+      customBankInput.value = "";
+    }
     resetBeneficiary();
   });
 
-  /* ---- Submit ---- */
+  /* ================= SUBMIT ================= */
   let generatedOTP = "";
   let pendingTxn = {};
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+
     if (currentUser.status === "suspended") {
       alert("Your account is on hold. Contact support.");
       return;
     }
-
-    const amtRaw = parseFloat(
-      document.querySelector(".amount-input")?.value || 0,
-    );
-    if (!amtRaw || amtRaw <= 0) {
-      alert("Please enter a valid amount.");
-      return;
-    }
     if (!beneficiaryInput.value.trim()) {
-      alert("Please confirm the beneficiary name.");
+      alert("Please enter the beneficiary name.");
       return;
     }
 
     const acc = fromAccSelect ? fromAccSelect.value : "";
+    const amtRaw = parseFloat(
+      document.querySelector(".amount-input")?.value || 0,
+    );
+
     if (!acc) {
       alert("Please select an account to send from.");
+      return;
+    }
+    if (!amtRaw || amtRaw <= 0) {
+      alert("Please enter a valid transfer amount.");
+      return;
+    }
+    if (!bankSelect.value) {
+      alert("Please select a recipient bank.");
       return;
     }
 
@@ -271,16 +281,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (total > bal) {
       alert(
         "❌ Insufficient Balance\n\n" +
-          "Transfer:   $" +
+          "Transfer amount:    $" +
           fmt(amtRaw) +
           "\n" +
-          "Fee (2%):   $" +
+          "Transfer fee (2%):  $" +
           fmt(tax) +
           "\n" +
-          "Total:      $" +
+          "Total required:     $" +
           fmt(total) +
           "\n" +
-          "Available:  $" +
+          "Available balance:  $" +
           fmt(bal),
       );
       return;
@@ -299,11 +309,11 @@ document.addEventListener("DOMContentLoaded", () => {
       total,
       acc,
       note,
-      accLabel: acc.charAt(0).toUpperCase() + acc.slice(1) + " ••••" + last4,
       bank,
       name: beneficiaryInput.value.trim(),
       toAcct: accountInput.value.trim(),
       routing: routingInput.value.trim(),
+      accLabel: acc.charAt(0).toUpperCase() + acc.slice(1) + " ••••" + last4,
       txnId: "TXN" + Date.now(),
       date: new Date().toLocaleString(),
     };
@@ -311,47 +321,52 @@ document.addEventListener("DOMContentLoaded", () => {
     loadingScreen.style.display = "flex";
     setTimeout(() => {
       loadingScreen.style.display = "none";
-      generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-      if (window._sendOTP)
-        window._sendOTP(
-          currentUser.email || currentUser.contactEmail,
-          generatedOTP,
-          currentUser.firstName,
-        );
-      else console.log("Wire OTP:", generatedOTP);
+      sendOTP();
       otpModal.style.display = "flex";
     }, 2000);
   });
 
-  /* ---- Verify OTP ---- */
+  /* ================= OTP ================= */
+  function sendOTP() {
+    generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+    if (window._sendOTP) {
+      window._sendOTP(
+        currentUser.email || currentUser.contactEmail,
+        generatedOTP,
+        currentUser.firstName,
+      );
+    } else {
+      console.log(
+        "%c🔑 OTP: " + generatedOTP,
+        "background:#4b38f5;color:#fff;padding:4px 12px;border-radius:4px;font-weight:700;font-size:14px",
+      );
+    }
+  }
+
   verifyOtpBtn.addEventListener("click", () => {
-    if (!otpInput.value.trim()) return;
     if (otpInput.value.trim() !== generatedOTP) {
       otpInput.style.borderColor = "#e53935";
       setTimeout(() => {
         otpInput.style.borderColor = "";
       }, 1500);
-      alert("Invalid code. Try again.");
+      alert("Invalid OTP. Please try again.");
       return;
     }
+
     otpModal.style.display = "none";
     otpInput.value = "";
 
-    // Log both entries
+    /* ================= LOG DEBIT + FEE ================= */
     const logs = getLogs();
     const ts = new Date().toISOString();
-    const uName = currentUser.firstName + " " + currentUser.lastName;
+    const uName = `${currentUser.firstName} ${currentUser.lastName}`;
+
     logs.push({
       id: Date.now(),
       userId: session.id,
       userName: uName,
       action: "Wire Transfer",
-      details:
-        "Wire to " +
-        pendingTxn.name +
-        " — " +
-        pendingTxn.bank +
-        (pendingTxn.note ? " | " + pendingTxn.note : ""),
+      details: `Wire to ${pendingTxn.name} — ${pendingTxn.bank}${pendingTxn.note ? " | " + pendingTxn.note : ""}`,
       reason: pendingTxn.note || "",
       amount: pendingTxn.amtRaw,
       txnType: "debit",
@@ -365,7 +380,7 @@ document.addEventListener("DOMContentLoaded", () => {
       userId: session.id,
       userName: uName,
       action: "Transfer Fee (2%)",
-      details: "Fee for wire to " + pendingTxn.name,
+      details: `Fee for wire to ${pendingTxn.name}`,
       reason: "2% wire transfer fee",
       amount: pendingTxn.tax,
       txnType: "debit",
@@ -377,71 +392,64 @@ document.addEventListener("DOMContentLoaded", () => {
     saveLogs(logs.length > 500 ? logs.slice(-500) : logs);
 
     const newBal = calcBalance(pendingTxn.acc);
-    if (window._sendDebitAlert)
+    if (window._sendDebitAlert) {
       window._sendDebitAlert(
         currentUser.email || currentUser.contactEmail,
         pendingTxn.total,
-        "Wire to " + pendingTxn.name,
+        `Wire to ${pendingTxn.name} — ${pendingTxn.bank}`,
         newBal,
         currentUser.firstName,
       );
-
-    // Populate receipt
-    const set = (id, v) => {
-      const el = document.getElementById(id);
-      if (el) el.innerText = v;
-    };
-    set("receiptFrom", pendingTxn.accLabel);
-    set("receiptAmount", fmt(pendingTxn.amtRaw));
-    set("receiptNote", pendingTxn.note || "—");
-    set("receiptName", pendingTxn.name);
-    set("receiptAccount", "••••" + (pendingTxn.toAcct.slice(-4) || "****"));
-    set("receiptBank", pendingTxn.bank);
-    set("receiptId", pendingTxn.txnId);
-    set("receiptDate", pendingTxn.date);
-
-    const details = receiptModal?.querySelector(".receipt-details");
-    if (details) {
-      details.querySelectorAll(".injected-row").forEach((r) => r.remove());
-      const ref =
-        details.querySelector(".detail-row:nth-child(2)") ||
-        details.querySelector(".detail-row");
-      const html =
-        `<div class="detail-row injected-row"><span>Transfer Fee (2%)</span><span style="color:#e53935;font-weight:700">-$${fmt(pendingTxn.tax)}</span></div>` +
-        `<div class="detail-row injected-row" style="border-top:2px solid #e8eaf0;padding-top:12px;margin-top:4px"><span style="font-weight:700">Total Debited</span><span style="color:#c62828;font-weight:700;font-size:1rem">-$${fmt(pendingTxn.total)}</span></div>` +
-        `<div class="detail-row injected-row"><span>New Balance</span><span style="color:#2e7d32;font-weight:700">$${fmt(newBal)}</span></div>`;
-      if (ref) ref.insertAdjacentHTML("afterend", html);
     }
-    if (receiptModal) receiptModal.style.display = "flex";
 
+    showReceipt(newBal);
     form.reset();
     resetBeneficiary();
-    updateBal();
+    if (fromAccSelect) fromAccSelect.dispatchEvent(new Event("change"));
   });
 
+  /* ================= RECEIPT ================= */
+  function showReceipt(newBal) {
+    const s = (id, v) => {
+      const e = document.getElementById(id);
+      if (e) e.innerText = v;
+    };
+    s("receiptFrom", pendingTxn.accLabel);
+    s("receiptAmount", fmt(pendingTxn.amtRaw));
+    s("receiptNote", pendingTxn.note || "—");
+    s("receiptName", pendingTxn.name);
+    s("receiptAccount", "••••" + pendingTxn.toAcct.slice(-4));
+    s("receiptBank", pendingTxn.bank);
+    s("receiptId", pendingTxn.txnId);
+    s("receiptDate", pendingTxn.date);
+
+    // Inject fee + total + new balance rows
+    const det = receiptModal?.querySelector(".receipt-details");
+    if (det) {
+      det.querySelectorAll(".inj-row").forEach((r) => r.remove());
+      const anchor = det.querySelector(".detail-row");
+      const extra =
+        `<div class="detail-row inj-row"><span>Transfer Fee (2%)</span><span style="color:#e53935;font-weight:700">-$${fmt(pendingTxn.tax)}</span></div>` +
+        `<div class="detail-row inj-row" style="border-top:2px solid #e8eaf0;padding-top:12px;margin-top:4px"><span style="font-weight:700">Total Debited</span><span style="color:#c62828;font-weight:700;font-size:1rem">-$${fmt(pendingTxn.total)}</span></div>` +
+        `<div class="detail-row inj-row"><span>New Balance</span><span style="color:#2e7d32;font-weight:700">$${fmt(newBal)}</span></div>`;
+      if (anchor) anchor.insertAdjacentHTML("afterend", extra);
+    }
+
+    receiptModal.style.display = "flex";
+  }
+
+  /* ================= CLOSE RECEIPT ================= */
   document.getElementById("closeReceiptBtn")?.addEventListener("click", () => {
-    if (receiptModal) receiptModal.style.display = "none";
+    receiptModal.style.display = "none";
     pendingTxn = {};
   });
 
   document.getElementById("shareReceiptBtn")?.addEventListener("click", () => {
-    const text =
-      "ICU Wire Receipt\n─────────────────\nTo: " +
-      pendingTxn.name +
-      "\nBank: " +
-      pendingTxn.bank +
-      "\nAmount: $" +
-      fmt(pendingTxn.amtRaw) +
-      "\nFee (2%): $" +
-      fmt(pendingTxn.tax) +
-      "\nTotal: $" +
-      fmt(pendingTxn.total) +
-      "\nRef: " +
-      pendingTxn.txnId +
-      "\nDate: " +
-      pendingTxn.date;
+    const text = `ICU Wire Transfer Receipt\nTo: ${pendingTxn.name}\nBank: ${pendingTxn.bank}\nAmount: $${fmt(pendingTxn.amtRaw)}\nFee (2%): $${fmt(pendingTxn.tax)}\nTotal: $${fmt(pendingTxn.total)}\nRef: ${pendingTxn.txnId}\nDate: ${pendingTxn.date}`;
     if (navigator.share) navigator.share({ title: "ICU Receipt", text });
     else
-      navigator.clipboard?.writeText(text).then(() => alert("Receipt copied."));
+      navigator.clipboard
+        ?.writeText(text)
+        .then(() => alert("Receipt copied to clipboard."));
   });
 });
