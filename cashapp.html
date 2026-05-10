@@ -89,8 +89,15 @@
       <button
         class="done-btn"
         onclick="window.location.href = 'dashboard.html'"
+        style="margin-right: 10px"
       >
-        Back to Dashboard
+        &#8592; Dashboard</button
+      ><button
+        class="done-btn"
+        id="shareSuccessBtn"
+        style="background: #f0f2ff; color: #4b38f5"
+      >
+        &#128257; Share Receipt
       </button>
     </div>
     <div class="modal-overlay" id="confirmModal">
@@ -118,7 +125,10 @@
         </div>
       </div>
     </div>
-    <script src="assest/js/cashapp.js"></script>
+    <script src="assest/js/transaction-pin.js"></script>
+    <script src="assest/js/pin-verify.js"></script>
+    <script src="assest/js/face-verify.js"></script>
+    <script src="assest/js/auth.js"></script>
     <script src="assest/js/cashapp.js"></script>
   </body>
 </html>

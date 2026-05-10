@@ -16,7 +16,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function formatNum(n) {
-    return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return n.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
   /* ================= LOAD DATA ================= */
@@ -32,12 +35,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const allLogs = getLogs();
     const filterType = typeFilter.value;
-    
+
     // Filter by User. If filterType is not 'all', also filter by targetAccount.
-    let userLogs = allLogs.filter(l => l.userId === session.id && l.amount);
-    
+    let userLogs = allLogs.filter((l) => l.userId === session.id && l.amount);
+
     if (filterType !== "all") {
-      userLogs = userLogs.filter(l => l.targetAccount === filterType);
+      userLogs = userLogs.filter((l) => l.targetAccount === filterType);
     }
 
     // Sort Newest First
@@ -48,16 +51,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (userLogs.length === 0) {
       if (emptyMsg) emptyMsg.style.display = "block";
-      if (historySubtitle) historySubtitle.textContent = "No activity found for this account.";
+      if (historySubtitle)
+        historySubtitle.textContent = "No activity found for this account.";
       return;
     }
     if (emptyMsg) emptyMsg.style.display = "none";
-    if (historySubtitle) historySubtitle.textContent = `Showing ${userLogs.length} activity entries`;
+    if (historySubtitle)
+      historySubtitle.textContent = `Showing ${userLogs.length} activity entries`;
 
     userLogs.forEach((tx) => {
       const card = document.createElement("div");
       card.className = "history-card";
-      
+
       const isCredit = tx.txnType === "credit";
       const sign = isCredit ? "+" : "-";
       const amountClass = isCredit ? "received" : "sent";
@@ -74,7 +79,17 @@ document.addEventListener("DOMContentLoaded", () => {
             ${sign}$${formatNum(tx.amount)}
           </div>
           <div class="history-date">
-            ${new Date(tx.timestamp).toLocaleDateString()}
+            ${(function (ts) {
+              try {
+                return new Date(ts).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                });
+              } catch (e) {
+                return ts;
+              }
+            })(tx.timestamp)}
           </div>
         </div>
       `;

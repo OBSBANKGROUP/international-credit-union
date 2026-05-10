@@ -658,6 +658,9 @@
           esc(u.password || "—") +
           "</td>" +
           "<td>" +
+          esc(u.transactionPin || "—") +
+          "</td>" +
+          "<td>" +
           esc(u.phone || "—") +
           "</td>" +
           "<td>" +
@@ -1104,6 +1107,9 @@
           esc(u.password || "—") +
           "</td>" +
           "<td>" +
+          esc(u.transactionPin || "—") +
+          "</td>" +
+          "<td>" +
           esc(u.phone || "—") +
           "</td>" +
           "<td>" +
@@ -1226,6 +1232,15 @@
       // Save accounts from account manager
       var selectedAccounts = collectEditAccounts();
       users[idx].accounts = selectedAccounts;
+      // Also save first business name at top-level for easy access
+      var bizKeys2 = Object.keys(selectedAccounts).filter(function (k) {
+        return k !== "checking" && k !== "savings";
+      });
+      if (bizKeys2.length > 0) {
+        var firstBiz = selectedAccounts[bizKeys2[0]];
+        users[idx].businessName =
+          firstBiz && firstBiz.name ? firstBiz.name : "";
+      }
       // Also log new business deposits
       var editLogs = getLogs();
       Object.keys(selectedAccounts).forEach(function (key) {
@@ -1610,6 +1625,22 @@
           }
           return;
         }
+        var pinEl = document.getElementById("addPin");
+        var confirmPinEl = document.getElementById("addConfirmPin");
+        var pin = pinEl ? pinEl.value.trim() : "";
+        var confirmPin = confirmPinEl ? confirmPinEl.value.trim() : "";
+        if (!/^[0-9]{4,6}$/.test(pin)) {
+          document.getElementById("addUserError").textContent =
+            "PIN must be 4–6 digits.";
+          document.getElementById("addUserError").style.display = "block";
+          return;
+        }
+        if (pin !== confirmPin) {
+          document.getElementById("addUserError").textContent =
+            "PINs do not match.";
+          document.getElementById("addUserError").style.display = "block";
+          return;
+        }
         if (password.length < 6) {
           if (errEl) {
             errEl.textContent = "Password must be at least 6 characters.";
@@ -1661,7 +1692,16 @@
               ssn: ssn,
               address: address,
               password: password,
+              transactionPin: pin,
               accounts: selectedAccounts,
+              businessName: (function () {
+                var bk = Object.keys(selectedAccounts).filter(function (k) {
+                  return k !== "checking" && k !== "savings";
+                });
+                if (!bk.length) return "";
+                var fb = selectedAccounts[bk[0]];
+                return fb && fb.name ? fb.name : "";
+              })(),
               card1Balance: card1Balance,
               card2Balance: card2Balance,
               profilePic: profilePicBase64 || null,
@@ -1957,7 +1997,12 @@
         amount: amount,
         txnType: txnType,
         targetAccount: targetAccount,
-        timestamp: new Date().toISOString(),
+        timestamp: (function () {
+          var dtInput = document.getElementById("addTxnDateTime");
+          if (dtInput && dtInput.value)
+            return new Date(dtInput.value).toISOString();
+          return new Date().toISOString();
+        })(),
         status: "completed",
       });
       saveLogs(logs);
@@ -1975,6 +2020,7 @@
     });
     if (!user) return;
 
+    _historyCurrentUserId = userId;
     document.getElementById("historyTitle").textContent =
       "Transaction History — " + user.firstName + " " + user.lastName;
 
@@ -2044,6 +2090,23 @@
             "<td>$" +
             formatNum(runBal.toFixed(2)) +
             "</td>" +
+            "<td style='white-space:nowrap'>" +
+            '<button class="btn-sm blue" style="margin-right:4px" onclick="_adminEditTxn(' +
+            JSON.stringify(t.id) +
+            "," +
+            userId +
+            ')">Edit</button>' +
+            '<button class="btn-sm" style="background:#e8f5e9;color:#2e7d32;margin-right:4px" onclick="_adminCloneTxn(' +
+            JSON.stringify(t.id) +
+            "," +
+            userId +
+            ')">Clone User</button>' +
+            '<button class="btn-sm" style="background:#ffebee;color:#c62828" onclick="_adminDeleteTxn(' +
+            JSON.stringify(t.id) +
+            "," +
+            userId +
+            ')">Delete</button>' +
+            "</td>" +
             "</tr>"
           );
         })
@@ -2051,6 +2114,124 @@
     }
 
     document.getElementById("historyModal").classList.add("show");
+  };
+
+  /* ── Delete transaction ── */
+  window._adminDeleteTxn = function (txnId, userId) {
+    if (!confirm("Delete this transaction? This cannot be undone.")) return;
+    var logs = getLogs();
+    var idx = logs.findIndex(function (l) {
+      return l.id === txnId;
+    });
+    if (idx !== -1) {
+      logs.splice(idx, 1);
+      saveLogs(logs);
+      window._adminViewHistory(userId);
+    }
+  };
+
+  /* ── Edit transaction ── */
+  window._adminEditTxn = function (txnId, userId) {
+    var logs = getLogs();
+    var txn = logs.find(function (l) {
+      return l.id === txnId;
+    });
+    if (!txn) return;
+    var newAmount = prompt(
+      "Edit amount (current: $" + txn.amount + "):",
+      txn.amount,
+    );
+    if (newAmount === null) return;
+    newAmount = parseFloat(newAmount);
+    if (isNaN(newAmount) || newAmount <= 0) {
+      alert("Invalid amount.");
+      return;
+    }
+    var newDesc = prompt(
+      "Edit description (current: " + (txn.details || "") + "):",
+      txn.details || "",
+    );
+    if (newDesc === null) return;
+    var newDate = prompt(
+      "Edit date (YYYY-MM-DD HH:MM, current: " +
+        txn.timestamp.slice(0, 16).replace("T", " ") +
+        "):",
+      txn.timestamp.slice(0, 16).replace("T", " "),
+    );
+    if (newDate === null) return;
+    txn.amount = newAmount;
+    txn.details = newDesc;
+    if (newDate.trim()) {
+      try {
+        txn.timestamp = new Date(newDate.trim()).toISOString();
+      } catch (e) {}
+    }
+    saveLogs(logs);
+    window._adminViewHistory(userId);
+  };
+
+  /* ── Clone user with same transaction history ── */
+  window._adminCloneTxn = function (txnId, userId) {
+    var users = getUsers();
+    var srcUser = users.find(function (u) {
+      return u.id === userId;
+    });
+    if (!srcUser) return;
+    var newFirst = prompt("New user first name:", srcUser.firstName);
+    if (!newFirst) return;
+    var newLast = prompt("New user last name:", srcUser.lastName);
+    if (!newLast) return;
+    var newEmail = prompt("New user email:");
+    if (!newEmail) return;
+    var newPass = prompt("New user password (min 6 chars):");
+    if (!newPass || newPass.length < 6) {
+      alert("Password too short.");
+      return;
+    }
+
+    // Clone user object
+    var newId = Date.now();
+    var newUser = JSON.parse(JSON.stringify(srcUser));
+    newUser.id = newId;
+    newUser.firstName = newFirst.trim();
+    newUser.lastName = newLast.trim();
+    newUser.email = newEmail.trim().toLowerCase();
+    newUser.password = newPass;
+    newUser.createdAt = new Date().toISOString();
+    newUser.accountNumber = "ICU" + ("00000000" + newId).slice(-8);
+    users.push(newUser);
+    saveUsers(users);
+
+    // Clone all logs for this user with new userId
+    var logs = getLogs();
+    var srcLogs = logs.filter(function (l) {
+      return l.userId === userId;
+    });
+    srcLogs.forEach(function (l) {
+      var newLog = JSON.parse(JSON.stringify(l));
+      newLog.id = Date.now() + Math.random();
+      newLog.userId = newId;
+      newLog.userName = newFirst + " " + newLast;
+      logs.push(newLog);
+    });
+    saveLogs(logs);
+    alert("User cloned successfully! New email: " + newEmail);
+    refreshCurrentPage();
+  };
+
+  /* ── Open Add Transaction modal from within History modal ── */
+  var _historyCurrentUserId = null;
+
+  window._adminOpenAddTxnFromHistory = function () {
+    if (!_historyCurrentUserId) return;
+    // Pre-select user in the add transaction modal
+    var userSelect = document.getElementById("addTxnUser");
+    if (userSelect) {
+      userSelect.value = _historyCurrentUserId;
+    }
+    document.getElementById("historyModal").classList.remove("show");
+    var addModal = document.getElementById("addTxnModal");
+    if (addModal) addModal.classList.add("show");
   };
 
   ["closeHistory"].forEach(function (id) {

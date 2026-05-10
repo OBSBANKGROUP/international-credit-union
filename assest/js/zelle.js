@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const TAX_RATE = 0.02;
-  const USERS_KEY = "icu_users";
-  const SESSION_KEY = "icu_session";
-  const LOG_KEY = "icu_activity_log";
+  var TAX_RATE = 0.02;
+  var USERS_KEY = "icu_users";
+  var SESSION_KEY = "icu_session";
+  var LOG_KEY = "icu_activity_log";
 
   function getSession() {
     return JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.href = "index.html";
     return;
   }
+  if (window.checkSuspended && window.checkSuspended()) return;
   var users = getUsers();
   var user = users.find(function (u) {
     return u.id === session.id;
@@ -40,24 +41,21 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  /* balance — logs with no targetAccount fall back to user's primary account */
-  function calcBal(accountType) {
+  /* ── Balance ── */
+  function calcBal(type) {
     var primary = (user.accountType || "checking").toLowerCase();
     var b = 0;
-    getLogs()
-      .filter(function (l) {
-        return l.userId === session.id && l.amount != null;
-      })
-      .forEach(function (l) {
-        var acct = (l.targetAccount || primary).toLowerCase();
-        if (acct !== accountType.toLowerCase()) return;
-        if (l.txnType === "credit") b += parseFloat(l.amount);
-        else if (l.txnType === "debit") b -= parseFloat(l.amount);
-      });
+    getLogs().forEach(function (l) {
+      if (l.userId !== session.id || l.amount == null) return;
+      var acct = (l.targetAccount || primary).toLowerCase();
+      if (acct !== type.toLowerCase()) return;
+      if (l.txnType === "credit") b += parseFloat(l.amount);
+      else if (l.txnType === "debit") b -= parseFloat(l.amount);
+    });
     return b;
   }
 
-  /* Build account dropdown */
+  /* ── Build account dropdown (includes business accounts) ── */
   var fromSelect = document.getElementById("fromAccount");
   if (fromSelect) {
     var accts = user.accounts || {};
@@ -67,15 +65,35 @@ document.addEventListener("DOMContentLoaded", function () {
       : "****";
     var html = "";
     if (accts.checking)
-      html += '<option value="checking">Checking ••••' + last4 + "</option>";
+      html +=
+        '<option value="checking">Checking \u2022\u2022\u2022\u2022' +
+        last4 +
+        "</option>";
     if (accts.savings)
-      html += '<option value="savings">Savings ••••' + last4 + "</option>";
-    if (accts.business)
-      html += '<option value="business">Business ••••' + last4 + "</option>";
+      html +=
+        '<option value="savings">Savings \u2022\u2022\u2022\u2022' +
+        last4 +
+        "</option>";
+    Object.keys(accts).forEach(function (k) {
+      if (k === "checking" || k === "savings") return;
+      if (!accts[k]) return;
+      var label =
+        typeof accts[k] === "object" && accts[k].name
+          ? accts[k].name
+          : user.businessName || "Business";
+      html +=
+        '<option value="' +
+        k +
+        '">' +
+        label +
+        " \u2022\u2022\u2022\u2022" +
+        last4 +
+        "</option>";
+    });
     fromSelect.innerHTML = html;
   }
 
-  /* Live balance */
+  /* ── Live balance ── */
   var availBalEl = document.getElementById("availBal");
   function refreshBal() {
     var acc = fromSelect ? fromSelect.value : user.accountType || "checking";
@@ -91,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var generatedOTP = "";
   var pendingTxn = {};
 
-  /* Review */
+  /* ── Review button ── */
   document.getElementById("reviewBtn").addEventListener("click", function () {
     var rec = document.getElementById("recipient").value.trim();
     var name = document.getElementById("recipientName").value.trim();
@@ -122,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (total > bal) {
       alert(
-        "❌ Insufficient Balance\n\nTransfer:  " +
+        "\u274C Insufficient Balance\n\nTransfer: " +
           fmt(amtRaw) +
           "\nFee (2%): " +
           fmt(tax) +
@@ -135,24 +153,56 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     pendingTxn = {
-      rec,
-      name,
-      memo,
-      amtRaw,
-      tax,
-      total,
-      acc,
+      rec: rec,
+      name: name,
+      memo: memo,
+      amtRaw: amtRaw,
+      tax: tax,
+      total: total,
+      acc: acc,
       txnId: "ZL" + Date.now(),
       date: new Date().toLocaleString(),
     };
 
-    document.getElementById("cfTo").textContent = name;
-    document.getElementById("cfContact").textContent = rec;
-    document.getElementById("cfAmt").textContent = fmt(amtRaw);
-    document.getElementById("cfFrom").textContent =
-      acc.charAt(0).toUpperCase() + acc.slice(1);
+    /* ── Step 1: PIN ── */
+    if (window.PinVerify) {
+      PinVerify.prompt(
+        function () {
+          /* ── Step 2: Face verification ── */
+          if (window.FaceVerify) {
+            FaceVerify.prompt(
+              function () {
+                /* Face passed (never happens) — show confirm */
+                showConfirmModal();
+              },
+              function (reason) {
+                if (reason !== "cancelled") {
+                  alert(
+                    "Transfer blocked: Face verification failed. For assistance contact support.",
+                  );
+                }
+              },
+            );
+          } else {
+            showConfirmModal();
+          }
+        },
+        function () {
+          /* PIN cancelled */
+        },
+      );
+    } else {
+      showConfirmModal();
+    }
+  });
 
-    /* Inject fee into confirm modal */
+  function showConfirmModal() {
+    document.getElementById("cfTo").textContent = pendingTxn.name;
+    document.getElementById("cfContact").textContent = pendingTxn.rec;
+    document.getElementById("cfAmt").textContent = fmt(pendingTxn.amtRaw);
+    document.getElementById("cfFrom").textContent =
+      pendingTxn.acc.charAt(0).toUpperCase() + pendingTxn.acc.slice(1);
+
     var modal = document.getElementById("confirmModal");
     modal.querySelectorAll(".injected-fee").forEach(function (r) {
       r.remove();
@@ -162,21 +212,22 @@ document.addEventListener("DOMContentLoaded", function () {
       lastRow.insertAdjacentHTML(
         "afterend",
         '<div class="detail-row injected-fee"><span>Fee (2%)</span><strong style="color:#e53935">' +
-          fmt(tax) +
+          fmt(pendingTxn.tax) +
           "</strong></div>" +
-          '<div class="detail-row injected-fee" style="border-top:2px solid #f0f2f5;padding-top:10px"><span><b>Total Debited</b></span><strong style="color:#c62828">' +
-          fmt(total) +
+          '<div class="detail-row injected-fee" style="border-top:2px solid #f0f2f5;padding-top:10px">' +
+          '<span><b>Total Debited</b></span><strong style="color:#c62828">' +
+          fmt(pendingTxn.total) +
           "</strong></div>",
       );
     }
     modal.classList.add("open");
-  });
+  }
 
   document.getElementById("cancelBtn").addEventListener("click", function () {
     document.getElementById("confirmModal").classList.remove("open");
   });
 
-  /* Confirm → send OTP */
+  /* ── Confirm → OTP ── */
   document.getElementById("confirmBtn").addEventListener("click", function () {
     document.getElementById("confirmModal").classList.remove("open");
     generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
@@ -186,7 +237,11 @@ document.addEventListener("DOMContentLoaded", function () {
         generatedOTP,
         user.firstName,
       );
-    else console.log("Zelle OTP:", generatedOTP);
+    else
+      console.log(
+        "%c\uD83D\uDD11 Zelle OTP: " + generatedOTP,
+        "background:#6b2d8b;color:#fff;padding:4px 12px;border-radius:4px;font-weight:700;font-size:14px",
+      );
     document.getElementById("otpModal").classList.add("open");
   });
 
@@ -196,7 +251,7 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("otpModal").classList.remove("open");
     });
 
-  /* Verify OTP → log */
+  /* ── Verify OTP ── */
   document.getElementById("verifyBtn").addEventListener("click", function () {
     var entered = document.getElementById("otpInput").value.trim();
     if (!entered) return;
@@ -225,7 +280,7 @@ document.addEventListener("DOMContentLoaded", function () {
         " (" +
         pendingTxn.rec +
         ")" +
-        (pendingTxn.memo ? " — " + pendingTxn.memo : ""),
+        (pendingTxn.memo ? " \u2014 " + pendingTxn.memo : ""),
       reason: pendingTxn.memo || "",
       amount: pendingTxn.amtRaw,
       txnType: "debit",
@@ -234,7 +289,6 @@ document.addEventListener("DOMContentLoaded", function () {
       status: "completed",
       txnId: pendingTxn.txnId,
     });
-
     logs.push({
       id: Date.now() + 1,
       userId: session.id,
@@ -252,17 +306,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     saveLogs(logs.length > 500 ? logs.slice(-500) : logs);
 
-    var newBal = calcBal(pendingTxn.acc);
     refreshBal();
-
-    if (window._sendDebitAlert)
+    if (window._sendDebitAlert) {
       window._sendDebitAlert(
         user.email || user.contactEmail,
         pendingTxn.total,
         "Zelle to " + pendingTxn.name + " (" + pendingTxn.rec + ")",
-        newBal,
+        calcBal(pendingTxn.acc),
         user.firstName,
       );
+    }
 
     document.getElementById("mainContent").style.display = "none";
     document.getElementById("successMsg").textContent =
@@ -272,8 +325,35 @@ document.addEventListener("DOMContentLoaded", function () {
       " via Zelle. " +
       "Fee: " +
       fmt(pendingTxn.tax) +
-      " | Total debited: " +
+      " | Total: " +
       fmt(pendingTxn.total);
     document.getElementById("successScreen").style.display = "block";
+
+    var shareBtn = document.getElementById("shareSuccessBtn");
+    if (shareBtn) {
+      shareBtn.onclick = function () {
+        var txt =
+          "ICU Zelle Receipt\nTo: " +
+          pendingTxn.name +
+          " (" +
+          pendingTxn.rec +
+          ")\nAmount: " +
+          fmt(pendingTxn.amtRaw) +
+          "\nFee (2%): " +
+          fmt(pendingTxn.tax) +
+          "\nTotal: " +
+          fmt(pendingTxn.total) +
+          "\nRef: " +
+          pendingTxn.txnId +
+          "\nDate: " +
+          pendingTxn.date;
+        if (navigator.share)
+          navigator.share({ title: "ICU Receipt", text: txt });
+        else if (navigator.clipboard)
+          navigator.clipboard.writeText(txt).then(function () {
+            alert("Receipt copied.");
+          });
+      };
+    }
   });
 });

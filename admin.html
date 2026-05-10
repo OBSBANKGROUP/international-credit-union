@@ -282,6 +282,7 @@
                   <th>User</th>
                   <th>Email</th>
                   <th>Password</th>
+                  <th>PIN</th>
                   <th>Phone</th>
                   <th>Joined</th>
                   <th>Status</th>
@@ -828,6 +829,7 @@
                   <th>User</th>
                   <th>Email</th>
                   <th>Password</th>
+                  <th>PIN</th>
                   <th>Phone</th>
                   <th>Account Type</th>
                   <th>Status</th>
@@ -929,6 +931,10 @@
                 <div class="form-group">
                   <label>New Password (leave blank to keep)</label
                   ><input type="password" id="editPassword" />
+                </div>
+                <div class="form-group">
+                  <label>Transaction PIN (leave blank to keep)</label>
+                  <input type="password" id="editPin" inputmode="numeric" pattern="[0-9]{4,6}" placeholder="4–6 digit PIN" maxlength="6" />
                 </div>
               </div>
               <div class="modal-actions">
@@ -1080,6 +1086,14 @@
               <label>Confirm Password</label
               ><input type="password" id="addConfirmPassword" required />
             </div>
+            <div class="form-group">
+              <label>Transaction PIN (4–6 digits)</label>
+              <input type="password" id="addPin" inputmode="numeric" pattern="[0-9]{4,6}" placeholder="e.g. 1234" maxlength="6" required />
+            </div>
+            <div class="form-group">
+              <label>Confirm PIN</label>
+              <input type="password" id="addConfirmPin" inputmode="numeric" pattern="[0-9]{4,6}" placeholder="Re-enter PIN" maxlength="6" required />
+            </div>
             <div class="form-group" style="grid-column: span 2">
               <label>Profile Picture</label>
               <input type="file" id="addProfilePic" accept="image/*" />
@@ -1224,9 +1238,14 @@
       <div class="modal" style="max-width: 660px">
         <div class="modal-header">
           <h3 id="historyTitle">Transaction History</h3>
-          <button class="icon-btn" id="closeHistory">
-            <span class="material-icons-outlined">close</span>
-          </button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn-sm blue" id="addTxnFromHistoryBtn" onclick="_adminOpenAddTxnFromHistory()" style="font-size:.75rem;padding:6px 12px">
+              + New Transaction
+            </button>
+            <button class="icon-btn" id="closeHistory">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
         </div>
         <div class="history-summary" id="historySummary"></div>
         <div class="table-wrap" style="max-height: 400px; overflow-y: auto">
@@ -1238,6 +1257,7 @@
                 <th>Description</th>
                 <th>Amount</th>
                 <th>Balance</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="historyBody"></tbody>

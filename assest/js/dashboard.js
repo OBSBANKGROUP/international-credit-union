@@ -65,28 +65,89 @@ document.addEventListener("DOMContentLoaded", () => {
     return bal;
   }
 
-  const totalBalance = getAccBalance(currentUser.id);
-  const checkingBalance = getAccBalance(currentUser.id, "checking");
-  const savingsBalance = getAccBalance(currentUser.id, "savings");
+  /* ── Fixed balance: logs with no targetAccount fall back to
+     user's primary accountType (same fix as wire-transfer.js) ── */
+  const primary = (currentUser.accountType || "checking").toLowerCase();
 
-  // Update Balance Labels
+  function getAccBalFixed(userId, type) {
+    let bal = 0;
+    logs.forEach((l) => {
+      if (l.userId !== userId || l.amount == null) return;
+      const acct = (l.targetAccount || primary).toLowerCase();
+      if (type && acct !== type.toLowerCase()) return;
+      if (l.txnType === "credit") bal += parseFloat(l.amount);
+      else if (l.txnType === "debit") bal -= parseFloat(l.amount);
+    });
+    return bal;
+  }
+
+  /* ── Get account name from user.accounts (supports new {enabled,name} format
+     and old {checking:true} format) ── */
+  function getAcctName(key, fallback) {
+    const accts = currentUser.accounts || {};
+    const val = accts[key];
+    if (!val) return fallback;
+    if (typeof val === "object" && val.name) return val.name;
+    return fallback;
+  }
+
+  /* ── Find all business account keys (business_0, business_1, or legacy "business") ── */
+  function getBizKeys() {
+    const accts = currentUser.accounts || {};
+    return Object.keys(accts).filter(
+      (k) => k !== "checking" && k !== "savings" && accts[k],
+    );
+  }
+
+  const checkingBalance = getAccBalFixed(currentUser.id, "checking");
+  const savingsBalance = getAccBalFixed(currentUser.id, "savings");
+  const bizKeys = getBizKeys();
+
+  // Total = checking + savings + all business accounts
+  let totalBalance = checkingBalance + savingsBalance;
+  bizKeys.forEach((k) => {
+    totalBalance += getAccBalFixed(currentUser.id, k);
+  });
+
+  // Update total balance display
   document.querySelectorAll(".balance").forEach((el) => {
     el.textContent = formatCurrency(totalBalance);
   });
-
   const mainBalanceH1 = document.querySelector(".balance-card h1");
   if (mainBalanceH1) mainBalanceH1.textContent = formatCurrency(totalBalance);
 
-  // Update Account Boxes
-  const accountBoxes = document.querySelectorAll(
-    ".account-grid .account-box p",
-  );
-  if (accountBoxes.length >= 4) {
-    accountBoxes[0].textContent = formatCurrency(checkingBalance);
-    accountBoxes[1].textContent = formatCurrency(savingsBalance);
-    accountBoxes[2].textContent = formatCurrency(0); // CD
-    accountBoxes[3].textContent = currentUser.accountNumber || "— — — —";
+  /* ── Update account box labels and balances ── */
+  // Checking
+  const ckLabel = document.getElementById("acctLabel_checking");
+  const ckBal = document.getElementById("acctBal_checking");
+  if (ckLabel) ckLabel.textContent = getAcctName("checking", "Checking");
+  if (ckBal) ckBal.textContent = formatCurrency(checkingBalance);
+
+  // Savings
+  const svLabel = document.getElementById("acctLabel_savings");
+  const svBal = document.getElementById("acctBal_savings");
+  if (svLabel) svLabel.textContent = getAcctName("savings", "Savings");
+  if (svBal) svBal.textContent = formatCurrency(savingsBalance);
+
+  // Business — show first biz account in the 3rd box, with correct name
+  const bizBox = document.getElementById("acctBox_business");
+  const bizLabel = document.getElementById("acctLabel_business");
+  const bizBal = document.getElementById("acctBal_business");
+  if (bizKeys.length > 0) {
+    const firstBizKey = bizKeys[0];
+    const firstBizBal = getAccBalFixed(currentUser.id, firstBizKey);
+    const firstBizName = getAcctName(firstBizKey, "Business");
+    if (bizLabel) bizLabel.textContent = firstBizName;
+    if (bizBal) bizBal.textContent = formatCurrency(firstBizBal);
+    if (bizBox) bizBox.style.display = "";
+  } else {
+    // No business account — hide the box
+    if (bizBox) bizBox.style.display = "none";
   }
+
+  // Card number
+  const cardNumEl = document.getElementById("acctCardNum");
+  if (cardNumEl) cardNumEl.textContent = currentUser.accountNumber || "— — — —";
 
   /* ================= NOTIFICATIONS ================= */
   const notifyBar = document.getElementById("notifyBar");
@@ -148,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
             <div class="txn-info">
               <strong>${l.action}</strong>
-              <span>${new Date(l.timestamp).toLocaleDateString()}</span>
+              <span>${new Date(l.timestamp).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</span>
             </div>
           </div>
           <div class="txn-amount ${amtClass}">${sign}${formatCurrency(l.amount)}</div>
