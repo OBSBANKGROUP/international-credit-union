@@ -113,7 +113,7 @@ app.post('/send-contact', async (req, res) => {
     }
 
     const appName = process.env.APP_NAME || 'International Credit Union';
-    const supportEmail = process.env.SUPPORT_EMAIL || process.env.SMTP_USER;
+    const supportEmail = 'obsbankgroup@gmail.com';
 
     const mailOptions = {
         from: `"${appName} Contact Form" <${process.env.SMTP_USER}>`,

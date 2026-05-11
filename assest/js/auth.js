@@ -316,6 +316,11 @@
         return showLoginError("Invalid User ID or password. Please try again.");
       }
 
+      /* check status */
+      if (user.status && user.status !== "active") {
+        return showLoginError("Your account is " + user.status + ". Please contact support.");
+      }
+
       /* save ID checkbox */
       const saveCheck = document.getElementById("saveLogin");
       if (saveCheck && saveCheck.checked) {
