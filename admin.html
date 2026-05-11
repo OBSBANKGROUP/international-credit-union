@@ -97,7 +97,7 @@
             <span class="material-icons-outlined">settings</span>
           </button>
           <div class="admin-avatar">
-            <img src="assest/images/profile.png" alt="Admin" />
+            <img src="assets/images/profile.png" alt="Admin" />
           </div>
         </div>
       </header>
@@ -282,6 +282,7 @@
                   <th>User</th>
                   <th>Email</th>
                   <th>Password</th>
+                  <th>PIN</th>
                   <th>Phone</th>
                   <th>Joined</th>
                   <th>Status</th>
@@ -828,6 +829,7 @@
                   <th>User</th>
                   <th>Email</th>
                   <th>Password</th>
+                  <th>PIN</th>
                   <th>Phone</th>
                   <th>Account Type</th>
                   <th>Status</th>
@@ -882,17 +884,40 @@
                   </select>
                 </div>
                 <div class="form-group" style="grid-column: span 2">
-                  <label>Account Types</label>
-                  <div style="display: flex; gap: 16px; margin-top: 8px;">
-                    <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
-                      <input type="checkbox" name="editAccountType" value="checking"> Checking
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
-                      <input type="checkbox" name="editAccountType" value="savings"> Savings
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
-                      <input type="checkbox" name="editAccountType" value="business"> Business
-                    </label>
+                  <label>Linked Accounts</label>
+                  <div id="editAccountsManager" style="margin-top:10px">
+                    <!-- Checking -->
+                    <div class="acct-row" id="editRow_checking">
+                      <label class="acct-toggle">
+                        <input type="checkbox" name="editAccountType" value="checking" id="editChk_checking">
+                        <span class="acct-toggle-label">
+                          <span class="material-icons-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px">account_balance</span>
+                          Checking Account
+                        </span>
+                      </label>
+                      <div class="acct-name-wrap" id="editNameWrap_checking" style="display:none">
+                        <input type="text" id="editAcctName_checking" placeholder="Account label (optional)" class="acct-name-input" value="Checking Account"/>
+                      </div>
+                    </div>
+                    <!-- Savings -->
+                    <div class="acct-row" id="editRow_savings">
+                      <label class="acct-toggle">
+                        <input type="checkbox" name="editAccountType" value="savings" id="editChk_savings">
+                        <span class="acct-toggle-label">
+                          <span class="material-icons-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px">savings</span>
+                          Savings Account
+                        </span>
+                      </label>
+                      <div class="acct-name-wrap" id="editNameWrap_savings" style="display:none">
+                        <input type="text" id="editAcctName_savings" placeholder="Account label (optional)" class="acct-name-input" value="Savings Account"/>
+                      </div>
+                    </div>
+                    <!-- Business accounts list -->
+                    <div id="editBusinessList"></div>
+                    <button type="button" class="add-biz-btn" id="editAddBizBtn">
+                      <span class="material-icons-outlined" style="font-size:.9rem;vertical-align:middle">add</span>
+                      Add Business Account
+                    </button>
                   </div>
                 </div>
                 <div class="form-group">
@@ -906,6 +931,10 @@
                 <div class="form-group">
                   <label>New Password (leave blank to keep)</label
                   ><input type="password" id="editPassword" />
+                </div>
+                <div class="form-group">
+                  <label>Transaction PIN (leave blank to keep)</label>
+                  <input type="password" id="editPin" inputmode="numeric" pattern="[0-9]{4,6}" placeholder="4–6 digit PIN" maxlength="6" />
                 </div>
               </div>
               <div class="modal-actions">
@@ -959,17 +988,37 @@
               />
             </div>
             <div class="form-group" style="grid-column: span 2">
-              <label>Account Types (Select all that apply)</label>
-              <div style="display: flex; gap: 16px; margin-top: 8px;">
-                <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
-                  <input type="checkbox" name="accountType" value="checking" checked> Checking
-                </label>
-                <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
-                  <input type="checkbox" name="accountType" value="savings"> Savings
-                </label>
-                <label style="display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;">
-                  <input type="checkbox" name="accountType" value="business"> Business
-                </label>
+              <label>Linked Accounts</label>
+              <div id="addAccountsManager" style="margin-top:10px">
+                <div class="acct-row">
+                  <label class="acct-toggle">
+                    <input type="checkbox" name="accountType" value="checking" id="addChk_checking" checked>
+                    <span class="acct-toggle-label">
+                      <span class="material-icons-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px">account_balance</span>
+                      Checking Account
+                    </span>
+                  </label>
+                  <div class="acct-name-wrap" id="addNameWrap_checking">
+                    <input type="text" id="addAcctName_checking" placeholder="Account label" class="acct-name-input" value="Checking Account"/>
+                  </div>
+                </div>
+                <div class="acct-row">
+                  <label class="acct-toggle">
+                    <input type="checkbox" name="accountType" value="savings" id="addChk_savings">
+                    <span class="acct-toggle-label">
+                      <span class="material-icons-outlined" style="font-size:1rem;vertical-align:middle;margin-right:4px">savings</span>
+                      Savings Account
+                    </span>
+                  </label>
+                  <div class="acct-name-wrap" id="addNameWrap_savings" style="display:none">
+                    <input type="text" id="addAcctName_savings" placeholder="Account label" class="acct-name-input" value="Savings Account"/>
+                  </div>
+                </div>
+                <div id="addBusinessList"></div>
+                <button type="button" class="add-biz-btn" id="addAddBizBtn">
+                  <span class="material-icons-outlined" style="font-size:.9rem;vertical-align:middle">add</span>
+                  Add Business Account
+                </button>
               </div>
             </div>
             </div>
@@ -1036,6 +1085,14 @@
             <div class="form-group">
               <label>Confirm Password</label
               ><input type="password" id="addConfirmPassword" required />
+            </div>
+            <div class="form-group">
+              <label>Transaction PIN (4–6 digits)</label>
+              <input type="password" id="addPin" inputmode="numeric" pattern="[0-9]{4,6}" placeholder="e.g. 1234" maxlength="6" required />
+            </div>
+            <div class="form-group">
+              <label>Confirm PIN</label>
+              <input type="password" id="addConfirmPin" inputmode="numeric" pattern="[0-9]{4,6}" placeholder="Re-enter PIN" maxlength="6" required />
             </div>
             <div class="form-group" style="grid-column: span 2">
               <label>Profile Picture</label>
@@ -1181,9 +1238,14 @@
       <div class="modal" style="max-width: 660px">
         <div class="modal-header">
           <h3 id="historyTitle">Transaction History</h3>
-          <button class="icon-btn" id="closeHistory">
-            <span class="material-icons-outlined">close</span>
-          </button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn-sm blue" id="addTxnFromHistoryBtn" onclick="_adminOpenAddTxnFromHistory()" style="font-size:.75rem;padding:6px 12px">
+              + New Transaction
+            </button>
+            <button class="icon-btn" id="closeHistory">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
         </div>
         <div class="history-summary" id="historySummary"></div>
         <div class="table-wrap" style="max-height: 400px; overflow-y: auto">
@@ -1195,6 +1257,7 @@
                 <th>Description</th>
                 <th>Amount</th>
                 <th>Balance</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="historyBody"></tbody>

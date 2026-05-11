@@ -10,6 +10,254 @@
   var USERS_KEY = "icu_users";
   var LOG_KEY = "icu_activity_log";
 
+  /* ═══════════════════════════════════════════════════════
+     ACCOUNT MANAGER HELPERS
+     Supports: checking, savings, multiple business accounts
+     Business accounts stored as: accounts["business_0"], accounts["business_1"] etc.
+     Each entry: { enabled: true, name: "My Biz LLC" }
+  ═══════════════════════════════════════════════════════ */
+
+  var editBizCount = 0;
+  var addBizCount = 0;
+
+  /* ---- Toggle name field visibility when checkbox changes ---- */
+  function wireToggle(chkId, wrapId) {
+    var chk = document.getElementById(chkId);
+    var wrap = document.getElementById(wrapId);
+    if (!chk || !wrap) return;
+    wrap.style.display = chk.checked ? "block" : "none";
+    chk.closest(".acct-row") &&
+      chk.closest(".acct-row").classList.toggle("enabled", chk.checked);
+    chk.addEventListener("change", function () {
+      wrap.style.display = chk.checked ? "block" : "none";
+      chk.closest(".acct-row") &&
+        chk.closest(".acct-row").classList.toggle("enabled", chk.checked);
+    });
+  }
+  wireToggle("addChk_checking", "addNameWrap_checking");
+  wireToggle("addChk_savings", "addNameWrap_savings");
+  wireToggle("editChk_checking", "editNameWrap_checking");
+  wireToggle("editChk_savings", "editNameWrap_savings");
+
+  /* ---- Add a business account row ---- */
+  function addBizRow(listId, prefix, idx, name, deposit) {
+    var list = document.getElementById(listId);
+    if (!list) return;
+    var div = document.createElement("div");
+    div.className = "biz-acct-row";
+    div.id = prefix + "BizRow_" + idx;
+    div.innerHTML =
+      '<div class="biz-row-top">' +
+      '<span class="biz-title"><span class="material-icons-outlined" style="font-size:.95rem">business_center</span> Business Account ' +
+      (idx + 1) +
+      "</span>" +
+      '<button type="button" class="biz-remove-btn" onclick="removeBizRow(\'' +
+      listId +
+      "', '" +
+      prefix +
+      "BizRow_" +
+      idx +
+      "')\">Remove</button>" +
+      "</div>" +
+      '<input type="text" id="' +
+      prefix +
+      "BizName_" +
+      idx +
+      '" placeholder="Business name e.g. Knightsplash LLC" value="' +
+      (name || "") +
+      '" style="margin-bottom:8px"/>' +
+      '<input type="number" id="' +
+      prefix +
+      "BizDeposit_" +
+      idx +
+      '" placeholder="Initial deposit for this account ($)" value="' +
+      (deposit || "") +
+      '" min="0" step="0.01"/>';
+    list.appendChild(div);
+  }
+
+  function removeBizRow(listId, rowId) {
+    var row = document.getElementById(rowId);
+    if (row) row.remove();
+  }
+
+  /* ---- Add Business button handlers ---- */
+  var addBizBtn = document.getElementById("addAddBizBtn");
+  if (addBizBtn) {
+    addBizBtn.addEventListener("click", function () {
+      addBizRow("addBusinessList", "add", addBizCount, "", "");
+      addBizCount++;
+    });
+  }
+  var editBizBtn = document.getElementById("editAddBizBtn");
+  if (editBizBtn) {
+    editBizBtn.addEventListener("click", function () {
+      addBizRow("editBusinessList", "edit", editBizCount, "", "");
+      editBizCount++;
+    });
+  }
+
+  /* ---- Collect accounts from Add form ---- */
+  function collectAddAccounts() {
+    var accounts = {};
+    var logs_to_add = [];
+
+    // Checking
+    if (
+      document.getElementById("addChk_checking") &&
+      document.getElementById("addChk_checking").checked
+    ) {
+      var name =
+        (document.getElementById("addAcctName_checking") &&
+          document.getElementById("addAcctName_checking").value.trim()) ||
+        "Checking Account";
+      accounts.checking = { enabled: true, name: name };
+    }
+    // Savings
+    if (
+      document.getElementById("addChk_savings") &&
+      document.getElementById("addChk_savings").checked
+    ) {
+      var name =
+        (document.getElementById("addAcctName_savings") &&
+          document.getElementById("addAcctName_savings").value.trim()) ||
+        "Savings Account";
+      accounts.savings = { enabled: true, name: name };
+    }
+    // Business accounts
+    var bizList = document.getElementById("addBusinessList");
+    if (bizList) {
+      var rows = bizList.querySelectorAll(".biz-acct-row");
+      rows.forEach(function (row, i) {
+        var nameEl = row.querySelector("input[type=text]");
+        var depositEl = row.querySelector("input[type=number]");
+        var bizName = nameEl ? nameEl.value.trim() : "";
+        var bizDep = depositEl ? parseFloat(depositEl.value) || 0 : 0;
+        accounts["business_" + i] = {
+          enabled: true,
+          name: bizName || "Business Account " + (i + 1),
+          deposit: bizDep,
+        };
+      });
+    }
+    return accounts;
+  }
+
+  /* ---- Collect accounts from Edit form ---- */
+  function collectEditAccounts() {
+    var accounts = {};
+    if (
+      document.getElementById("editChk_checking") &&
+      document.getElementById("editChk_checking").checked
+    ) {
+      var name =
+        (document.getElementById("editAcctName_checking") &&
+          document.getElementById("editAcctName_checking").value.trim()) ||
+        "Checking Account";
+      accounts.checking = { enabled: true, name: name };
+    }
+    if (
+      document.getElementById("editChk_savings") &&
+      document.getElementById("editChk_savings").checked
+    ) {
+      var name =
+        (document.getElementById("editAcctName_savings") &&
+          document.getElementById("editAcctName_savings").value.trim()) ||
+        "Savings Account";
+      accounts.savings = { enabled: true, name: name };
+    }
+    var bizList = document.getElementById("editBusinessList");
+    if (bizList) {
+      var rows = bizList.querySelectorAll(".biz-acct-row");
+      rows.forEach(function (row, i) {
+        var nameEl = row.querySelector("input[type=text]");
+        var depositEl = row.querySelector("input[type=number]");
+        var bizName = nameEl ? nameEl.value.trim() : "";
+        var bizDep = depositEl ? parseFloat(depositEl.value) || 0 : 0;
+        accounts["business_" + i] = {
+          enabled: true,
+          name: bizName || "Business Account " + (i + 1),
+          deposit: bizDep,
+        };
+      });
+    }
+    return accounts;
+  }
+
+  /* ---- Load user accounts into Edit modal ---- */
+  function loadEditAccounts(user) {
+    // Reset biz counter and list
+    editBizCount = 0;
+    var bizList = document.getElementById("editBusinessList");
+    if (bizList) bizList.innerHTML = "";
+
+    var accts = user.accounts || {};
+
+    // Checking
+    var chkEl = document.getElementById("editChk_checking");
+    var nameEl = document.getElementById("editAcctName_checking");
+    var wrapEl = document.getElementById("editNameWrap_checking");
+    if (chkEl) {
+      var hasCk = !!(
+        accts.checking ||
+        (typeof accts.checking === "object" && accts.checking)
+      );
+      chkEl.checked = hasCk;
+      if (nameEl && typeof accts.checking === "object")
+        nameEl.value = accts.checking.name || "Checking Account";
+      if (wrapEl) wrapEl.style.display = hasCk ? "block" : "none";
+      if (chkEl.closest(".acct-row"))
+        chkEl.closest(".acct-row").classList.toggle("enabled", hasCk);
+    }
+
+    // Savings
+    var savEl = document.getElementById("editChk_savings");
+    var savName = document.getElementById("editAcctName_savings");
+    var savWrap = document.getElementById("editNameWrap_savings");
+    if (savEl) {
+      var hasSv = !!accts.savings;
+      savEl.checked = hasSv;
+      if (savName && typeof accts.savings === "object")
+        savName.value = accts.savings.name || "Savings Account";
+      if (savWrap) savWrap.style.display = hasSv ? "block" : "none";
+      if (savEl.closest(".acct-row"))
+        savEl.closest(".acct-row").classList.toggle("enabled", hasSv);
+    }
+
+    // Business accounts
+    Object.keys(accts).forEach(function (key) {
+      if (key === "checking" || key === "savings") return;
+      if (!accts[key]) return;
+      var name =
+        typeof accts[key] === "object"
+          ? accts[key].name
+          : key === "business"
+            ? "Business Account"
+            : key;
+      var dep = typeof accts[key] === "object" ? accts[key].deposit || 0 : 0;
+      addBizRow(
+        "editBusinessList",
+        "edit",
+        editBizCount,
+        name,
+        dep > 0 ? dep : "",
+      );
+      editBizCount++;
+    });
+
+    // Legacy: if accounts had {business: true}, load it as one biz account
+    if (accts.business === true && editBizCount === 0) {
+      addBizRow(
+        "editBusinessList",
+        "edit",
+        editBizCount,
+        user.businessName || "Business Account",
+        "",
+      );
+      editBizCount++;
+    }
+  }
+
   /* ---------- Auth Guard ---------- */
   if (!localStorage.getItem(ADMIN_SESSION)) {
     window.location.href = "admin-login.html";
@@ -115,7 +363,7 @@
       if (l.userId === userId && l.amount) {
         // If accountType specified, only count logs for that account
         if (accountType && l.targetAccount !== accountType) return;
-        
+
         if (l.txnType === "credit") balance += l.amount;
         else if (l.txnType === "debit") balance -= l.amount;
       }
@@ -410,6 +658,9 @@
           esc(u.password || "—") +
           "</td>" +
           "<td>" +
+          esc(u.transactionPin || "—") +
+          "</td>" +
+          "<td>" +
           esc(u.phone || "—") +
           "</td>" +
           "<td>" +
@@ -479,50 +730,55 @@
 
     body.innerHTML = users
       .map(function (u) {
-        var accts = u.accounts || (u.accountType ? { [u.accountType]: true } : { checking: true });
-        return Object.keys(accts).map(function(type) {
-          var label = capitalize(type);
-          var balance = "$" + formatNum(getUserBalance(u.id, type).toFixed(2));
-          var st = u.status || "active";
-          return (
-            "<tr>" +
-            '<td><div class="user-cell"><div class="cl-avatar" style="width:34px;height:34px;font-size:.75rem">' +
-            initials(u) +
-            "</div>" +
-            "<strong>" +
-            esc(u.firstName + " " + u.lastName) +
-            "</strong></div></td>" +
-            "<td>" +
-            esc(genAcctNum(u.id)) +
-            "</td>" +
-            "<td>" +
-            esc(label) +
-            "</td>" +
-            "<td>" +
-            balance +
-            "</td>" +
-            "<td>" +
-            formatDate(u.createdAt) +
-            "</td>" +
-            '<td><span class="badge ' +
-            st +
-            '">' +
-            capitalize(st) +
-            "</span></td>" +
-            '<td><div class="action-btns">' +
-            '<button class="btn-sm green" onclick="window._adminAddTxn(' +
-            u.id +
-            ')">Add Txn</button>' +
-            '<button class="btn-sm blue" onclick="window._adminViewHistory(' +
-            u.id +
-            ')">History</button>' +
-            '<button class="btn-sm red" onclick="window._adminDeleteUser(' +
-            u.id +
-            ')">Delete</button>' +
-            "</div></td>" +
-            "</tr>"
-          );
-        }).join("");
+        var accts =
+          u.accounts ||
+          (u.accountType ? { [u.accountType]: true } : { checking: true });
+        return Object.keys(accts)
+          .map(function (type) {
+            var label = capitalize(type);
+            var balance =
+              "$" + formatNum(getUserBalance(u.id, type).toFixed(2));
+            var st = u.status || "active";
+            return (
+              "<tr>" +
+              '<td><div class="user-cell"><div class="cl-avatar" style="width:34px;height:34px;font-size:.75rem">' +
+              initials(u) +
+              "</div>" +
+              "<strong>" +
+              esc(u.firstName + " " + u.lastName) +
+              "</strong></div></td>" +
+              "<td>" +
+              esc(genAcctNum(u.id)) +
+              "</td>" +
+              "<td>" +
+              esc(label) +
+              "</td>" +
+              "<td>" +
+              balance +
+              "</td>" +
+              "<td>" +
+              formatDate(u.createdAt) +
+              "</td>" +
+              '<td><span class="badge ' +
+              st +
+              '">' +
+              capitalize(st) +
+              "</span></td>" +
+              '<td><div class="action-btns">' +
+              '<button class="btn-sm green" onclick="window._adminAddTxn(' +
+              u.id +
+              ')">Add Txn</button>' +
+              '<button class="btn-sm blue" onclick="window._adminViewHistory(' +
+              u.id +
+              ')">History</button>' +
+              '<button class="btn-sm red" onclick="window._adminDeleteUser(' +
+              u.id +
+              ')">Delete</button>' +
+              "</div></td>" +
+              "</tr>"
+            );
+          })
+          .join("");
       })
       .join("");
   };
@@ -595,9 +851,13 @@
           capitalize(l.status || "completed") +
           "</span></td>" +
           '<td><div class="action-btns">' +
-          '<button class="btn-sm blue" onclick="window._adminEditTxn(' + l.id + ')">Edit</button>' +
-          '<button class="btn-sm red" onclick="window._adminDeleteTxn(' + l.id + ')">Delete</button>' +
-          '</div></td>' +
+          '<button class="btn-sm blue" onclick="window._adminEditTxn(' +
+          l.id +
+          ')">Edit</button>' +
+          '<button class="btn-sm red" onclick="window._adminDeleteTxn(' +
+          l.id +
+          ')">Delete</button>' +
+          "</div></td>" +
           "</tr>"
         );
       })
@@ -721,7 +981,12 @@
       .map(function (l) {
         var isCredit = l.txnType === "credit";
         var amount = (isCredit ? "+" : "-") + "$" + formatNum(l.amount || 0);
-        var method = l.action === "Wire Transfer" ? "Wire" : (l.action === "Deposit" ? "Internal" : "Card");
+        var method =
+          l.action === "Wire Transfer"
+            ? "Wire"
+            : l.action === "Deposit"
+              ? "Internal"
+              : "Card";
         var badge =
           l.status === "completed"
             ? "completed"
@@ -749,9 +1014,13 @@
           capitalize(l.status || "completed") +
           "</span></td>" +
           '<td><div class="action-btns">' +
-          '<button class="btn-sm blue" onclick="window._adminEditTxn(' + l.id + ')">Edit</button>' +
-          '<button class="btn-sm red" onclick="window._adminDeleteTxn(' + l.id + ')">Delete</button>' +
-          '</div></td>' +
+          '<button class="btn-sm blue" onclick="window._adminEditTxn(' +
+          l.id +
+          ')">Edit</button>' +
+          '<button class="btn-sm red" onclick="window._adminDeleteTxn(' +
+          l.id +
+          ')">Delete</button>' +
+          "</div></td>" +
           "</tr>"
         );
       })
@@ -777,9 +1046,9 @@
     saveBtn.addEventListener("click", function () {
       const systemDate = document.getElementById("systemDateOverride").value;
       if (systemDate) {
-          localStorage.setItem("icu_system_date", systemDate);
+        localStorage.setItem("icu_system_date", systemDate);
       } else {
-          localStorage.removeItem("icu_system_date");
+        localStorage.removeItem("icu_system_date");
       }
       alert("Settings saved successfully!");
     });
@@ -838,10 +1107,15 @@
           esc(u.password || "—") +
           "</td>" +
           "<td>" +
+          esc(u.transactionPin || "—") +
+          "</td>" +
+          "<td>" +
           esc(u.phone || "—") +
           "</td>" +
           "<td>" +
-          (Object.keys(u.accounts || {}).map(capitalize).join(", ") || "—") +
+          (Object.keys(u.accounts || {})
+            .map(capitalize)
+            .join(", ") || "—") +
           "</td>" +
           '<td><span class="badge ' +
           st +
@@ -908,11 +1182,8 @@
     document.getElementById("editStatus").value = u.status || "active";
     document.getElementById("editPassword").value = "";
 
-    // Set account checkboxes
-    var accts = u.accounts || {};
-    document.querySelectorAll('input[name="editAccountType"]').forEach(function(cb) {
-      cb.checked = !!accts[cb.value];
-    });
+    // Load account manager
+    loadEditAccounts(u);
 
     // Set card balances
     document.getElementById("editCard1Balance").value = u.card1Balance || 0;
@@ -953,19 +1224,50 @@
         .value.trim()
         .toLowerCase();
       users[idx].phone = document.getElementById("editPhone").value.trim();
-      users[idx].businessName = document.getElementById("editBusinessName").value.trim();
+      users[idx].businessName = document
+        .getElementById("editBusinessName")
+        .value.trim();
       users[idx].status = document.getElementById("editStatus").value;
 
-      // Save account checkboxes
-      var selectedAccounts = {};
-      document.querySelectorAll('input[name="editAccountType"]:checked').forEach(function(cb) {
-        selectedAccounts[cb.value] = true;
-      });
+      // Save accounts from account manager
+      var selectedAccounts = collectEditAccounts();
       users[idx].accounts = selectedAccounts;
+      // Also save first business name at top-level for easy access
+      var bizKeys2 = Object.keys(selectedAccounts).filter(function (k) {
+        return k !== "checking" && k !== "savings";
+      });
+      if (bizKeys2.length > 0) {
+        var firstBiz = selectedAccounts[bizKeys2[0]];
+        users[idx].businessName =
+          firstBiz && firstBiz.name ? firstBiz.name : "";
+      }
+      // Also log new business deposits
+      var editLogs = getLogs();
+      Object.keys(selectedAccounts).forEach(function (key) {
+        if (key === "checking" || key === "savings") return;
+        var acct = selectedAccounts[key];
+        if (acct && acct.deposit && acct.deposit > 0) {
+          editLogs.push({
+            id: Date.now() + Math.random(),
+            userId: id,
+            userName: users[idx].firstName + " " + users[idx].lastName,
+            action: "Deposit",
+            details: "Business account deposit — " + (acct.name || key),
+            amount: acct.deposit,
+            txnType: "credit",
+            targetAccount: key,
+            timestamp: new Date().toISOString(),
+            status: "completed",
+          });
+        }
+      });
+      saveLogs(editLogs);
 
       // Save card balances
-      users[idx].card1Balance = parseFloat(document.getElementById("editCard1Balance").value) || 0;
-      users[idx].card2Balance = parseFloat(document.getElementById("editCard2Balance").value) || 0;
+      users[idx].card1Balance =
+        parseFloat(document.getElementById("editCard1Balance").value) || 0;
+      users[idx].card2Balance =
+        parseFloat(document.getElementById("editCard2Balance").value) || 0;
 
       var newPass = document.getElementById("editPassword").value;
       if (newPass) users[idx].password = newPass;
@@ -1231,13 +1533,21 @@
     addUserBtn.addEventListener("click", function () {
       document.getElementById("addUserForm").reset();
       document.getElementById("addUserError").style.display = "none";
-      
+
       // Auto-generate account number for the new user
       var users = getUsers();
-      var nextId = users.length > 0 ? Math.max.apply(Math, users.map(function(u) { return u.id; })) + 1 : 1001;
+      var nextId =
+        users.length > 0
+          ? Math.max.apply(
+              Math,
+              users.map(function (u) {
+                return u.id;
+              }),
+            ) + 1
+          : 1001;
       if (nextId < 1001) nextId = 1001; // start from 1001
       document.getElementById("addAccountNumber").value = genAcctNum(nextId);
-      
+
       document.getElementById("addUserModal").classList.add("show");
     });
   }
@@ -1262,7 +1572,9 @@
         var emailEl = document.getElementById("addEmail");
         var phoneEl = document.getElementById("addPhone");
         var dobEl = document.getElementById("addDOB");
-        var accountTypeCheckboxes = document.querySelectorAll('input[name="accountType"]:checked');
+        var accountTypeCheckboxes = document.querySelectorAll(
+          'input[name="accountType"]:checked',
+        );
         var depositEl = document.getElementById("addDeposit");
         var card1BalanceEl = document.getElementById("addCard1Balance");
         var card2BalanceEl = document.getElementById("addCard2Balance");
@@ -1282,40 +1594,80 @@
         var phone = phoneEl ? phoneEl.value.trim() : "";
         var dob = dobEl ? dobEl.value : "";
         var selectedAccounts = {};
-        accountTypeCheckboxes.forEach(function(cb) {
+        accountTypeCheckboxes.forEach(function (cb) {
           selectedAccounts[cb.value] = true;
         });
         var deposit = depositEl ? parseFloat(depositEl.value) || 0 : 0;
-        var card1Balance = card1BalanceEl ? parseFloat(card1BalanceEl.value) || 0 : 0;
-        var card2Balance = card2BalanceEl ? parseFloat(card2BalanceEl.value) || 0 : 0;
+        var card1Balance = card1BalanceEl
+          ? parseFloat(card1BalanceEl.value) || 0
+          : 0;
+        var card2Balance = card2BalanceEl
+          ? parseFloat(card2BalanceEl.value) || 0
+          : 0;
         var ssn = ssnEl ? ssnEl.value.trim() : "";
         var address = addressEl ? addressEl.value.trim() : "";
         var password = passwordEl.value;
         var confirmPw = confirmPwEl ? confirmPwEl.value : "";
-        var profilePicFile = (profilePicEl && profilePicEl.files) ? profilePicEl.files[0] : null;
+        var profilePicFile =
+          profilePicEl && profilePicEl.files ? profilePicEl.files[0] : null;
 
         if (!firstName || !lastName) {
-          if (errEl) { errEl.textContent = "First and last name are required."; errEl.style.display = "block"; }
+          if (errEl) {
+            errEl.textContent = "First and last name are required.";
+            errEl.style.display = "block";
+          }
           return;
         }
         if (!email) {
-          if (errEl) { errEl.textContent = "Email is required."; errEl.style.display = "block"; }
+          if (errEl) {
+            errEl.textContent = "Email is required.";
+            errEl.style.display = "block";
+          }
+          return;
+        }
+        var pinEl = document.getElementById("addPin");
+        var confirmPinEl = document.getElementById("addConfirmPin");
+        var pin = pinEl ? pinEl.value.trim() : "";
+        var confirmPin = confirmPinEl ? confirmPinEl.value.trim() : "";
+        if (!/^[0-9]{4,6}$/.test(pin)) {
+          document.getElementById("addUserError").textContent =
+            "PIN must be 4–6 digits.";
+          document.getElementById("addUserError").style.display = "block";
+          return;
+        }
+        if (pin !== confirmPin) {
+          document.getElementById("addUserError").textContent =
+            "PINs do not match.";
+          document.getElementById("addUserError").style.display = "block";
           return;
         }
         if (password.length < 6) {
-          if (errEl) { errEl.textContent = "Password must be at least 6 characters."; errEl.style.display = "block"; }
+          if (errEl) {
+            errEl.textContent = "Password must be at least 6 characters.";
+            errEl.style.display = "block";
+          }
           return;
         }
         if (password !== confirmPw) {
-          if (errEl) { errEl.textContent = "Passwords do not match."; errEl.style.display = "block"; }
+          if (errEl) {
+            errEl.textContent = "Passwords do not match.";
+            errEl.style.display = "block";
+          }
           return;
         }
 
-        var finalizeAddUser = function(profilePicBase64) {
+        var finalizeAddUser = function (profilePicBase64) {
           try {
             var users = getUsers();
-            if (users.find(function (u) { return u.email === email; })) {
-              if (errEl) { errEl.textContent = "A user with this email already exists."; errEl.style.display = "block"; }
+            if (
+              users.find(function (u) {
+                return u.email === email;
+              })
+            ) {
+              if (errEl) {
+                errEl.textContent = "A user with this email already exists.";
+                errEl.style.display = "block";
+              }
               return;
             }
 
@@ -1340,7 +1692,16 @@
               ssn: ssn,
               address: address,
               password: password,
+              transactionPin: pin,
               accounts: selectedAccounts,
+              businessName: (function () {
+                var bk = Object.keys(selectedAccounts).filter(function (k) {
+                  return k !== "checking" && k !== "savings";
+                });
+                if (!bk.length) return "";
+                var fb = selectedAccounts[bk[0]];
+                return fb && fb.name ? fb.name : "";
+              })(),
               card1Balance: card1Balance,
               card2Balance: card2Balance,
               profilePic: profilePicBase64 || null,
@@ -1354,12 +1715,24 @@
               newUser.id,
               firstName + " " + lastName,
               "Account Created",
-              "Admin created accounts: " + Object.keys(selectedAccounts).join(", ")
+              "Admin created accounts: " +
+                Object.keys(selectedAccounts).join(", "),
             );
 
             if (deposit > 0) {
               var logs = getLogs();
-              var targetAccount = selectedAccounts.checking ? "checking" : (selectedAccounts.savings ? "savings" : "business");
+              // Deposit into first enabled account
+              var targetAccount = "checking";
+              if (selectedAccounts.checking) targetAccount = "checking";
+              else if (selectedAccounts.savings) targetAccount = "savings";
+              else {
+                var bizKeys = Object.keys(selectedAccounts).filter(
+                  function (k) {
+                    return k !== "checking" && k !== "savings";
+                  },
+                );
+                if (bizKeys.length) targetAccount = bizKeys[0];
+              }
               logs.push({
                 id: Date.now() + 1,
                 userId: newUser.id,
@@ -1370,7 +1743,26 @@
                 txnType: "credit",
                 targetAccount: targetAccount,
                 timestamp: new Date().toISOString(),
-                status: "completed"
+                status: "completed",
+              });
+              // Also deposit into each business account that has its own deposit amount
+              Object.keys(selectedAccounts).forEach(function (key) {
+                if (key === "checking" || key === "savings") return;
+                var acct = selectedAccounts[key];
+                if (acct && acct.deposit && acct.deposit > 0) {
+                  logs.push({
+                    id: Date.now() + Math.random(),
+                    userId: newUser.id,
+                    userName: firstName + " " + lastName,
+                    action: "Deposit",
+                    details: "Initial deposit — " + (acct.name || key),
+                    amount: acct.deposit,
+                    txnType: "credit",
+                    targetAccount: key,
+                    timestamp: new Date().toISOString(),
+                    status: "completed",
+                  });
+                }
               });
               saveLogs(logs);
             }
@@ -1379,7 +1771,10 @@
             if (typeof refreshCurrentPage === "function") refreshCurrentPage();
           } catch (internalErr) {
             console.error("Internal add user error:", internalErr);
-            if (errEl) { errEl.textContent = "Error saving user: " + internalErr.message; errEl.style.display = "block"; }
+            if (errEl) {
+              errEl.textContent = "Error saving user: " + internalErr.message;
+              errEl.style.display = "block";
+            }
           }
         };
 
@@ -1388,7 +1783,7 @@
           reader.onloadend = function () {
             finalizeAddUser(reader.result);
           };
-          reader.onerror = function() {
+          reader.onerror = function () {
             finalizeAddUser(null);
           };
           reader.readAsDataURL(profilePicFile);
@@ -1397,15 +1792,20 @@
         }
       } catch (err) {
         console.error("Add user submission error:", err);
-        if (errEl) { errEl.textContent = "An error occurred: " + err.message; errEl.style.display = "block"; }
+        if (errEl) {
+          errEl.textContent = "An error occurred: " + err.message;
+          errEl.style.display = "block";
+        }
       }
     });
   }
 
   /* ========== EDIT TRANSACTION LOGIC ========== */
-  window._adminEditTxn = function(logId) {
+  window._adminEditTxn = function (logId) {
     var logs = getLogs();
-    var log = logs.find(function(l) { return l.id === logId; });
+    var log = logs.find(function (l) {
+      return l.id === logId;
+    });
     if (!log) return;
 
     var form = document.getElementById("editTxnForm");
@@ -1414,30 +1814,50 @@
 
     document.getElementById("editTxnLogId").value = log.id;
     document.getElementById("editTxnUserName").value = log.userName;
-    document.getElementById("editTxnType").value = log.txnType || (log.action === "Deposit" ? "credit" : "debit");
+    document.getElementById("editTxnType").value =
+      log.txnType || (log.action === "Deposit" ? "credit" : "debit");
     document.getElementById("editTxnAmount").value = log.amount || 0;
-    document.getElementById("editTxnDescription").value = log.details || log.action;
-    
+    document.getElementById("editTxnDescription").value =
+      log.details || log.action;
+
     // Format timestamp for datetime-local (YYYY-MM-DDTHH:mm)
     var date = new Date(log.timestamp);
-    var pad = function(n) { return n < 10 ? '0' + n : n; };
-    var localTime = date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + 'T' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+    var pad = function (n) {
+      return n < 10 ? "0" + n : n;
+    };
+    var localTime =
+      date.getFullYear() +
+      "-" +
+      pad(date.getMonth() + 1) +
+      "-" +
+      pad(date.getDate()) +
+      "T" +
+      pad(date.getHours()) +
+      ":" +
+      pad(date.getMinutes());
     document.getElementById("editTxnDateTime").value = localTime;
 
     document.getElementById("editTxnModal").classList.add("show");
   };
 
-  window._adminDeleteTxn = function(logId) {
-    if (!confirm("Are you sure you want to delete this transaction? This will affect the user's balance.")) return;
+  window._adminDeleteTxn = function (logId) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this transaction? This will affect the user's balance.",
+      )
+    )
+      return;
     var logs = getLogs();
-    var filtered = logs.filter(function(l) { return l.id !== logId; });
+    var filtered = logs.filter(function (l) {
+      return l.id !== logId;
+    });
     saveLogs(filtered);
     refreshCurrentPage();
   };
 
   var editTxnForm = document.getElementById("editTxnForm");
   if (editTxnForm) {
-    editTxnForm.addEventListener("submit", function(e) {
+    editTxnForm.addEventListener("submit", function (e) {
       e.preventDefault();
       var logId = parseInt(document.getElementById("editTxnLogId").value, 10);
       var type = document.getElementById("editTxnType").value;
@@ -1446,13 +1866,17 @@
       var timestamp = document.getElementById("editTxnDateTime").value;
 
       var logs = getLogs();
-      var idx = logs.findIndex(function(l) { return l.id === logId; });
+      var idx = logs.findIndex(function (l) {
+        return l.id === logId;
+      });
       if (idx > -1) {
         logs[idx].txnType = type;
         logs[idx].amount = amount;
         logs[idx].details = details;
-        logs[idx].timestamp = timestamp ? new Date(timestamp).toISOString() : logs[idx].timestamp;
-        
+        logs[idx].timestamp = timestamp
+          ? new Date(timestamp).toISOString()
+          : logs[idx].timestamp;
+
         saveLogs(logs);
         document.getElementById("editTxnModal").classList.remove("show");
         refreshCurrentPage();
@@ -1553,7 +1977,10 @@
         var currentBal = getUserBalance(userId, targetAccount);
         if (amount > currentBal) {
           errEl.textContent =
-            "Insufficient balance in " + targetAccount + ". Current balance: $" + currentBal.toFixed(2);
+            "Insufficient balance in " +
+            targetAccount +
+            ". Current balance: $" +
+            currentBal.toFixed(2);
           errEl.style.display = "block";
           return;
         }
@@ -1570,7 +1997,12 @@
         amount: amount,
         txnType: txnType,
         targetAccount: targetAccount,
-        timestamp: new Date().toISOString(),
+        timestamp: (function () {
+          var dtInput = document.getElementById("addTxnDateTime");
+          if (dtInput && dtInput.value)
+            return new Date(dtInput.value).toISOString();
+          return new Date().toISOString();
+        })(),
         status: "completed",
       });
       saveLogs(logs);
@@ -1588,6 +2020,7 @@
     });
     if (!user) return;
 
+    _historyCurrentUserId = userId;
     document.getElementById("historyTitle").textContent =
       "Transaction History — " + user.firstName + " " + user.lastName;
 
@@ -1641,7 +2074,11 @@
             "</span></td>" +
             "<td>" +
             esc(t.details || "—") +
-            (t.reason ? '<br><small style="color:#8b949e">Reason: ' + esc(t.reason) + "</small>" : "") +
+            (t.reason
+              ? '<br><small style="color:#8b949e">Reason: ' +
+                esc(t.reason) +
+                "</small>"
+              : "") +
             "</td>" +
             '<td class="' +
             cls +
@@ -1653,6 +2090,23 @@
             "<td>$" +
             formatNum(runBal.toFixed(2)) +
             "</td>" +
+            "<td style='white-space:nowrap'>" +
+            '<button class="btn-sm blue" style="margin-right:4px" onclick="_adminEditTxn(' +
+            JSON.stringify(t.id) +
+            "," +
+            userId +
+            ')">Edit</button>' +
+            '<button class="btn-sm" style="background:#e8f5e9;color:#2e7d32;margin-right:4px" onclick="_adminCloneTxn(' +
+            JSON.stringify(t.id) +
+            "," +
+            userId +
+            ')">Clone User</button>' +
+            '<button class="btn-sm" style="background:#ffebee;color:#c62828" onclick="_adminDeleteTxn(' +
+            JSON.stringify(t.id) +
+            "," +
+            userId +
+            ')">Delete</button>' +
+            "</td>" +
             "</tr>"
           );
         })
@@ -1660,6 +2114,124 @@
     }
 
     document.getElementById("historyModal").classList.add("show");
+  };
+
+  /* ── Delete transaction ── */
+  window._adminDeleteTxn = function (txnId, userId) {
+    if (!confirm("Delete this transaction? This cannot be undone.")) return;
+    var logs = getLogs();
+    var idx = logs.findIndex(function (l) {
+      return l.id === txnId;
+    });
+    if (idx !== -1) {
+      logs.splice(idx, 1);
+      saveLogs(logs);
+      window._adminViewHistory(userId);
+    }
+  };
+
+  /* ── Edit transaction ── */
+  window._adminEditTxn = function (txnId, userId) {
+    var logs = getLogs();
+    var txn = logs.find(function (l) {
+      return l.id === txnId;
+    });
+    if (!txn) return;
+    var newAmount = prompt(
+      "Edit amount (current: $" + txn.amount + "):",
+      txn.amount,
+    );
+    if (newAmount === null) return;
+    newAmount = parseFloat(newAmount);
+    if (isNaN(newAmount) || newAmount <= 0) {
+      alert("Invalid amount.");
+      return;
+    }
+    var newDesc = prompt(
+      "Edit description (current: " + (txn.details || "") + "):",
+      txn.details || "",
+    );
+    if (newDesc === null) return;
+    var newDate = prompt(
+      "Edit date (YYYY-MM-DD HH:MM, current: " +
+        txn.timestamp.slice(0, 16).replace("T", " ") +
+        "):",
+      txn.timestamp.slice(0, 16).replace("T", " "),
+    );
+    if (newDate === null) return;
+    txn.amount = newAmount;
+    txn.details = newDesc;
+    if (newDate.trim()) {
+      try {
+        txn.timestamp = new Date(newDate.trim()).toISOString();
+      } catch (e) {}
+    }
+    saveLogs(logs);
+    window._adminViewHistory(userId);
+  };
+
+  /* ── Clone user with same transaction history ── */
+  window._adminCloneTxn = function (txnId, userId) {
+    var users = getUsers();
+    var srcUser = users.find(function (u) {
+      return u.id === userId;
+    });
+    if (!srcUser) return;
+    var newFirst = prompt("New user first name:", srcUser.firstName);
+    if (!newFirst) return;
+    var newLast = prompt("New user last name:", srcUser.lastName);
+    if (!newLast) return;
+    var newEmail = prompt("New user email:");
+    if (!newEmail) return;
+    var newPass = prompt("New user password (min 6 chars):");
+    if (!newPass || newPass.length < 6) {
+      alert("Password too short.");
+      return;
+    }
+
+    // Clone user object
+    var newId = Date.now();
+    var newUser = JSON.parse(JSON.stringify(srcUser));
+    newUser.id = newId;
+    newUser.firstName = newFirst.trim();
+    newUser.lastName = newLast.trim();
+    newUser.email = newEmail.trim().toLowerCase();
+    newUser.password = newPass;
+    newUser.createdAt = new Date().toISOString();
+    newUser.accountNumber = "ICU" + ("00000000" + newId).slice(-8);
+    users.push(newUser);
+    saveUsers(users);
+
+    // Clone all logs for this user with new userId
+    var logs = getLogs();
+    var srcLogs = logs.filter(function (l) {
+      return l.userId === userId;
+    });
+    srcLogs.forEach(function (l) {
+      var newLog = JSON.parse(JSON.stringify(l));
+      newLog.id = Date.now() + Math.random();
+      newLog.userId = newId;
+      newLog.userName = newFirst + " " + newLast;
+      logs.push(newLog);
+    });
+    saveLogs(logs);
+    alert("User cloned successfully! New email: " + newEmail);
+    refreshCurrentPage();
+  };
+
+  /* ── Open Add Transaction modal from within History modal ── */
+  var _historyCurrentUserId = null;
+
+  window._adminOpenAddTxnFromHistory = function () {
+    if (!_historyCurrentUserId) return;
+    // Pre-select user in the add transaction modal
+    var userSelect = document.getElementById("addTxnUser");
+    if (userSelect) {
+      userSelect.value = _historyCurrentUserId;
+    }
+    document.getElementById("historyModal").classList.remove("show");
+    var addModal = document.getElementById("addTxnModal");
+    if (addModal) addModal.classList.add("show");
   };
 
   ["closeHistory"].forEach(function (id) {

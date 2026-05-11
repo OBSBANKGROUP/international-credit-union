@@ -3,60 +3,92 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>Manage Accounts | International Credit Union</title>
-
-    <link rel="stylesheet" href="assest/css/Manage-account.css" />
-
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assest/css/Manage-account.css" />
+    <script src="assest/js/theme.js"></script>
   </head>
-
   <body>
-    <header class="page-header">
-      <div class="container">
+    <header class="ma-header">
+      <div class="hc">
+        <a href="dashboard.html" class="back-btn">&#8592; Back</a>
         <h2>Manage Accounts</h2>
       </div>
     </header>
 
-    <main class="accounts-page container">
-      <!-- TOTAL BALANCE -->
+    <div class="page-body">
+      <div class="container">
+        <!-- ── HERO ── -->
+        <div class="total-hero">
+          <div>
+            <h4>Total Balance Across All Accounts</h4>
+            <h1 id="totalBalance">$0.00</h1>
+            <p id="memberName">Loading...</p>
+            <div class="hero-meta">
+              <div class="hero-meta-item">
+                <span>Account Number</span>
+                <strong id="heroAccNum">••••••</strong>
+              </div>
+              <div class="hero-meta-item">
+                <span>Routing Number</span>
+                <strong id="heroRouting">••••••</strong>
+              </div>
+              <div class="hero-meta-item">
+                <span>Account Status</span>
+                <strong>&#10003; Active</strong>
+              </div>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <a href="wire-transfer.html" class="hero-action-btn white"
+              >Transfer Funds</a
+            >
+            <a href="settings.html" class="hero-action-btn light">Settings</a>
+          </div>
+        </div>
 
-      <section class="total-balance">
-        <h3>Total Balance Across Accounts</h3>
+        <!-- ── SUMMARY PILLS ── -->
+        <div class="accounts-summary" id="accountsPills"></div>
 
-        <h1 id="totalBalance">$0.00</h1>
-      </section>
+        <!-- ── PERSONAL ACCOUNTS ── -->
+        <div class="section-label">Personal Accounts</div>
+        <div class="accounts-grid" id="personalAccounts"></div>
 
-      <!-- PERSONAL ACCOUNTS -->
+        <!-- ── BUSINESS ACCOUNTS ── -->
+        <div class="section-label">Business Accounts</div>
+        <div class="accounts-grid" id="businessAccounts"></div>
 
-      <section class="accounts-section">
-        <h3>Personal Accounts</h3>
-
-        <div id="personalAccounts" class="accounts-grid"></div>
-      </section>
-
-      <!-- BUSINESS ACCOUNTS -->
-
-      <section class="accounts-section">
-        <h3>Business Accounts</h3>
-
-        <div id="businessAccounts" class="accounts-grid"></div>
-      </section>
-
-      <!-- ACTION BUTTONS -->
-
-      <div class="account-actions">
-        <a href="settings.html" class="action-btn"> Account Settings </a>
-
-        <a href="dashboard.html" class="action-btn secondary">
-          Back to Dashboard
-        </a>
+        <!-- ── TRANSACTIONS ── -->
+        <div class="txn-section">
+          <div class="txn-header">
+            <h3>Recent Transactions</h3>
+            <a href="transaction.html">View All</a>
+          </div>
+          <div class="txn-filters">
+            <button class="txn-filter-btn active" data-filter="all">All</button>
+            <button class="txn-filter-btn" data-filter="checking">
+              Checking
+            </button>
+            <button class="txn-filter-btn" data-filter="savings">
+              Savings
+            </button>
+            <button class="txn-filter-btn" data-filter="business">
+              Business
+            </button>
+          </div>
+          <div id="txnList"><p class="empty-txn">No transactions yet.</p></div>
+        </div>
       </div>
-    </main>
+    </div>
 
+    <script src="assest/js/auth.js"></script>
     <script src="assest/js/Manage-account.js"></script>
   </body>
 </html>
