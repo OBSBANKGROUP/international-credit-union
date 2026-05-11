@@ -65,8 +65,12 @@
      ========================================================== */
   const accountForm = document.querySelector(".account-form");
 
+  let pendingUser = null;
+  let pendingDeposit = 0;
+  let generatedOtp = null;
+
   if (accountForm) {
-    accountForm.addEventListener("submit", function (e) {
+    accountForm.addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const firstName = (
@@ -119,9 +123,11 @@
         );
       }
 
-      /* --- save user --- */
+      /* --- PREPARE USER OBJECT --- */
       const accountType = document.querySelector("select")?.value || "checking";
-      const newUser = {
+      pendingDeposit = parseFloat(document.getElementById("initialDeposit")?.value) || 0;
+      
+      pendingUser = {
         id: Date.now(),
         firstName,
         lastName,
@@ -134,46 +140,112 @@
         createdAt: new Date().toISOString(),
       };
 
-      users.push(newUser);
-      saveUsers(users);
-
-      /* log activity */
-      logActivity(
-        newUser.id,
-        firstName + " " + lastName,
-        "Account Created",
-        "New " +
-          (document.querySelector("select")?.value || "Checking") +
-          " account opened",
-      );
-
-      /* initial deposit log */
-      const initialDeposit = parseFloat(document.getElementById("initialDeposit")?.value) || 0;
-      if (initialDeposit > 0) {
-        logActivity(
-          newUser.id,
-          firstName + " " + lastName,
-          "Deposit",
-          "Initial account funding",
-          initialDeposit,
-          "credit",
-          newUser.accountType // using the account type selected
-        );
+      /* --- GENERATE & SEND OTP --- */
+      const submitBtn = document.getElementById("submitBtn");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending OTP...";
       }
 
-      /* auto-login & redirect */
-      setSession({
-        id: newUser.id,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        email: newUser.email,
-        accountNumber: newUser.accountNumber,
-        profilePic: newUser.profilePic || null
-      });
+      generatedOtp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits
 
-      showFormAlert("Account created successfully! Redirecting…", "success");
-      setTimeout(() => (window.location.href = "dashboard.html"), 1200);
+      try {
+        const response = await fetch("http://localhost:3000/send-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to_email: pendingUser.contactEmail,
+            otp_code: generatedOtp,
+            user_name: pendingUser.firstName + " " + pendingUser.lastName,
+            app_name: "International Credit Union"
+          })
+        });
+
+        if (!response.ok) throw new Error("Failed to send OTP");
+
+        // Hide main submit button, show OTP section
+        const submitSection = document.getElementById("submitSection");
+        if (submitSection) submitSection.style.display = "none";
+        
+        const otpSection = document.getElementById("otpSection");
+        if (otpSection) {
+            otpSection.style.display = "block";
+            const otpErrorMsg = document.getElementById("otpErrorMsg");
+            if (otpErrorMsg) otpErrorMsg.style.display = "none";
+        }
+        showFormAlert("Verification code sent to your email. Please check your inbox.", "success");
+
+      } catch (error) {
+        console.error("OTP Send Error:", error);
+        showFormAlert("Failed to send OTP email. Is the email service running?", "error");
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit Application";
+        }
+      }
     });
+
+    /* --- VERIFY OTP --- */
+    const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+    if (verifyOtpBtn) {
+      verifyOtpBtn.addEventListener("click", function() {
+        const otpInput = document.getElementById("otpInput")?.value.trim();
+        const otpErrorMsg = document.getElementById("otpErrorMsg");
+
+        if (otpInput === generatedOtp) {
+          // Success
+          if (otpErrorMsg) otpErrorMsg.style.display = "none";
+          verifyOtpBtn.disabled = true;
+          verifyOtpBtn.textContent = "Creating Account...";
+
+          /* --- save user --- */
+          const users = getUsers();
+          users.push(pendingUser);
+          saveUsers(users);
+
+          /* log activity */
+          logActivity(
+            pendingUser.id,
+            pendingUser.firstName + " " + pendingUser.lastName,
+            "Account Created",
+            "New " + pendingUser.accountType + " account opened",
+          );
+
+          /* initial deposit log */
+          if (pendingDeposit > 0) {
+            logActivity(
+              pendingUser.id,
+              pendingUser.firstName + " " + pendingUser.lastName,
+              "Deposit",
+              "Initial account funding",
+              pendingDeposit,
+              "credit",
+              pendingUser.accountType
+            );
+          }
+
+          /* auto-login & redirect */
+          setSession({
+            id: pendingUser.id,
+            firstName: pendingUser.firstName,
+            lastName: pendingUser.lastName,
+            email: pendingUser.email,
+            accountNumber: pendingUser.accountNumber,
+            profilePic: pendingUser.profilePic || null
+          });
+
+          showFormAlert("Account created successfully! Redirecting…", "success");
+          setTimeout(() => (window.location.href = "dashboard.html"), 1200);
+
+        } else {
+          // Error
+          if (otpErrorMsg) {
+            otpErrorMsg.textContent = "Invalid OTP code. Please try again.";
+            otpErrorMsg.style.display = "block";
+          }
+        }
+      });
+    }
   }
 
   /* small alert helper for the registration form */
@@ -242,6 +314,11 @@
 
       if (!user) {
         return showLoginError("Invalid User ID or password. Please try again.");
+      }
+
+      /* check status */
+      if (user.status && user.status !== "active") {
+        return showLoginError("Your account is " + user.status + ". Please contact support.");
       }
 
       /* save ID checkbox */
