@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Help Center | International Credit Union</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assest/css/mobile.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #f3f5f9;
+        color: #0a2342;
+      }
+      .hc-header {
+        background: linear-gradient(135deg, #021633, #0a2342);
+        color: white;
+        padding: 16px 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .hc-header .hc {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        max-width: 900px;
+        margin: auto;
+        padding: 0 20px;
+      }
+      .back-btn {
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        opacity: 0.8;
+      }
+      .hc-header h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+      .hero {
+        background: linear-gradient(135deg, #4b38f5, #6a5cff);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+      }
+      .hero h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+      }
+      .hero p {
+        opacity: 0.8;
+        margin-bottom: 24px;
+        font-size: 0.95rem;
+      }
+      .search-wrap {
+        max-width: 520px;
+        margin: 0 auto;
+        display: flex;
+        background: white;
+        border-radius: 50px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+      .search-wrap input {
+        flex: 1;
+        padding: 14px 20px;
+        border: none;
+        font-size: 0.95rem;
+        font-family: "Inter", sans-serif;
+        color: #0a2342;
+        outline: none;
+      }
+      .search-wrap button {
+        padding: 14px 22px;
+        background: #4b38f5;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        font-family: "Inter", sans-serif;
+      }
+      .container {
+        max-width: 900px;
+        margin: auto;
+        padding: 0 20px;
+      }
+      .page-body {
+        padding: 48px 0 80px;
+      }
+      .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #0a2342;
+      }
+      /* Categories */
+      .cat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 48px;
+      }
+      .cat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+        cursor: pointer;
+        transition: 0.25s;
+        text-decoration: none;
+        color: #0a2342;
+        border: 2px solid transparent;
+      }
+      .cat-card:hover {
+        border-color: #4b38f5;
+        transform: translateY(-3px);
+      }
+      .cat-card .cat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+        font-size: 1.3rem;
+      }
+      .cat-card h4 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .cat-card p {
+        font-size: 0.75rem;
+        color: #888;
+      }
+      /* FAQ */
+      .faq-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 48px;
+      }
+      .faq-item {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+      }
+      .faq-q {
+        padding: 18px 20px;
+        font-weight: 600;
+        font-size: 0.92rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+      }
+      .faq-q:hover {
+        background: #f8f9fc;
+      }
+      .faq-q .faq-arrow {
+        transition: 0.3s;
+        color: #4b38f5;
+        font-size: 1.1rem;
+      }
+      .faq-item.open .faq-arrow {
+        transform: rotate(180deg);
+      }
+      .faq-a {
+        display: none;
+        padding: 0 20px 18px;
+        font-size: 0.88rem;
+        color: #555;
+        line-height: 1.65;
+      }
+      .faq-item.open .faq-a {
+        display: block;
+      }
+      /* Contact strip */
+      .contact-strip {
+        background: linear-gradient(135deg, #021633, #0a2342);
+        border-radius: 20px;
+        padding: 36px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        color: white;
+      }
+      .contact-strip h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .contact-strip p {
+        opacity: 0.7;
+        font-size: 0.85rem;
+      }
+      .contact-strip-btns {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .c-btn {
+        padding: 11px 22px;
+        border-radius: 22px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        font-family: "Inter", sans-serif;
+        transition: 0.2s;
+      }
+      .c-btn.white {
+        background: white;
+        color: #0a2342;
+      }
+      .c-btn.outline {
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+      }
+      .c-btn:hover {
+        transform: translateY(-2px);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hc-header">
+      <div class="hc">
+        <a href="index.html" class="back-btn">&#8592; Home</a>
+        <h2>Help Center</h2>
+      </div>
+    </header>
+
+    <div class="hero">
+      <h1>How can we help you?</h1>
+      <p>Search our knowledge base or browse categories below</p>
+      <div class="search-wrap">
+        <input
+          type="text"
+          id="helpSearch"
+          placeholder="Search for answers..."
+        />
+        <button onclick="searchHelp()">Search</button>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="container">
+        <div class="section-title">Browse by Category</div>
+        <div class="cat-grid">
+          <a href="#accounts" class="cat-card">
+            <div class="cat-icon" style="background: #f0f2ff; color: #4b38f5">
+              <span class="material-icons-outlined">account_balance</span>
+            </div>
+            <h4>Accounts</h4>
+            <p>Open, manage & close accounts</p>
+          </a>
+          <a href="#transfers" class="cat-card">
+            <div class="cat-icon" style="background: #e0faf6; color: #00897b">
+              <span class="material-icons-outlined">swap_horiz</span>
+            </div>
+            <h4>Transfers</h4>
+            <p>Wire, Zelle, Cash App transfers</p>
+          </a>
+          <a href="#cards" class="cat-card">
+            <div class="cat-icon" style="background: #fff3e0; color: #e65100">
+              <span class="material-icons-outlined">credit_card</span>
+            </div>
+            <h4>Cards</h4>
+            <p>Debit & credit card support</p>
+          </a>
+          <a href="#security" class="cat-card">
+            <div class="cat-icon" style="background: #fce4ec; color: #c62828">
+              <span class="material-icons-outlined">security</span>
+            </div>
+            <h4>Security</h4>
+            <p>PIN, OTP, fraud protection</p>
+          </a>
+          <a href="#loans" class="cat-card">
+            <div class="cat-icon" style="background: #e8f5e9; color: #2e7d32">
+              <span class="material-icons-outlined"
+                >account_balance_wallet</span
+              >
+            </div>
+            <h4>Loans</h4>
+            <p>Apply, manage, repay loans</p>
+          </a>
+          <a href="#mobile" class="cat-card">
+            <div class="cat-icon" style="background: #f3e5f5; color: #7b1fa2">
+              <span class="material-icons-outlined">smartphone</span>
+            </div>
+            <h4>Mobile & App</h4>
+            <p>App features & troubleshooting</p>
+          </a>
+        </div>
+
+        <div class="section-title" id="accounts">
+          Frequently Asked Questions
+        </div>
+        <div class="faq-list" id="faqList">
+          <div class="faq-item">
+            <div class="faq-q">
+              How do I open a new account?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              Visit our
+              <a href="open-account.html" style="color: #4b38f5"
+                >Open Account</a
+              >
+              page and complete the online application. You'll need a valid ID,
+              your Social Security Number, and an initial deposit. Accounts are
+              typically activated within 1–2 business days.
+            </div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">
+              How do I check my account balance?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              Log in to your account and visit the Dashboard. Your real-time
+              balance is displayed at the top of the page for all linked
+              accounts.
+            </div>
+          </div>
+          <div class="faq-item" id="transfers">
+            <div class="faq-q">
+              What are the wire transfer limits?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              Domestic wire transfers: $500–$50,000 per transaction, $50,000
+              daily limit. International wire transfers: $100–$25,000 per
+              transaction. Zelle: up to $2,500 per transaction, $5,000 daily.
+              All transfers require PIN and email OTP verification.
+            </div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">
+              How long does a wire transfer take?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              Domestic wire transfers are processed same business day if
+              submitted before 4:00 PM EST. International wires typically take
+              1–5 business days depending on the destination country and
+              receiving bank.
+            </div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">
+              Why is there a 2% transfer fee?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              A 2% processing fee is applied to all outgoing transfers (wire,
+              Zelle, Cash App). This fee covers transaction processing, security
+              verification, and fraud monitoring costs. The fee and total
+              deduction are clearly shown on your receipt.
+            </div>
+          </div>
+          <div class="faq-item" id="cards">
+            <div class="faq-q">
+              How do I apply for a credit card?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              Visit the
+              <a href="creditcard.html" style="color: #4b38f5">Credit Cards</a>
+              page from your dashboard. Review available cards, check your
+              credit score estimate, and complete the application form.
+              Decisions are typically made within 2–3 business days.
+            </div>
+          </div>
+          <div class="faq-item" id="security">
+            <div class="faq-q">
+              What is a transaction PIN?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              Your transaction PIN is a 4–6 digit code required before every
+              transfer. It was set by your account administrator when your
+              account was created. Contact support if you've forgotten your PIN
+              or need it reset.
+            </div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">
+              Why does face verification always fail on Zelle/Cash App?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              Face verification is an additional security layer on peer-to-peer
+              transfers. If verification fails, it means the system could not
+              confirm your identity at that time. Please try again in a few
+              minutes or contact support for manual verification assistance.
+            </div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">
+              My account is suspended. What do I do?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              Account suspensions are issued for security or compliance reasons.
+              Please visit our nearest branch in person with a valid
+              government-issued ID, or contact our online support team at
+              support@internationalcu.com. Do not attempt to log in repeatedly
+              as this may extend the suspension period.
+            </div>
+          </div>
+          <div class="faq-item" id="loans">
+            <div class="faq-q">
+              How do I apply for a loan?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              Visit the
+              <a href="Loan.html" style="color: #4b38f5">Loans</a> section from
+              your dashboard. We offer personal, auto, home, and business loans.
+              Eligibility is based on your credit history and account standing
+              with ICU.
+            </div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">
+              How do I deposit a check remotely?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              Use our
+              <a href="deposit-check.html" style="color: #4b38f5"
+                >Mobile Check Deposit</a
+              >
+              feature. Take a photo of the front and back of your endorsed
+              check. Deposits are reviewed and funds typically available within
+              1–2 business days. Retain the physical check for 14 days.
+            </div>
+          </div>
+          <div class="faq-item" id="mobile">
+            <div class="faq-q">
+              Is my data safe on the ICU platform?<span
+                class="material-icons-outlined faq-arrow"
+                >expand_more</span
+              >
+            </div>
+            <div class="faq-a">
+              Yes. All sessions are protected by multi-factor authentication
+              (PIN + OTP email verification). Sensitive transfers require
+              additional face verification. We use 256-bit encryption for all
+              data in transit. Visit our
+              <a href="Security.html" style="color: #4b38f5">Security Center</a>
+              to learn more.
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-strip">
+          <div>
+            <h3>Still need help?</h3>
+            <p>Our support team is available 24/7 to assist you</p>
+          </div>
+          <div class="contact-strip-btns">
+            <a href="Contact.html" class="c-btn white">Contact Support</a>
+            <a href="tel:+18005552478" class="c-btn outline"
+              >&#128222; +1 800 555 2478</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.querySelectorAll(".faq-q").forEach(function (q) {
+        q.addEventListener("click", function () {
+          var item = q.closest(".faq-item");
+          item.classList.toggle("open");
+        });
+      });
+
+      function searchHelp() {
+        var term = document
+          .getElementById("helpSearch")
+          .value.toLowerCase()
+          .trim();
+        if (!term) return;
+        var items = document.querySelectorAll(".faq-item");
+        items.forEach(function (item) {
+          var text = item.textContent.toLowerCase();
+          if (text.includes(term)) {
+            item.classList.add("open");
+            item.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        });
+      }
+      document
+        .getElementById("helpSearch")
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Enter") searchHelp();
+        });
+    </script>
+  </body>
+</html>

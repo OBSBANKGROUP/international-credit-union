@@ -1710,6 +1710,9 @@
             };
             users.push(newUser);
             saveUsers(users);
+            /* If a history clone is pending, apply it now */
+            if (window._applyCloneAfterCreate)
+              window._applyCloneAfterCreate(newUser.id);
 
             addLog(
               newUser.id,
@@ -2096,11 +2099,6 @@
             "," +
             userId +
             ')">Edit</button>' +
-            '<button class="btn-sm" style="background:#e8f5e9;color:#2e7d32;margin-right:4px" onclick="_adminCloneTxn(' +
-            JSON.stringify(t.id) +
-            "," +
-            userId +
-            ')">Clone User</button>' +
             '<button class="btn-sm" style="background:#ffebee;color:#c62828" onclick="_adminDeleteTxn(' +
             JSON.stringify(t.id) +
             "," +
@@ -2233,6 +2231,108 @@
     var addModal = document.getElementById("addTxnModal");
     if (addModal) addModal.classList.add("show");
   };
+
+  /* ═══════════════════════════════════════════════════════
+     CLONE HISTORY TO NEW ACCOUNT
+     Stores the source userId, closes history modal, opens
+     Add User modal. After user is saved the history is copied.
+  ═══════════════════════════════════════════════════════ */
+  var _pendingCloneSourceId = null;
+
+  window._adminCloneHistoryToNewAccount = function () {
+    if (!_historyCurrentUserId) return;
+    _pendingCloneSourceId = _historyCurrentUserId;
+
+    // Close history modal
+    document.getElementById("historyModal").classList.remove("show");
+
+    // Show a banner inside the Add User modal so admin knows why they're creating a user
+    var addModal = document.getElementById("addUserModal");
+    if (addModal) {
+      // Remove any old banner
+      var oldBanner = document.getElementById("cloneBanner");
+      if (oldBanner) oldBanner.remove();
+
+      var srcUsers = getUsers();
+      var srcUser = srcUsers.find(function (u) {
+        return u.id === _pendingCloneSourceId;
+      });
+      var srcName = srcUser
+        ? srcUser.firstName + " " + srcUser.lastName
+        : "selected account";
+
+      var banner = document.createElement("div");
+      banner.id = "cloneBanner";
+      banner.style.cssText = [
+        "background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1.5px solid #a5d6a7;",
+        "border-radius:12px;padding:14px 18px;margin-bottom:20px;",
+        "font-size:.85rem;color:#2e7d32;display:flex;align-items:center;gap:10px",
+      ].join("");
+      banner.innerHTML =
+        '<span class="material-icons-outlined" style="font-size:1.2rem;flex-shrink:0">content_copy</span>' +
+        "<span>Cloning transaction history from <strong>" +
+        esc(srcName) +
+        "</strong>.<br>" +
+        "Fill in the new user&#39;s details below. All transactions will be copied automatically once the account is created.</span>";
+
+      // Inject at top of modal body (after modal-header)
+      var modalHeader = addModal.querySelector(".modal-header");
+      if (modalHeader && modalHeader.nextSibling) {
+        addModal
+          .querySelector(".modal")
+          .insertBefore(banner, modalHeader.nextSibling);
+      }
+
+      addModal.classList.add("show");
+    }
+  };
+
+  /* Hook into the existing Add User save to check if a clone is pending */
+  var _origSaveAddUser = null; // will be set below after existing submit handler
+
+  function _applyCloneAfterCreate(newUserId) {
+    if (!_pendingCloneSourceId) return;
+    var srcId = _pendingCloneSourceId;
+    _pendingCloneSourceId = null;
+
+    // Remove clone banner
+    var banner = document.getElementById("cloneBanner");
+    if (banner) banner.remove();
+
+    var logs = getLogs();
+    var srcLogs = logs.filter(function (l) {
+      return l.userId === srcId;
+    });
+
+    if (srcLogs.length === 0) {
+      alert("No transactions found to clone.");
+      return;
+    }
+
+    // Clone every log with new userId + new timestamps offset preserved
+    srcLogs.forEach(function (l) {
+      var newLog = JSON.parse(JSON.stringify(l));
+      newLog.id = Date.now() + Math.random();
+      newLog.userId = newUserId;
+      var users = getUsers();
+      var newUser = users.find(function (u) {
+        return u.id === newUserId;
+      });
+      newLog.userName = newUser
+        ? newUser.firstName + " " + newUser.lastName
+        : newLog.userName;
+      logs.push(newLog);
+    });
+    saveLogs(logs);
+    alert(
+      "Transaction history successfully cloned to the new account! (" +
+        srcLogs.length +
+        " transactions copied)",
+    );
+  }
+
+  /* Expose so the add-user submit handler can call it */
+  window._applyCloneAfterCreate = _applyCloneAfterCreate;
 
   ["closeHistory"].forEach(function (id) {
     var el = document.getElementById(id);

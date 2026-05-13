@@ -1,0 +1,547 @@
+/* ================================================================
+   ICU GLOBAL MOBILE STYLESHEET
+   Add to every page: <link rel="stylesheet" href="assets/css/mobile.css"/>
+   Place AFTER all other CSS links so it takes precedence.
+================================================================ */
+
+/* ── Base resets for mobile ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+table {
+  width: 100%;
+}
+
+/* ── Prevent horizontal overflow globally ── */
+body {
+  overflow-x: hidden;
+}
+
+/* ================================================================
+   INDEX / LANDING PAGE
+================================================================ */
+@media (max-width: 768px) {
+  /* Top bar */
+  .top-bar {
+    display: none !important;
+  }
+
+  /* Main header */
+  .main-header {
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px !important;
+  }
+  .main-header .nav-links {
+    display: none !important;
+  }
+  .main-header .logo {
+    height: 44px;
+  }
+  .auth-buttons {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+  .auth-buttons a,
+  .auth-buttons button {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Hero */
+  .hero-section,
+  .hero {
+    padding: 48px 16px 40px !important;
+    text-align: center;
+  }
+  .hero h1,
+  .hero-title {
+    font-size: 2rem !important;
+    line-height: 1.2 !important;
+  }
+  .hero p,
+  .hero-sub {
+    font-size: 1rem !important;
+  }
+  .hero-btns,
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-btns a,
+  .hero-buttons a {
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+  }
+
+  /* Features grid */
+  .features-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  .feature-card {
+    padding: 20px !important;
+  }
+
+  /* Info rows */
+  .info-row {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    text-align: center;
+  }
+  .info-text h3 {
+    font-size: 1.5rem !important;
+  }
+  .info-image {
+    order: -1;
+  }
+  .info-image img {
+    max-height: 200px;
+    object-fit: contain;
+  }
+
+  /* Footer */
+  .footer-grid,
+  .footer-columns {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 24px;
+  }
+  .footer {
+    padding: 40px 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-grid,
+  .footer-columns {
+    grid-template-columns: 1fr !important;
+  }
+  .hero h1,
+  .hero-title {
+    font-size: 1.6rem !important;
+  }
+}
+
+/* ================================================================
+   DASHBOARD
+================================================================ */
+@media (max-width: 768px) {
+  /* Dashboard header */
+  .dashboard-header .hc,
+  .dashboard-header > div {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px !important;
+  }
+  .header-logo {
+    height: 32px !important;
+  }
+
+  /* Balance card / hero */
+  .balance-hero,
+  .bal-hero {
+    padding: 24px 18px !important;
+  }
+  .balance-hero h1,
+  .bal-hero h1 {
+    font-size: 2rem !important;
+  }
+
+  /* Stats row */
+  .stats-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+  .stat-card {
+    padding: 16px !important;
+  }
+  .stat-card .s-val {
+    font-size: 1.2rem !important;
+  }
+
+  /* Quick action grid */
+  .quick-actions,
+  .actions-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+  }
+  .action-item,
+  .action-card {
+    padding: 14px 8px !important;
+  }
+  .action-item span,
+  .action-card p {
+    font-size: 0.7rem !important;
+  }
+  .action-item .icon,
+  .action-card .ac-icon {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1rem !important;
+  }
+
+  /* Transaction cards */
+  .history-card {
+    padding: 14px 16px !important;
+  }
+  .history-left h3 {
+    font-size: 0.88rem !important;
+  }
+
+  /* Bottom nav (mobile) */
+  .bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e8eaf0;
+    padding: 8px 0 12px;
+    justify-content: space-around;
+    z-index: 100;
+    box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.08);
+  }
+  .bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    color: #888;
+    text-decoration: none;
+    font-size: 0.65rem;
+    font-weight: 600;
+  }
+  .bottom-nav a.active,
+  .bottom-nav a:hover {
+    color: #4b38f5;
+  }
+  .bottom-nav .material-icons-outlined {
+    font-size: 1.3rem;
+  }
+
+  /* Page bottom padding for bottom nav */
+  body {
+    padding-bottom: 72px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-row {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .quick-actions,
+  .actions-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* ================================================================
+   WIRE TRANSFER / FORMS
+================================================================ */
+@media (max-width: 768px) {
+  .wire-form-page .container,
+  .form-page .container {
+    padding: 0 14px !important;
+  }
+
+  .wire-form,
+  .transfer-form {
+    padding: 20px 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px !important; /* prevents iOS zoom */
+    padding: 12px 14px !important;
+  }
+
+  .amount-box {
+    border-radius: 12px !important;
+  }
+  .amount-input {
+    font-size: 16px !important;
+  }
+
+  /* Receipt modal */
+  .receipt-card-wrap {
+    border-radius: 18px !important;
+  }
+  .receipt-header {
+    padding: 24px 18px !important;
+  }
+  .receipt-body {
+    padding: 18px !important;
+  }
+  .receipt-footer {
+    padding: 0 18px 20px !important;
+  }
+  .receipt-big-amount {
+    font-size: 1.8rem !important;
+  }
+  .receipt-actions {
+    flex-direction: column !important;
+  }
+  .receipt-btn {
+    width: 100% !important;
+  }
+}
+
+/* ================================================================
+   ADMIN PAGE
+================================================================ */
+@media (max-width: 900px) {
+  .admin-layout {
+    flex-direction: column !important;
+  }
+  .admin-sidebar {
+    width: 100% !important;
+    flex-direction: row !important;
+    overflow-x: auto;
+    padding: 8px !important;
+    gap: 4px !important;
+    min-height: unset !important;
+  }
+  .admin-sidebar .nav-link {
+    flex-direction: column !important;
+    gap: 2px !important;
+    padding: 8px 12px !important;
+    font-size: 0.65rem !important;
+    white-space: nowrap;
+    border-radius: 10px !important;
+  }
+  .admin-sidebar .nav-link span:first-child {
+    font-size: 1.1rem !important;
+  }
+  .admin-content {
+    padding: 16px !important;
+  }
+  .data-table {
+    font-size: 0.78rem !important;
+  }
+  .data-table th,
+  .data-table td {
+    padding: 8px 10px !important;
+  }
+
+  /* Modal full screen on mobile */
+  .modal {
+    max-height: 95vh !important;
+    margin: 10px !important;
+  }
+  .modal-overlay {
+    align-items: flex-start !important;
+    padding: 10px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-sidebar .nav-link span.nav-text {
+    display: none !important;
+  }
+  .admin-sidebar .nav-link {
+    padding: 10px !important;
+  }
+  .page-top {
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: flex-start !important;
+  }
+  .stats-cards {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* ================================================================
+   CARDS — credit/debit card pages
+================================================================ */
+@media (max-width: 768px) {
+  .cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .card-visual {
+    height: 180px !important;
+  }
+  .card-visual .card-number {
+    font-size: 1.1rem !important;
+    letter-spacing: 4px !important;
+  }
+
+  .score-hero {
+    flex-direction: column !important;
+    text-align: center;
+    padding: 28px 18px !important;
+  }
+  .score-gauge {
+    margin: 0 auto !important;
+  }
+}
+
+/* ================================================================
+   MODALS — all OTP / PIN / face modals
+================================================================ */
+@media (max-width: 480px) {
+  .otp-box,
+  .pin-box {
+    padding: 24px 18px !important;
+    border-radius: 18px !important;
+  }
+  #pinVerifyBox {
+    padding: 28px 18px !important;
+  }
+  #faceVerifyBox {
+    padding: 24px 16px !important;
+  }
+  #pinDigits {
+    max-width: 200px !important;
+    gap: 8px !important;
+  }
+  .pin-key {
+    padding: 13px !important;
+    font-size: 1.1rem !important;
+  }
+}
+
+/* ================================================================
+   ACCOUNT MANAGER
+================================================================ */
+@media (max-width: 768px) {
+  .total-hero {
+    padding: 24px 18px !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  .total-hero h1 {
+    font-size: 2rem !important;
+  }
+  .hero-meta {
+    gap: 8px !important;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    padding: 8px 14px !important;
+    font-size: 0.78rem !important;
+  }
+  .accounts-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .accounts-summary {
+    flex-direction: column !important;
+  }
+  .summary-pill {
+    min-width: unset !important;
+  }
+}
+
+/* ================================================================
+   NOTIFICATION / TRANSACTION PAGES
+================================================================ */
+@media (max-width: 600px) {
+  .notif-header .hc,
+  .ma-header .hc {
+    padding: 0 14px !important;
+  }
+  .notif-card {
+    padding: 14px 16px !important;
+  }
+  .filter-tabs {
+    gap: 6px !important;
+  }
+  .filter-tab {
+    padding: 7px 14px !important;
+    font-size: 0.78rem !important;
+  }
+  .txn-section {
+    padding: 18px 16px !important;
+  }
+}
+
+/* ================================================================
+   SETTINGS PAGE
+================================================================ */
+@media (max-width: 768px) {
+  .settings-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .settings-card {
+    padding: 20px 16px !important;
+  }
+  .profile-photo-section {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+}
+
+/* ================================================================
+   BUSINESS DASHBOARD
+================================================================ */
+@media (max-width: 768px) {
+  .biz-hero {
+    flex-direction: column !important;
+    gap: 16px !important;
+    text-align: center !important;
+    padding: 24px 18px !important;
+  }
+  .biz-hero h1 {
+    font-size: 2rem !important;
+  }
+  .biz-hero-actions {
+    width: 100% !important;
+  }
+  .hero-btn {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  .stats-row {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .tools-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ================================================================
+   GENERAL — inputs font-size 16px prevents iOS auto-zoom
+================================================================ */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ================================================================
+   DARK MODE mobile adjustments
+================================================================ */
+@media (max-width: 768px) {
+  .dark-mode .bottom-nav {
+    background: #1c1f35 !important;
+    border-top-color: #2e3250 !important;
+  }
+  .dark-mode .bottom-nav a {
+    color: #666 !important;
+  }
+  .dark-mode .bottom-nav a.active {
+    color: #6a5cff !important;
+  }
+}
