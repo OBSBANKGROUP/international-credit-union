@@ -49,3 +49,15 @@ function googleTranslateElementInit() {
     "google_translate_element",
   );
 }
+
+/* ── Protect login inputs from Google Translate DOM manipulation ── */
+(function protectLoginInputs() {
+  var protectedIds = ["loginUserId", "loginPassword", "loginOtpInput"];
+  protectedIds.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.classList.add("notranslate");
+      el.setAttribute("translate", "no");
+    }
+  });
+})();

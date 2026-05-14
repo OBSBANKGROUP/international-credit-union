@@ -458,36 +458,39 @@
         );
       }
 
-      const userId = (document.getElementById("loginUserId")?.value || "")
-        .trim()
-        .toLowerCase();
-      const password = document.getElementById("loginPassword")?.value || ""; // do NOT trim passwords
+      // Read input values directly from DOM elements
+      // Use .value on the raw input element — not textContent which Google Translate modifies
+      const userIdEl = document.getElementById("loginUserId");
+      const passEl = document.getElementById("loginPassword");
       const errorEl = document.getElementById("loginError");
+
       if (errorEl) errorEl.style.display = "none";
 
+      // Get raw values — these are always correct even with Google Translate active
+      const rawUserId = userIdEl ? userIdEl.value : "";
+      const rawPassword = passEl ? passEl.value : "";
+
+      const userId = rawUserId.trim().toLowerCase();
+      const password = rawPassword; // passwords are case+space sensitive
+
       if (!userId || !password)
-        return showLoginError("Please enter your User ID and password.");
+        return showLoginError("Please enter your email address and password.");
 
       const users = getUsers();
 
-      // Robust login match — handles all edge cases:
-      // 1. Email stored with different casing
-      // 2. Password stored with or without whitespace
-      // 3. Admin-created vs self-registered accounts
+      // Find user — try every reasonable comparison to handle all storage edge cases
       const user = users.find((u) => {
-        // Email match — normalize both sides
         const storedEmail = (u.email || "").toLowerCase().trim();
-        const enteredEmail = userId; // already lowercased + trimmed above
-        if (storedEmail !== enteredEmail) return false;
+        if (storedEmail !== userId) return false;
 
-        // Password match — try multiple comparisons
-        const storedPass = u.password || "";
-        const enteredPass = password;
+        const sp = u.password || ""; // stored password
+        const ep = rawPassword; // entered password (raw, untrimmed)
+
         return (
-          storedPass === enteredPass || // exact match
-          storedPass.trim() === enteredPass.trim() || // trimmed both sides
-          storedPass === enteredPass.trim() || // stored exact, entered trimmed
-          storedPass.trim() === enteredPass // stored trimmed, entered exact
+          sp === ep || // exact
+          sp.trim() === ep.trim() || // both trimmed
+          sp === ep.trim() || // stored exact vs entered trimmed
+          sp.trim() === ep // stored trimmed vs entered exact
         );
       });
 
@@ -500,7 +503,7 @@
           );
         }
         return showLoginError(
-          "Invalid User ID or password." +
+          "Invalid email or password." +
             (left > 0 && left < MAX_LOGIN_ATTEMPTS
               ? " " + left + " attempt" + (left > 1 ? "s" : "") + " remaining."
               : ""),

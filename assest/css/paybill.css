@@ -139,3 +139,27 @@ body {
   border-radius: 20px;
   margin-left: 10px;
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .paybill-hero {
+    padding: 36px 16px !important;
+  }
+  .biller-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+  .biller-card {
+    padding: 16px 12px !important;
+  }
+  .bill-form {
+    padding: 24px 18px !important;
+  }
+  .form-group input,
+  .form-group select {
+    font-size: 16px !important;
+  }
+  .payment-summary {
+    padding: 18px !important;
+  }
+}

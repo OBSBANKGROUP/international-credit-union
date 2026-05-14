@@ -158,3 +158,31 @@ body {
   color: #0046be;
   text-decoration: underline;
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .invest-hero {
+    padding: 40px 16px !important;
+  }
+  .invest-hero h1 {
+    font-size: 1.8rem !important;
+  }
+  .invest-grid,
+  .portfolio-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  .invest-card {
+    padding: 22px 18px !important;
+  }
+  .chart-wrap {
+    overflow-x: auto !important;
+  }
+  .invest-form {
+    padding: 22px 18px !important;
+  }
+  .form-group input,
+  .form-group select {
+    font-size: 16px !important;
+  }
+}

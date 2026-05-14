@@ -139,3 +139,34 @@ body {
 .hidden {
   display: none;
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .loan-hero {
+    padding: 40px 16px !important;
+  }
+  .loan-hero h1 {
+    font-size: 1.8rem !important;
+  }
+  .loan-types {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  .loan-card {
+    padding: 22px 18px !important;
+  }
+  .loan-form {
+    padding: 24px 18px !important;
+  }
+  .loan-form .form-row {
+    grid-template-columns: 1fr !important;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px !important;
+  }
+  .calculator-box {
+    padding: 22px 18px !important;
+  }
+}

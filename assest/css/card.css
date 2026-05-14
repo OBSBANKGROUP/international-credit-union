@@ -88,3 +88,31 @@ body {
   border-radius: 25px;
   text-decoration: none;
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .cards-section {
+    padding: 24px 14px !important;
+  }
+  .card-visual {
+    height: 180px !important;
+  }
+  .card-number {
+    font-size: 1rem !important;
+    letter-spacing: 3px !important;
+  }
+  .card-details-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .card-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  .card-actions button {
+    width: 100% !important;
+  }
+  .card-info-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}

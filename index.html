@@ -45,10 +45,10 @@
     <header class="main-header">
       <div class="main-header-inner">
         <img src="assest/images/logo.jpeg" alt="ICU Logo" class="logo-img" />
-        <!-- <div class="site-name">
+        <div class="site-name">
           International Credit Union
           <small>Secure &bull; Trusted &bull; Global</small>
-        </div> -->
+        </div>
         <div class="header-spacer"></div>
         <nav class="header-nav">
           <a href="insurance.html">Insurance</a>
@@ -105,17 +105,26 @@
     <section class="hero" id="hero-login">
       <div class="container hero-content">
         <!-- LOGIN PANEL -->
-        <div class="login-panel">
+        <div class="login-panel notranslate" translate="no">
           <h3>Sign In</h3>
 
-          <label
-            >Email
-            <address></address
-          ></label>
-          <input type="text" id="loginemail" />
+          <label>Email Address</label>
+          <input
+            type="email"
+            id="loginUserId"
+            class="notranslate"
+            translate="no"
+            autocomplete="username"
+          />
 
           <label>Password</label>
-          <input type="password" id="loginPassword" />
+          <input
+            type="password"
+            id="loginPassword"
+            class="notranslate"
+            translate="no"
+            autocomplete="current-password"
+          />
 
           <div class="save-id">
             <input type="checkbox" id="saveLogin" /> Save login info
@@ -254,9 +263,15 @@
               confidently, and with the right banking partner behind you.
               Monitor your score in real time from your dashboard.
             </p>
-            <a href="creditcard.html" class="info-btn primary"
-              >Check Your Credit Score &#8594;</a
+            <button
+              onclick="
+                document.getElementById('creditModal').classList.add('open')
+              "
+              class="info-btn primary"
+              style="border: none; cursor: pointer"
             >
+              Check Your Credit Score &#8594;
+            </button>
           </div>
           <div class="info-img-wrap">
             <img src="assest/images/creditscore.jpeg" alt="Credit Score" />
@@ -275,7 +290,14 @@
             >
           </div>
           <div class="info-img-wrap">
-            <img src="assest/images/bankapp.jpeg" alt="Mobile Banking" />
+            <img
+              src="assest/images/bankapp.jpeg"
+              alt="Mobile Banking"
+              onclick="
+                document.getElementById('appModal').classList.add('open')
+              "
+              style="cursor: pointer"
+            />
           </div>
         </div>
       </div>
@@ -442,19 +464,122 @@
       </div>
     </footer>
 
+    <!-- ═══ CREDIT SCORE MODAL ═══ -->
+    <div class="app-modal" id="creditModal">
+      <div class="app-modal-box">
+        <div style="font-size: 2.5rem; margin-bottom: 14px">🔒</div>
+        <h2>Sign In Required</h2>
+        <p>
+          You need to <strong>log in</strong> or
+          <strong>create an account</strong> to check your credit score and
+          access your personalized financial dashboard.
+        </p>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+          "
+        >
+          <button
+            onclick="
+              document.getElementById('creditModal').classList.remove('open');
+              document
+                .getElementById('hero-login')
+                .scrollIntoView({ behavior: 'smooth' });
+            "
+            style="
+              padding: 13px 24px;
+              background: linear-gradient(135deg, #4b38f5, #6a5cff);
+              color: white;
+              border: none;
+              border-radius: 22px;
+              font-weight: 700;
+              cursor: pointer;
+              font-family: Inter, sans-serif;
+              font-size: 0.92rem;
+            "
+          >
+            Sign In / Sign Up
+          </button>
+          <button
+            onclick="
+              document.getElementById('creditModal').classList.remove('open')
+            "
+            style="
+              padding: 11px 24px;
+              background: #f5f5f5;
+              color: #555;
+              border: none;
+              border-radius: 22px;
+              font-weight: 600;
+              cursor: pointer;
+              font-family: Inter, sans-serif;
+              font-size: 0.85rem;
+            "
+          >
+            &#8592; Go Back
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ APP MODAL ═══ -->
     <div class="app-modal" id="appModal">
       <div class="app-modal-box">
-        <h2>Mobile App</h2>
+        <div style="font-size: 2.5rem; margin-bottom: 14px">📱</div>
+        <h2>App Not Available in Your Region</h2>
         <p>
-          Our dedicated mobile app is coming soon. Continue using our secure web
-          platform for full banking access.
+          Our mobile app is currently not available in your region. Please
+          continue using our secure website for full banking access — it works
+          great on mobile too!
         </p>
-        <button
-          onclick="document.getElementById('appModal').classList.remove('open')"
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+          "
         >
-          Continue to Website
-        </button>
+          <button
+            onclick="
+              document.getElementById('appModal').classList.remove('open')
+            "
+            style="
+              padding: 13px 24px;
+              background: linear-gradient(135deg, #4b38f5, #6a5cff);
+              color: white;
+              border: none;
+              border-radius: 22px;
+              font-weight: 700;
+              cursor: pointer;
+              font-family: Inter, sans-serif;
+              font-size: 0.92rem;
+            "
+          >
+            Continue Using Website
+          </button>
+          <button
+            onclick="
+              document.getElementById('appModal').classList.remove('open')
+            "
+            style="
+              padding: 11px 24px;
+              background: #f5f5f5;
+              color: #555;
+              border: none;
+              border-radius: 22px;
+              font-weight: 600;
+              cursor: pointer;
+              font-family: Inter, sans-serif;
+              font-size: 0.85rem;
+            "
+          >
+            Go Back
+          </button>
+        </div>
       </div>
     </div>
 
