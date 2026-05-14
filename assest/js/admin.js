@@ -399,6 +399,31 @@
     });
   }
 
+  /* ── Admin debug helper (console only) ──
+     In browser console type: _icuDebugUser("email@example.com")
+     Shows stored email + password so you can verify they match ── */
+  window._icuDebugUser = function (email) {
+    var users = getUsers();
+    var u = users.find(function (x) {
+      return (
+        (x.email || "").toLowerCase().trim() ===
+        (email || "").toLowerCase().trim()
+      );
+    });
+    if (!u) {
+      console.log("No user found with email:", email);
+      return;
+    }
+    console.log("=== ICU USER DEBUG ===");
+    console.log("Email stored:   [" + u.email + "]");
+    console.log("Password stored:[" + u.password + "]");
+    console.log("Status:         ", u.status);
+    console.log("ID:             ", u.id);
+    console.log("Account type:   ", u.accountType);
+    console.log("=====================");
+    console.log("To login use email exactly as stored above.");
+  };
+
   /* ---------- Logout ---------- */
   document
     .getElementById("adminLogout")

@@ -469,14 +469,27 @@
         return showLoginError("Please enter your User ID and password.");
 
       const users = getUsers();
-      // Case-insensitive email match + exact password match
-      // Try exact match first, then trimmed fallback for passwords saved by admin
-      const user = users.find(
-        (u) =>
-          (u.email || "").toLowerCase().trim() === userId &&
-          ((u.password || "") === password ||
-            (u.password || "").trim() === password.trim()),
-      );
+
+      // Robust login match — handles all edge cases:
+      // 1. Email stored with different casing
+      // 2. Password stored with or without whitespace
+      // 3. Admin-created vs self-registered accounts
+      const user = users.find((u) => {
+        // Email match — normalize both sides
+        const storedEmail = (u.email || "").toLowerCase().trim();
+        const enteredEmail = userId; // already lowercased + trimmed above
+        if (storedEmail !== enteredEmail) return false;
+
+        // Password match — try multiple comparisons
+        const storedPass = u.password || "";
+        const enteredPass = password;
+        return (
+          storedPass === enteredPass || // exact match
+          storedPass.trim() === enteredPass.trim() || // trimmed both sides
+          storedPass === enteredPass.trim() || // stored exact, entered trimmed
+          storedPass.trim() === enteredPass // stored trimmed, entered exact
+        );
+      });
 
       if (!user) {
         const att = recordFailedAttempt();
