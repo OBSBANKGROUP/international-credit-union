@@ -1,96 +1,82 @@
-(function() {
+(function () {
   "use strict";
 
-  /* 
-   * EmailJS Configuration (Fallback)
-   * Please replace the placeholders below with your actual EmailJS credentials.
-   * You can get these from your EmailJS dashboard: https://dashboard.emailjs.com/
-   */
-  const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY"; // Replace with your Public Key
-  const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID"; // Replace with your Service ID
-  const EMAILJS_OTP_TEMPLATE_ID = "YOUR_OTP_TEMPLATE_ID"; // Replace with your OTP Template ID
-  const EMAILJS_DEBIT_TEMPLATE_ID = "YOUR_DEBIT_TEMPLATE_ID"; // Replace with your Debit Alert Template ID
+  /* ================================================================
+     ICU EMAIL CONFIG — EmailJS Only (works on static hosting)
+     ----------------------------------------------------------------
+     Fill in your 4 credentials from emailjs.com then you're done.
+     No server needed — emails send directly from the browser.
+     ================================================================ */
 
-  // Local Backend Configuration (Primary)
-  const LOCAL_BACKEND_URL = "http://localhost:3000";
+  var EMAILJS_PUBLIC_KEY = "_5MKFe0Q8J_H9RvVy"; // Account → Public Key
+  var EMAILJS_SERVICE_ID = "service_jzi1nah"; // Email Services → your service
+  var EMAILJS_OTP_TEMPLATE_ID = "template_tmsqzp3"; // Email Templates → OTP template
+  var EMAILJS_DEBIT_TEMPLATE_ID = "template_47w8bcg"; // Email Templates → Debit alert
 
-  // Initialize EmailJS
-  if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") {
-    emailjs.init(EMAILJS_PUBLIC_KEY);
+  /* ── Init EmailJS ── */
+  function isReady() {
+    return (
+      typeof emailjs !== "undefined" && EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY"
+    );
   }
 
-  /**
-   * Universal email sending helper
-   */
-  window._sendEmail = async function(endpoint, templateId, templateParams) {
-    // 1. Try Local Backend
-    try {
-      const response = await fetch(`${LOCAL_BACKEND_URL}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(templateParams),
-      });
+  if (isReady()) {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    console.log("EmailJS ready");
+  } else {
+    console.warn(
+      "EmailJS credentials not set yet — OTPs will be logged to console only.",
+    );
+  }
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Email sent via Local Backend:", data);
-        return data;
-      }
-    } catch (err) {
-      console.warn("Local backend not available, falling back to EmailJS/Console.");
+  /* ── Core send function ── */
+  window._sendEmail = function (templateId, params) {
+    if (!isReady()) {
+      console.log("EMAIL (dev mode):", templateId, params);
+      return Promise.resolve({ status: 200, text: "dev-mode" });
     }
-
-    // 2. Fallback to EmailJS
-    if (typeof emailjs === 'undefined') {
-      console.warn("EmailJS library not loaded. Logging to console instead.");
-      console.log("Email Template:", templateId, "Params:", templateParams);
-      return Promise.resolve({ status: 200, text: "Simulated success" });
-    }
-
-    if (EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") {
-      console.warn("EmailJS credentials not set. Logging to console instead.");
-      console.log("Email Template:", templateId, "Params:", templateParams);
-      return Promise.resolve({ status: 200, text: "Simulated success" });
-    }
-
-    return emailjs.send(EMAILJS_SERVICE_ID, templateId, templateParams)
-      .then(function(response) {
-        console.log("Email sent successfully via EmailJS!", response.status, response.text);
-        return response;
-      }, function(error) {
-        console.error("Failed to send email via EmailJS...", error);
-        throw error;
+    return emailjs
+      .send(EMAILJS_SERVICE_ID, templateId, params)
+      .then(function (res) {
+        console.log("Email sent:", res.status);
+        return res;
+      })
+      .catch(function (err) {
+        console.error("Email failed:", err);
+        throw err;
       });
   };
 
-  /**
-   * Send OTP Code
-   */
-  window._sendOTP = function(toEmail, otpCode, userName) {
-    return window._sendEmail("/send-otp", EMAILJS_OTP_TEMPLATE_ID, {
+  /* ── Send OTP ── */
+  window._sendOTP = function (toEmail, otpCode, userName) {
+    return window._sendEmail(EMAILJS_OTP_TEMPLATE_ID, {
       to_email: toEmail,
       otp_code: otpCode,
       user_name: userName || "Valued Member",
-      app_name: "International Credit Union"
+      app_name: "International Credit Union",
     });
   };
 
-  /**
-   * Send Debit/Transfer Alert
-   */
-  window._sendDebitAlert = function(toEmail, amount, details, balance, userName) {
-    return window._sendEmail("/send-alert", EMAILJS_DEBIT_TEMPLATE_ID, {
+  /* ── Send Debit Alert ── */
+  window._sendDebitAlert = function (
+    toEmail,
+    amount,
+    details,
+    balance,
+    userName,
+  ) {
+    return window._sendEmail(EMAILJS_DEBIT_TEMPLATE_ID, {
       to_email: toEmail,
-      amount: amount,
-      details: details,
-      balance: balance,
+      amount: parseFloat(amount || 0).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+      }),
+      details: details || "",
+      balance: parseFloat(balance || 0).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+      }),
       user_name: userName || "Valued Member",
       app_name: "International Credit Union",
-      date: new Date().toLocaleString()
+      date: new Date().toLocaleString(),
     });
   };
-
 })();
-

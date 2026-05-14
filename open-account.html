@@ -173,7 +173,13 @@
 
             <div class="form-group">
               <label>Initial Deposit ($)</label>
-              <input type="number" id="initialDeposit" value="0" min="0" step="0.01" />
+              <input
+                type="number"
+                id="initialDeposit"
+                value="0"
+                min="0"
+                step="0.01"
+              />
             </div>
           </div>
 
@@ -259,16 +265,56 @@
           </div>
 
           <!-- OTP SECTION -->
-          <div id="otpSection" style="display: none; margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px; text-align: center; border: 1px solid #ddd;">
-            <h3 style="margin-bottom: 10px;">Verify Your Email</h3>
-            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #555;">We have sent a 6-digit verification code to your email. Please enter it below to create your account.</p>
-            <div class="form-group" style="max-width: 200px; margin: 0 auto 15px;">
-              <input type="text" id="otpInput" placeholder="Enter OTP" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 2px;" />
+          <div
+            id="otpSection"
+            style="
+              display: none;
+              margin-top: 20px;
+              padding: 20px;
+              background: #f9f9f9;
+              border-radius: 8px;
+              text-align: center;
+              border: 1px solid #ddd;
+            "
+          >
+            <h3 style="margin-bottom: 10px">Verify Your Email</h3>
+            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #555">
+              We have sent a 6-digit verification code to your email. Please
+              enter it below to create your account.
+            </p>
+            <div
+              class="form-group"
+              style="max-width: 200px; margin: 0 auto 15px"
+            >
+              <input
+                type="text"
+                id="otpInput"
+                placeholder="Enter OTP"
+                maxlength="6"
+                style="
+                  text-align: center;
+                  font-size: 1.2rem;
+                  letter-spacing: 2px;
+                "
+              />
             </div>
-            <button type="button" class="submit-btn" id="verifyOtpBtn" style="background-color: #2e7d32;">
+            <button
+              type="button"
+              class="submit-btn"
+              id="verifyOtpBtn"
+              style="background-color: #2e7d32"
+            >
               Verify & Create Account
             </button>
-            <p id="otpErrorMsg" style="color: #d32f2f; margin-top: 10px; display: none; font-size: 0.85rem;"></p>
+            <p
+              id="otpErrorMsg"
+              style="
+                color: #d32f2f;
+                margin-top: 10px;
+                display: none;
+                font-size: 0.85rem;
+              "
+            ></p>
           </div>
         </form>
       </div>
@@ -347,7 +393,7 @@
 
           <!-- Contact Info -->
           <div class="footer-contact">
-            <p><strong>Email:</strong> support@internationalcu.com</p>
+            <p><strong>Email:</strong> info@internationalcunion.com</p>
             <p><strong>Phone:</strong> +1 (800) 555-2478</p>
           </div>
         </div>

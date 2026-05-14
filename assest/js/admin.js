@@ -359,13 +359,24 @@
   function getUserBalance(userId, accountType) {
     var logs = getLogs();
     var balance = 0;
+    // Get user's primary account type for fallback
+    var allUsers = getUsers();
+    var thisUser = allUsers.find(function (u) {
+      return u.id === userId;
+    });
+    var userPrimary = thisUser
+      ? (thisUser.accountType || "checking").toLowerCase()
+      : "checking";
+
     logs.forEach(function (l) {
       if (l.userId === userId && l.amount) {
-        // If accountType specified, only count logs for that account
-        if (accountType && l.targetAccount !== accountType) return;
-
-        if (l.txnType === "credit") balance += l.amount;
-        else if (l.txnType === "debit") balance -= l.amount;
+        // Use explicit targetAccount if set; else fall back to user primary
+        var acct = l.targetAccount
+          ? l.targetAccount.toLowerCase()
+          : userPrimary;
+        if (accountType && acct !== accountType.toLowerCase()) return;
+        if (l.txnType === "credit") balance += parseFloat(l.amount);
+        else if (l.txnType === "debit") balance -= parseFloat(l.amount);
       }
     });
     return balance;
@@ -373,9 +384,17 @@
 
   function getUserTxns(userId, accountType) {
     var logs = getLogs();
+    var allUsers = getUsers();
+    var thisUser = allUsers.find(function (u) {
+      return u.id === userId;
+    });
+    var userPrimary = thisUser
+      ? (thisUser.accountType || "checking").toLowerCase()
+      : "checking";
     return logs.filter(function (l) {
       if (l.userId !== userId || !l.amount) return false;
-      if (accountType && l.targetAccount !== accountType) return false;
+      var acct = l.targetAccount ? l.targetAccount.toLowerCase() : userPrimary;
+      if (accountType && acct !== accountType.toLowerCase()) return false;
       return true;
     });
   }

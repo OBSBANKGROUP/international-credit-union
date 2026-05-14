@@ -40,6 +40,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // Show suspended overlay if account is on hold
+  if (window.checkSuspended && window.checkSuspended()) return;
+
   // Update Profile Name and Picture
   const usernameEls = document.querySelectorAll(".username");
   usernameEls.forEach((el) => {
@@ -65,15 +68,20 @@ document.addEventListener("DOMContentLoaded", () => {
     return bal;
   }
 
-  /* ── Fixed balance: logs with no targetAccount fall back to
-     user's primary accountType (same fix as wire-transfer.js) ── */
+  /* ── Fixed balance calculation ──
+     Logs with no targetAccount fall back to the user's primary accountType.
+     Logs that explicitly have targetAccount="checking" or "savings" always
+     count for that specific account regardless of primary type.
+  ── */
   const primary = (currentUser.accountType || "checking").toLowerCase();
 
   function getAccBalFixed(userId, type) {
     let bal = 0;
     logs.forEach((l) => {
       if (l.userId !== userId || l.amount == null) return;
-      const acct = (l.targetAccount || primary).toLowerCase();
+      // If log has an explicit targetAccount, use it
+      // If no targetAccount, count it only toward the primary account
+      const acct = l.targetAccount ? l.targetAccount.toLowerCase() : primary;
       if (type && acct !== type.toLowerCase()) return;
       if (l.txnType === "credit") bal += parseFloat(l.amount);
       else if (l.txnType === "debit") bal -= parseFloat(l.amount);

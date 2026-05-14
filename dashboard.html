@@ -17,7 +17,8 @@
 
     <link rel="stylesheet" href="assest/css/dashboard.css" />
     <script src="assest/js/theme.js"></script>
-  </head>
+    <link rel="stylesheet" href="assest/css/mobile.css"/>
+</head>
 
   <body>
   <!-- ===== HEADER ===== -->
@@ -153,29 +154,29 @@
 
         <!-- ===== ACCOUNT SUMMARY ===== -->
 
-        <section class="account-grid">
+        <section class="account-grid" id="accountGrid">
           <div class="account-box">
             <div class="box-icon"><span class="material-icons-outlined">account_balance</span></div>
-            <h5>Checking</h5>
-            <p>$0.00</p>
+            <h5 id="acctLabel_checking">Checking</h5>
+            <p id="acctBal_checking">$0.00</p>
           </div>
 
           <div class="account-box">
             <div class="box-icon"><span class="material-icons-outlined">savings</span></div>
-            <h5>Savings</h5>
-            <p>$0.00</p>
+            <h5 id="acctLabel_savings">Savings</h5>
+            <p id="acctBal_savings">$0.00</p>
           </div>
 
-          <div class="account-box">
-            <div class="box-icon"><span class="material-icons-outlined">history_edu</span></div>
-            <h5>Cert. Deposit</h5>
-            <p>$0.00</p>
+          <div class="account-box" id="acctBox_business">
+            <div class="box-icon"><span class="material-icons-outlined">business_center</span></div>
+            <h5 id="acctLabel_business">Business</h5>
+            <p id="acctBal_business">$0.00</p>
           </div>
 
           <div class="account-box">
             <div class="box-icon"><span class="material-icons-outlined">credit_card</span></div>
             <h5>Card Number</h5>
-            <p>— — — —</p>
+            <p id="acctCardNum">— — — —</p>
           </div>
         </section>
 
@@ -380,7 +381,8 @@ Verify
 </div>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="assest/js/emailjs-config.js"></script>
-    <script src="assest/js/dashboard.js"></script>
     <script src="assest/js/auth.js"></script>
+    <script src="assest/js/security.js"></script>
+    <script src="assest/js/dashboard.js"></script>
   </body>
 </html>
