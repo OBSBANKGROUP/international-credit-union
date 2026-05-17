@@ -458,41 +458,62 @@
         );
       }
 
-      // Read input values directly from DOM elements
-      // Use .value on the raw input element — not textContent which Google Translate modifies
-      const userIdEl = document.getElementById("loginUserId");
-      const passEl = document.getElementById("loginPassword");
-      const errorEl = document.getElementById("loginError");
+      // Clear any previous error
+      var errorEl = document.getElementById("loginError");
+      if (errorEl) {
+        errorEl.style.display = "none";
+        errorEl.textContent = "";
+      }
 
-      if (errorEl) errorEl.style.display = "none";
+      // Read values directly — bypass any Google Translate DOM manipulation
+      var emailInput = document.getElementById("loginUserId");
+      var passwordInput = document.getElementById("loginPassword");
 
-      // Get raw values — these are always correct even with Google Translate active
-      const rawUserId = userIdEl ? userIdEl.value : "";
-      const rawPassword = passEl ? passEl.value : "";
+      var enteredEmail = emailInput
+        ? emailInput.value.trim().toLowerCase()
+        : "";
+      var enteredPassword = passwordInput ? passwordInput.value : "";
 
-      const userId = rawUserId.trim().toLowerCase();
-      const password = rawPassword; // passwords are case+space sensitive
+      // Basic validation
+      if (!enteredEmail)
+        return showLoginError("Please enter your email address.");
+      if (!enteredPassword)
+        return showLoginError("Please enter your password.");
 
-      if (!userId || !password)
-        return showLoginError("Please enter your email address and password.");
+      // Load all users
+      var allUsers = getUsers();
 
-      const users = getUsers();
+      // DEBUG: log what we're searching for (remove after fixing)
+      console.log(
+        "Login attempt — email:",
+        enteredEmail,
+        "| users stored:",
+        allUsers.length,
+      );
 
-      // Find user — try every reasonable comparison to handle all storage edge cases
-      const user = users.find((u) => {
-        const storedEmail = (u.email || "").toLowerCase().trim();
-        if (storedEmail !== userId) return false;
+      // Find matching user — normalize both email and password
+      var user = null;
+      for (var i = 0; i < allUsers.length; i++) {
+        var u = allUsers[i];
+        var storedEmail = (u.email || "").toLowerCase().trim();
+        var storedPassword = u.password || "";
 
-        const sp = u.password || ""; // stored password
-        const ep = rawPassword; // entered password (raw, untrimmed)
+        console.log("Checking:", storedEmail, "vs", enteredEmail);
 
-        return (
-          sp === ep || // exact
-          sp.trim() === ep.trim() || // both trimmed
-          sp === ep.trim() || // stored exact vs entered trimmed
-          sp.trim() === ep // stored trimmed vs entered exact
-        );
-      });
+        if (storedEmail !== enteredEmail) continue;
+
+        // Password comparison — try 4 combinations to handle whitespace differences
+        var passwordMatch =
+          storedPassword === enteredPassword ||
+          storedPassword.trim() === enteredPassword.trim() ||
+          storedPassword === enteredPassword.trim() ||
+          storedPassword.trim() === enteredPassword;
+
+        if (passwordMatch) {
+          user = u;
+          break;
+        }
+      }
 
       if (!user) {
         const att = recordFailedAttempt();
