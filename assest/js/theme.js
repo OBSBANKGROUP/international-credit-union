@@ -11,16 +11,18 @@
    */
   function applyTheme() {
     const savedTheme = localStorage.getItem(THEME_KEY) || "light";
-    if (savedTheme === "dark") {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
+    if (document.body) {
+      if (savedTheme === "dark") {
+        document.body.classList.add("dark-mode");
+      } else {
+        document.body.classList.remove("dark-mode");
+      }
     }
 
     // Sync any existing toggles on the page
     const darkToggles = document.querySelectorAll("#darkToggle");
-    darkToggles.forEach(toggle => {
-      toggle.checked = (savedTheme === "dark");
+    darkToggles.forEach((toggle) => {
+      toggle.checked = savedTheme === "dark";
     });
   }
 
@@ -34,7 +36,7 @@
 
     // Set initial state
     const savedTheme = localStorage.getItem(THEME_KEY) || "light";
-    toggle.checked = (savedTheme === "dark");
+    toggle.checked = savedTheme === "dark";
 
     // Listen for changes
     toggle.addEventListener("change", () => {
@@ -63,5 +65,3 @@
   // Also run on DOMContentLoaded to ensure body class is set correctly
   document.addEventListener("DOMContentLoaded", applyTheme);
 })();
-
-

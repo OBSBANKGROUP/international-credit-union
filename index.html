@@ -3,13 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta
+      name="description"
+      content="International Credit Union — Secure online banking, wire transfers, loans, investments and more."
+    />
+    <link rel="icon" type="image/jpeg" href="assets/images/logo.jpeg" />
     <title>International Credit Union — Secure Banking</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="assest/css/index.css" />
@@ -17,23 +18,28 @@
     <script src="assest/js/theme.js"></script>
   </head>
   <body>
-    <!-- ═══ TOP BAR ═══ -->
+    <!-- TOP BAR -->
     <div class="top-bar">
-      FDIC-Insured — Backed by the full faith and credit of the U.S. Government
+      FDIC-Insured &mdash; Backed by the full faith and credit of the U.S.
+      Government
       <a href="help-center.html">Learn More</a>
     </div>
 
-    <!-- ═══ CATEGORY NAV ═══ -->
+    <!-- CATEGORY NAV -->
     <div class="cat-nav">
       <div class="cat-nav-inner">
         <div class="cat-links">
-          <span class="active">Personal</span>
-          <a href="Wealth_management.html">Wealth Management</a>
-          <a href="business.html">Business</a>
-          <a href="Corporate.html">Corporations &amp; Institutions</a>
+          <span class="cat-link active">Personal</span>
+          <a class="cat-link" href="Wealth_management.html"
+            >Wealth Management</a
+          >
+          <a class="cat-link" href="business.html">Business</a>
+          <a class="cat-link" href="Corporate.html"
+            >Corporations &amp; Institutions</a
+          >
         </div>
         <div class="top-links">
-          <a href="Security.html">&#128274; Security</a>
+          <a href="Security.html">Security</a>
           <div id="google_translate_element"></div>
           <a href="Contact.html">Contact Us</a>
           <a href="help-center.html">Help</a>
@@ -41,160 +47,182 @@
       </div>
     </div>
 
-    <!-- ═══ MAIN HEADER ═══ -->
+    <!-- MAIN HEADER -->
     <header class="main-header">
-      <div class="main-header-inner">
-        <img src="assest/images/logo.jpeg" alt="ICU Logo" class="logo-img" />
-        <!-- <div class="site-name">
-          International Credit Union
-          <small>Secure &bull; Trusted &bull; Global</small>
-        </div> -->
-        <div class="header-spacer"></div>
+      <div class="header-inner">
+        <a href="index.html" class="brand">
+          <img
+            src="assest/images/logo.jpeg"
+            alt="ICU Logo"
+            class="brand-logo"
+          />
+          <div class="brand-text">
+            <span class="brand-name">International Credit Union</span>
+            <span class="brand-sub">Secure &bull; Trusted &bull; Global</span>
+          </div>
+        </a>
         <nav class="header-nav">
           <a href="insurance.html">Insurance</a>
           <a href="Loan.html">Loans</a>
           <a href="invest.html">Invest</a>
-          <a href="open-account.html" class="btn-outline">Open Account</a>
-          <a href="#hero-login" class="btn-solid">Sign In</a>
+          <a href="open-account.html" class="nav-outline">Open Account</a>
+          <a href="#hero" class="nav-solid">Sign In</a>
         </nav>
         <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </button>
       </div>
     </header>
 
-    <!-- ═══ MOBILE MENU ═══ -->
-    <div class="mobile-menu" id="mobileMenu">
-      <div class="mobile-menu-panel" id="mobilePanel">
-        <div class="mobile-close">
-          <button id="closeMenuBtn" aria-label="Close menu">&#10005;</button>
+    <!-- MOBILE DRAWER -->
+    <div class="drawer-overlay" id="drawerOverlay">
+      <div class="drawer" id="drawer">
+        <div class="drawer-header">
+          <span class="brand-name">ICU</span>
+          <button id="drawerCloseBtn" aria-label="Close">&#10005;</button>
         </div>
-        <div class="mobile-nav-links">
+        <div class="drawer-links">
           <a href="index.html">&#127968; Personal Banking</a>
           <a href="business.html">&#128188; Business Banking</a>
           <a href="Wealth_management.html">&#128200; Wealth Management</a>
           <a href="Corporate.html">&#127963; Corporations</a>
-          <div class="m-divider"></div>
+          <div class="drawer-divider"></div>
           <a href="insurance.html">&#128737; Insurance</a>
           <a href="Loan.html">&#128181; Loans</a>
           <a href="invest.html">&#128176; Investments</a>
           <a href="creditcard.html">&#128179; Credit Cards</a>
-          <div class="m-divider"></div>
+          <div class="drawer-divider"></div>
           <a href="Security.html">&#128274; Security</a>
           <a href="help-center.html">&#10067; Help Center</a>
           <a href="Contact.html">&#128222; Contact Us</a>
-          <div class="m-divider"></div>
-          <a
-            href="open-account.html"
-            style="
-              border: 1.5px solid #e0e4ee;
-              text-align: center;
-              border-radius: 22px;
-              padding: 12px 18px;
-            "
+          <div class="drawer-divider"></div>
+          <a href="open-account.html" class="drawer-btn-outline"
             >Open Account</a
           >
-          <a href="#hero-login" class="m-btn">Sign In</a>
+          <a href="#hero" class="drawer-btn-solid" id="drawerSignIn">Sign In</a>
         </div>
       </div>
     </div>
 
-    <!-- ═══ HERO ═══ -->
-    <section class="hero" id="hero-login">
-      <div class="container hero-content">
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <div class="hero-inner">
         <!-- LOGIN PANEL -->
         <div class="login-panel notranslate" translate="no">
           <h3>Sign In</h3>
+          <p class="login-sub">
+            Welcome back &mdash; access your accounts securely
+          </p>
 
-          <label>Email Address</label>
+          <label for="loginUserId">Email Address</label>
           <input
             type="email"
             id="loginUserId"
-            class="notranslate"
+            class="login-input notranslate"
             translate="no"
-            autocomplete="username"
+            placeholder="your@email.com"
+            autocomplete="email"
           />
 
-          <label>Password</label>
+          <label for="loginPassword">Password</label>
           <input
             type="password"
             id="loginPassword"
-            class="notranslate"
+            class="login-input notranslate"
             translate="no"
+            placeholder="Enter your password"
             autocomplete="current-password"
           />
 
-          <div class="save-id">
-            <input type="checkbox" id="saveLogin" /> Save login info
+          <div class="login-check-row">
+            <label class="check-label">
+              <input type="checkbox" id="saveLogin" /> Keep me signed in
+            </label>
+            <a href="settings.html" class="forgot-link">Forgot password?</a>
           </div>
 
+          <p id="loginError" class="login-error"></p>
           <button class="login-btn" id="loginBtn">Log In</button>
-          <p
-            id="loginError"
-            style="
-              color: #e53935;
-              font-size: 0.82rem;
-              margin-top: 10px;
-              display: none;
-            "
-          ></p>
-
-          <div class="login-links">
-            <a href="#">Forgot ID / Password</a>
-            <a href="open-account.html">Enroll</a>
-          </div>
-
+          <div class="login-divider"><span>or</span></div>
           <button
-            class="open-btn"
+            class="enroll-btn"
             onclick="window.location.href = 'open-account.html'"
           >
             Open an Account
           </button>
+          <p class="enroll-note">
+            New member? <a href="open-account.html">Enroll now &rarr;</a>
+          </p>
         </div>
 
-        <!-- MAIN HERO AREA -->
-        <div class="hero-main">
-          <h1>Choose the card that works for you</h1>
-
-          <div class="offers">
-            <div class="offer-card">
-              <h2>$200</h2>
-              <p>Online Bonus</p>
-              <img src="assest/images/redcard.jpeg" alt="Cash Rewards" />
-              <span>Cash Rewards</span>
+        <!-- CARD OFFERS -->
+        <div class="hero-right">
+          <h1>
+            Choose the card that<br /><span class="gold">works for you</span>
+          </h1>
+          <p class="hero-sub">
+            Earn rewards, cash back and exclusive benefits with every purchase.
+          </p>
+          <div class="cards-grid">
+            <div
+              class="card-tile"
+              onclick="window.location.href = 'creditcard.html'"
+            >
+              <div class="card-tile-top">
+                <span class="tile-amt">$200</span>
+                <span class="tile-label">Online Bonus</span>
+              </div>
+              <img src="assest/images/redcard.jpeg" alt="Cash Rewards Card" />
+              <span class="tile-name">Cash Rewards</span>
             </div>
-            <div class="offer-card">
-              <h2>$200</h2>
-              <p>No Annual Fee</p>
+            <div
+              class="card-tile"
+              onclick="window.location.href = 'creditcard.html'"
+            >
+              <div class="card-tile-top">
+                <span class="tile-amt">$200</span>
+                <span class="tile-label">No Annual Fee</span>
+              </div>
               <img
                 src="assest/images/silvercard.jpeg"
                 alt="Unlimited Rewards"
               />
-              <span>Unlimited Rewards</span>
+              <span class="tile-name">Unlimited Rewards</span>
             </div>
-            <div class="offer-card">
-              <h2>25,000</h2>
-              <p>Bonus Points</p>
+            <div
+              class="card-tile"
+              onclick="window.location.href = 'creditcard.html'"
+            >
+              <div class="card-tile-top">
+                <span class="tile-amt">25K</span>
+                <span class="tile-label">Bonus Points</span>
+              </div>
               <img src="assest/images/goldcard.jpeg" alt="Travel Rewards" />
-              <span>Travel Rewards</span>
+              <span class="tile-name">Travel Rewards</span>
             </div>
-            <div class="offer-card">
-              <h2>0%</h2>
-              <p>Intro APR</p>
-              <img src="assest/images/platumcard.jpeg" alt="Balance Transfer" />
-              <span>Balance Transfer</span>
+            <div
+              class="card-tile"
+              onclick="window.location.href = 'creditcard.html'"
+            >
+              <div class="card-tile-top">
+                <span class="tile-amt">0%</span>
+                <span class="tile-label">Intro APR</span>
+              </div>
+              <img
+                src="assest/images/platinumcard.jpeg"
+                alt="Balance Transfer"
+              />
+              <span class="tile-name">Balance Transfer</span>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ═══ FEATURES ═══ -->
-    <section class="features">
-      <div style="max-width: 1200px; margin: auto">
-        <div class="section-center">
+    <!-- FEATURES -->
+    <section class="features-section">
+      <div class="container">
+        <div class="section-head">
           <span class="section-tag">Why Choose Us</span>
           <h2>Be part of something big</h2>
           <p>
@@ -204,7 +232,7 @@
         </div>
         <div class="features-grid">
           <div class="feature-card">
-            <div class="f-icon" style="background: #f0f2ff; color: #4b38f5">
+            <div class="f-icon" style="background: #f0f2ff">
               &#9996;&#65039;
             </div>
             <h3>Financial Assistance</h3>
@@ -212,123 +240,121 @@
               Support packages designed to help members through challenging
               financial times.
             </p>
-            <a href="Loan.html" class="f-link">Learn more &#8594;</a>
+            <a href="Loan.html" class="f-link">Learn more &rarr;</a>
           </div>
           <div class="feature-card">
-            <div class="f-icon" style="background: #e8f5e9; color: #2e7d32">
-              &#127968;
-            </div>
+            <div class="f-icon" style="background: #e8f5e9">&#127968;</div>
             <h3>Mortgages &amp; Loans</h3>
             <p>
               Flexible home loan and personal loan options tailored to your
               financial needs.
             </p>
-            <a href="Loan.html" class="f-link">Explore loans &#8594;</a>
+            <a href="Loan.html" class="f-link">Explore loans &rarr;</a>
           </div>
           <div class="feature-card">
-            <div class="f-icon" style="background: #fff3e0; color: #e65100">
-              &#128176;
-            </div>
+            <div class="f-icon" style="background: #fff3e0">&#128176;</div>
             <h3>High-Yield Savings</h3>
             <p>
               Make your money work harder with competitive interest rates on
               savings accounts.
             </p>
-            <a href="open-account.html" class="f-link">Open savings &#8594;</a>
+            <a href="open-account.html" class="f-link">Open savings &rarr;</a>
           </div>
           <div class="feature-card">
-            <div class="f-icon" style="background: #fce4ec; color: #c62828">
-              &#11088;
-            </div>
+            <div class="f-icon" style="background: #fce4ec">&#11088;</div>
             <h3>Business Loans</h3>
             <p>
               Low interest business financing to help your company grow and
               thrive.
             </p>
-            <a href="business.html" class="f-link">Business banking &#8594;</a>
+            <a href="business.html" class="f-link">Business banking &rarr;</a>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ═══ INFO ROWS ═══ -->
+    <!-- INFO — CREDIT SCORE -->
     <section class="info-section">
-      <div class="info-inner">
+      <div class="container">
         <div class="info-row">
           <div class="info-text">
-            <span class="badge">Credit Score</span>
-            <h3>Level up your Credit Score</h3>
+            <span class="section-tag">Credit Score</span>
+            <h2>Level up your Credit Score</h2>
             <p>
-              Build your credit the way it was meant — strategically,
-              confidently, and with the right banking partner behind you.
-              Monitor your score in real time from your dashboard.
+              Build your credit strategically and confidently with the right
+              banking partner behind you. Monitor your score in real time from
+              your dashboard.
             </p>
             <button
+              class="info-btn primary"
               onclick="
                 document.getElementById('creditModal').classList.add('open')
               "
-              class="info-btn primary"
-              style="border: none; cursor: pointer"
             >
-              Check Your Credit Score &#8594;
+              Check Your Credit Score &rarr;
             </button>
           </div>
-          <div class="info-img-wrap">
+          <div class="info-img">
             <img src="assest/images/creditscore.jpeg" alt="Credit Score" />
-          </div>
-        </div>
-        <div class="info-row reverse">
-          <div class="info-text">
-            <span class="badge">Mobile Banking</span>
-            <h3>Convenient banking anywhere</h3>
-            <p>
-              Manage accounts, send money, pay bills, and monitor all activity
-              anytime from our secure online platform — desktop or mobile.
-            </p>
-            <a href="open-account.html" class="info-btn dark"
-              >Get Started Today &#8594;</a
-            >
-          </div>
-          <div class="info-img-wrap">
-            <img
-              src="assest/images/bankapp.jpeg"
-              alt="Mobile Banking"
-              onclick="
-                document.getElementById('appModal').classList.add('open')
-              "
-              style="cursor: pointer"
-            />
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ═══ STATS STRIP ═══ -->
+    <!-- INFO — MOBILE BANKING -->
+    <section class="info-section grey">
+      <div class="container">
+        <div class="info-row reverse">
+          <div class="info-text">
+            <span class="section-tag">Mobile Banking</span>
+            <h2>Convenient banking anywhere</h2>
+            <p>
+              Manage accounts, send money, pay bills, and monitor all activity
+              anytime from our secure online platform &mdash; desktop or mobile.
+            </p>
+            <a href="open-account.html" class="info-btn dark"
+              >Get Started Today &rarr;</a
+            >
+          </div>
+          <div
+            class="info-img app-img"
+            onclick="document.getElementById('appModal').classList.add('open')"
+          >
+            <img src="assest/images/bankapp.jpeg" alt="Mobile Banking App" />
+            <div class="img-hover-tag">Download App</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
     <div class="stats-strip">
-      <div class="stats-inner">
-        <div class="stat-item">
-          <h3>$2.4B+</h3>
-          <p>Assets Under Management</p>
-        </div>
-        <div class="stat-item">
-          <h3>150K+</h3>
-          <p>Active Members</p>
-        </div>
-        <div class="stat-item">
-          <h3>99.9%</h3>
-          <p>Uptime Reliability</p>
-        </div>
-        <div class="stat-item">
-          <h3>24/7</h3>
-          <p>Customer Support</p>
+      <div class="container">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-num">$2.4B+</div>
+            <div class="stat-lbl">Assets Under Management</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">150K+</div>
+            <div class="stat-lbl">Active Members</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">99.9%</div>
+            <div class="stat-lbl">Uptime Reliability</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">24/7</div>
+            <div class="stat-lbl">Customer Support</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ═══ SERVICES ═══ -->
-    <section class="services">
-      <div class="services-inner">
-        <div class="section-center">
+    <!-- SERVICES -->
+    <section class="services-section">
+      <div class="container">
+        <div class="section-head">
           <span class="section-tag">Our Protection</span>
           <h2>Services &amp; Coverage We Offer</h2>
           <p>
@@ -341,7 +367,7 @@
             <div class="svc-icon" style="background: #f0f2ff">&#128062;</div>
             <h3>Pet Insurance</h3>
             <p>Affordable coverage for your beloved pets' veterinary needs.</p>
-            <a href="insurance.html#pet" class="svc-link">Learn more &#8594;</a>
+            <a href="insurance.html" class="svc-link">Learn more &rarr;</a>
           </div>
           <div class="service-card">
             <div class="svc-icon" style="background: #e8f5e9">&#127968;</div>
@@ -349,17 +375,13 @@
             <p>
               Flexible coverage for homes, condos, and investment properties.
             </p>
-            <a href="insurance.html#home" class="svc-link"
-              >Learn more &#8594;</a
-            >
+            <a href="insurance.html" class="svc-link">Learn more &rarr;</a>
           </div>
           <div class="service-card">
             <div class="svc-icon" style="background: #fff3e0">&#127962;</div>
             <h3>Business Insurance</h3>
             <p>Comprehensive protection tailored for growing businesses.</p>
-            <a href="insurance.html#business" class="svc-link"
-              >Learn more &#8594;</a
-            >
+            <a href="insurance.html" class="svc-link">Learn more &rarr;</a>
           </div>
           <div class="service-card">
             <div class="svc-icon" style="background: #fce4ec">&#127891;</div>
@@ -367,9 +389,7 @@
             <p>
               Affordable coverage designed for students and young professionals.
             </p>
-            <a href="insurance.html#student" class="svc-link"
-              >Learn more &#8594;</a
-            >
+            <a href="insurance.html" class="svc-link">Learn more &rarr;</a>
           </div>
           <div class="service-card">
             <div class="svc-icon" style="background: #f3e5f5">
@@ -377,213 +397,140 @@
             </div>
             <h3>Health Insurance</h3>
             <p>Comprehensive healthcare protection for you and your family.</p>
-            <a href="insurance.html#health" class="svc-link"
-              >Learn more &#8594;</a
-            >
+            <a href="insurance.html" class="svc-link">Learn more &rarr;</a>
           </div>
           <div class="service-card">
             <div class="svc-icon" style="background: #e0f7fa">&#128737;</div>
             <h3>Life Insurance</h3>
             <p>Secure your loved ones' future with our life coverage plans.</p>
-            <a href="insurance.html#life" class="svc-link"
-              >Learn more &#8594;</a
-            >
+            <a href="insurance.html" class="svc-link">Learn more &rarr;</a>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ═══ FOOTER ═══ -->
+    <!-- FOOTER -->
     <footer class="main-footer">
-      <div class="footer-inner">
-        <div class="footer-brand">
-          <h3>International Credit Union</h3>
-          <p>
-            Secure, reliable, and innovative financial services for individuals
-            and businesses worldwide. FDIC insured and committed to your
-            financial wellbeing.
-          </p>
-          <div class="footer-social">
-            <a href="#">&#127760;</a>
-            <a href="#">&#128248;</a>
-            <a href="#">&#127381;</a>
-            <a href="#">&#128247;</a>
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <h3>International Credit Union</h3>
+            <p>
+              Secure, reliable, and innovative financial services for
+              individuals and businesses worldwide. FDIC insured and committed
+              to your financial wellbeing.
+            </p>
+            <div class="footer-social">
+              <a href="#" aria-label="Web">&#127760;</a>
+              <a href="#" aria-label="Instagram">&#128247;</a>
+              <a href="#" aria-label="YouTube">&#127381;</a>
+              <a href="#" aria-label="Twitter">&#128248;</a>
+            </div>
           </div>
-        </div>
-        <div class="footer-col">
-          <h4>Quick Links</h4>
-          <ul>
-            <li><a href="index.html">Personal Banking</a></li>
-            <li><a href="business.html">Business Banking</a></li>
-            <li><a href="Loan.html">Loans</a></li>
-            <li><a href="invest.html">Investments</a></li>
-            <li><a href="open-account.html">Open Account</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Our Services</h4>
-          <ul>
-            <li><a href="open-account.html">Checking Accounts</a></li>
-            <li><a href="open-account.html">Savings Accounts</a></li>
-            <li><a href="creditcard.html">Credit Cards</a></li>
-            <li><a href="insurance.html">Insurance</a></li>
-            <li><a href="wire-transfer.html">Wire Transfers</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Support</h4>
-          <ul>
-            <li><a href="help-center.html">Help Center</a></li>
-            <li><a href="Security.html">Security</a></li>
-            <li><a href="Security.html#Privacy_Policy">Privacy Policy</a></li>
-            <li>
-              <a href="Security.html#Terms_Conditions"
-                >Terms &amp; Conditions</a
-              >
-            </li>
-            <li><a href="Contact.html">Report Fraud</a></li>
-          </ul>
-          <div class="footer-newsletter" style="margin-top: 20px">
-            <h4 style="margin-bottom: 10px">Stay Connected</h4>
-            <input type="email" placeholder="Your email address" />
-            <button type="button">Subscribe</button>
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="index.html">Personal Banking</a></li>
+              <li><a href="business.html">Business Banking</a></li>
+              <li><a href="Loan.html">Loans</a></li>
+              <li><a href="invest.html">Investments</a></li>
+              <li><a href="open-account.html">Open Account</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Our Services</h4>
+            <ul>
+              <li><a href="open-account.html">Checking Accounts</a></li>
+              <li><a href="open-account.html">Savings Accounts</a></li>
+              <li><a href="creditcard.html">Credit Cards</a></li>
+              <li><a href="insurance.html">Insurance</a></li>
+              <li><a href="wire-transfer.html">Wire Transfers</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Support</h4>
+            <ul>
+              <li><a href="help-center.html">Help Center</a></li>
+              <li><a href="Security.html">Security</a></li>
+              <li><a href="Security.html">Privacy Policy</a></li>
+              <li><a href="Security.html">Terms &amp; Conditions</a></li>
+              <li><a href="Contact.html">Report Fraud</a></li>
+            </ul>
             <div class="footer-contact">
-              <strong>Email:</strong> info@internationalcunion.com<br />
-              <strong>Phone:</strong> +1 (800) 555-2478
+              <p><strong>Email:</strong> support@internationalcu.com</p>
+              <p><strong>Phone:</strong> +1 (800) 555-2478</p>
             </div>
           </div>
         </div>
-      </div>
-      <div class="footer-bottom">
-        <span
-          >&#169; 2026 International Credit Union. All rights reserved.</span
-        >
-        <div class="fdic-badge">
-          &#127981; FDIC Insured &bull; Equal Housing Lender
+        <div class="footer-bottom">
+          <span
+            >&copy; 2026 International Credit Union. All rights reserved.</span
+          >
+          <span class="fdic-badge"
+            >&#127981; FDIC Insured &bull; Equal Housing Lender</span
+          >
         </div>
       </div>
     </footer>
 
-    <!-- ═══ CREDIT SCORE MODAL ═══ -->
-    <div class="app-modal" id="creditModal">
-      <div class="app-modal-box">
-        <div style="font-size: 2.5rem; margin-bottom: 14px">🔒</div>
+    <!-- CREDIT SCORE MODAL -->
+    <div class="modal-overlay" id="creditModal">
+      <div class="modal-box">
+        <div class="modal-icon">&#128274;</div>
         <h2>Sign In Required</h2>
         <p>
           You need to <strong>log in</strong> or
           <strong>create an account</strong> to check your credit score and
           access your personalized financial dashboard.
         </p>
-        <div
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 8px;
+        <button
+          class="modal-btn primary"
+          onclick="
+            document.getElementById('creditModal').classList.remove('open');
+            document
+              .getElementById('hero')
+              .scrollIntoView({ behavior: 'smooth' });
           "
         >
-          <button
-            onclick="
-              document.getElementById('creditModal').classList.remove('open');
-              document
-                .getElementById('hero-login')
-                .scrollIntoView({ behavior: 'smooth' });
-            "
-            style="
-              padding: 13px 24px;
-              background: linear-gradient(135deg, #4b38f5, #6a5cff);
-              color: white;
-              border: none;
-              border-radius: 22px;
-              font-weight: 700;
-              cursor: pointer;
-              font-family: Inter, sans-serif;
-              font-size: 0.92rem;
-            "
-          >
-            Sign In / Sign Up
-          </button>
-          <button
-            onclick="
-              document.getElementById('creditModal').classList.remove('open')
-            "
-            style="
-              padding: 11px 24px;
-              background: #f5f5f5;
-              color: #555;
-              border: none;
-              border-radius: 22px;
-              font-weight: 600;
-              cursor: pointer;
-              font-family: Inter, sans-serif;
-              font-size: 0.85rem;
-            "
-          >
-            &#8592; Go Back
-          </button>
-        </div>
+          Sign In / Sign Up
+        </button>
+        <button
+          class="modal-btn ghost"
+          onclick="
+            document.getElementById('creditModal').classList.remove('open')
+          "
+        >
+          &larr; Go Back
+        </button>
       </div>
     </div>
 
-    <!-- ═══ APP MODAL ═══ -->
-    <div class="app-modal" id="appModal">
-      <div class="app-modal-box">
-        <div style="font-size: 2.5rem; margin-bottom: 14px">📱</div>
+    <!-- APP MODAL -->
+    <div class="modal-overlay" id="appModal">
+      <div class="modal-box">
+        <div class="modal-icon">&#128242;</div>
         <h2>App Not Available in Your Region</h2>
         <p>
           Our mobile app is currently not available in your region. Please
-          continue using our secure website for full banking access — it works
-          great on mobile too!
+          continue using our secure website &mdash; it works great on mobile
+          too!
         </p>
-        <div
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 8px;
-          "
+        <button
+          class="modal-btn primary"
+          onclick="document.getElementById('appModal').classList.remove('open')"
         >
-          <button
-            onclick="
-              document.getElementById('appModal').classList.remove('open')
-            "
-            style="
-              padding: 13px 24px;
-              background: linear-gradient(135deg, #4b38f5, #6a5cff);
-              color: white;
-              border: none;
-              border-radius: 22px;
-              font-weight: 700;
-              cursor: pointer;
-              font-family: Inter, sans-serif;
-              font-size: 0.92rem;
-            "
-          >
-            Continue Using Website
-          </button>
-          <button
-            onclick="
-              document.getElementById('appModal').classList.remove('open')
-            "
-            style="
-              padding: 11px 24px;
-              background: #f5f5f5;
-              color: #555;
-              border: none;
-              border-radius: 22px;
-              font-weight: 600;
-              cursor: pointer;
-              font-family: Inter, sans-serif;
-              font-size: 0.85rem;
-            "
-          >
-            Go Back
-          </button>
-        </div>
+          Continue Using Website
+        </button>
+        <button
+          class="modal-btn ghost"
+          onclick="document.getElementById('appModal').classList.remove('open')"
+        >
+          &larr; Go Back
+        </button>
       </div>
     </div>
 
-    <!-- ═══ SCRIPTS ═══ -->
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="assest/js/emailjs-config.js"></script>
     <script src="assest/js/main.js"></script>
