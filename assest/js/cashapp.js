@@ -58,29 +58,36 @@ document.addEventListener("DOMContentLoaded", function () {
   /* ── Build account dropdown (includes business accounts) ── */
   var fromSelect = document.getElementById("fromAccount");
   if (fromSelect) {
-    var accts = user.accounts || {};
-    accts[user.accountType || "checking"] = true;
+    var rawAccts = user.accounts
+      ? JSON.parse(JSON.stringify(user.accounts))
+      : {};
+    // Always include primary account type
+    rawAccts[user.accountType || "checking"] = true;
     var last4 = user.accountNumber
       ? String(user.accountNumber).slice(-4)
       : "****";
     var html = "";
-    if (accts.checking)
+    if (rawAccts.checking)
       html +=
         '<option value="checking">Checking \u2022\u2022\u2022\u2022' +
         last4 +
         "</option>";
-    if (accts.savings)
+    if (rawAccts.savings)
       html +=
         '<option value="savings">Savings \u2022\u2022\u2022\u2022' +
         last4 +
         "</option>";
-    Object.keys(accts).forEach(function (k) {
+    // Add all business accounts — supports legacy {business:true} and new {business_0:{name:...}}
+    Object.keys(rawAccts).forEach(function (k) {
       if (k === "checking" || k === "savings") return;
-      if (!accts[k]) return;
+      var val = rawAccts[k];
+      if (!val) return;
       var label =
-        typeof accts[k] === "object" && accts[k].name
-          ? accts[k].name
-          : user.businessName || "Business";
+        typeof val === "object" && val.name
+          ? val.name
+          : k === "business"
+            ? user.businessName || "Business Account"
+            : user.businessName || "Business Account";
       html +=
         '<option value="' +
         k +
@@ -90,6 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
         last4 +
         "</option>";
     });
+    if (!html) html = '<option value="">No accounts available</option>';
     fromSelect.innerHTML = html;
   }
 

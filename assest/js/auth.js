@@ -473,7 +473,6 @@
         ? emailInput.value.trim().toLowerCase()
         : "";
       var enteredPassword = passwordInput ? passwordInput.value : "";
-
       // Basic validation
       if (!enteredEmail)
         return showLoginError("Please enter your email address.");
@@ -491,23 +490,46 @@
         allUsers.length,
       );
 
-      // Find matching user — normalize both email and password
+      // Sanitize entered values — fix common mobile keyboard issues
+      function cleanInput(str) {
+        return (str || "")
+          .replace(/\r\n|\r|\n/g, "") // remove newlines (mobile "Go" key)
+          .replace(/[\u200B-\u200D\uFEFF]/g, "") // remove zero-width spaces
+          .replace(/[\u2018\u2019]/g, "'") // smart single quotes → straight
+          .replace(/[\u201C\u201D]/g, '"'); // smart double quotes → straight
+      }
+
+      var cleanEmail = cleanInput(enteredEmail);
+      var cleanPassword = cleanInput(enteredPassword);
+
+      console.log(
+        "Login attempt — email: [" +
+          cleanEmail +
+          "] | users stored: " +
+          allUsers.length,
+      );
+
+      // Find matching user
       var user = null;
       for (var i = 0; i < allUsers.length; i++) {
         var u = allUsers[i];
-        var storedEmail = (u.email || "").toLowerCase().trim();
-        var storedPassword = u.password || "";
+        var storedEmail = cleanInput(u.email || "").toLowerCase();
+        var storedPassword = cleanInput(u.password || "");
 
-        console.log("Checking:", storedEmail, "vs", enteredEmail);
+        console.log("Checking: [" + storedEmail + "] vs [" + cleanEmail + "]");
 
-        if (storedEmail !== enteredEmail) continue;
+        if (storedEmail !== cleanEmail) continue;
 
-        // Password comparison — try 4 combinations to handle whitespace differences
+        // Password — try exact, trimmed, and cleaned combinations
         var passwordMatch =
+          storedPassword === cleanPassword ||
+          storedPassword.trim() === cleanPassword.trim() ||
+          storedPassword === cleanPassword.trim() ||
+          storedPassword.trim() === cleanPassword ||
           storedPassword === enteredPassword ||
-          storedPassword.trim() === enteredPassword.trim() ||
-          storedPassword === enteredPassword.trim() ||
-          storedPassword.trim() === enteredPassword;
+          storedPassword.trim() === enteredPassword.trim();
+
+        console.log("Password match:", passwordMatch);
 
         if (passwordMatch) {
           user = u;

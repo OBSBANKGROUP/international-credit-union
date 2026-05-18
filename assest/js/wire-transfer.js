@@ -119,29 +119,31 @@ document.addEventListener("DOMContentLoaded", () => {
   // From-account MUST be the first <select> in the form
   const fromAccSelect = form.querySelector("select");
   if (fromAccSelect) {
-    const accts = currentUser.accounts || {};
-    // Always include primary account type
-    accts[currentUser.accountType || "checking"] = true;
+    const rawAccts = currentUser.accounts
+      ? JSON.parse(JSON.stringify(currentUser.accounts))
+      : {};
+    rawAccts[currentUser.accountType || "checking"] = true;
 
     const last4 = currentUser.accountNumber
       ? String(currentUser.accountNumber).slice(-4)
       : "****";
     let options = '<option value="">Select Account</option>';
 
-    if (accts.checking)
-      options += `<option value="checking">Checking •••• ${last4}</option>`;
-    if (accts.savings)
-      options += `<option value="savings">Savings •••• ${last4}</option>`;
+    if (rawAccts.checking)
+      options += `<option value="checking">Checking ••••${last4}</option>`;
+    if (rawAccts.savings)
+      options += `<option value="savings">Savings ••••${last4}</option>`;
 
-    // Business accounts — support both legacy {business:true} and new {business_0:{name:...}}
-    Object.keys(accts).forEach((k) => {
+    // Business accounts — supports legacy {business:true} and new {business_0:{name:"..."}}
+    Object.keys(rawAccts).forEach((k) => {
       if (k === "checking" || k === "savings") return;
-      if (!accts[k]) return;
+      const val = rawAccts[k];
+      if (!val) return;
       const label =
-        typeof accts[k] === "object" && accts[k].name
-          ? accts[k].name
-          : currentUser.businessName || "Business";
-      options += `<option value="${k}">${label} •••• ${last4}</option>`;
+        typeof val === "object" && val.name
+          ? val.name
+          : currentUser.businessName || "Business Account";
+      options += `<option value="${k}">${label} ••••${last4}</option>`;
     });
 
     fromAccSelect.innerHTML = options;

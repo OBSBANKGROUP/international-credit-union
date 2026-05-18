@@ -1,8 +1,8 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const TAX_RATE = 0.02;
-  const USERS_KEY = "icu_users";
-  const SESSION_KEY = "icu_session";
-  const LOG_KEY = "icu_activity_log";
+document.addEventListener("DOMContentLoaded", function () {
+  var TAX_RATE = 0.02;
+  var SESSION_KEY = "icu_session";
+  var USERS_KEY = "icu_users";
+  var LOG_KEY = "icu_activity_log";
 
   function getSession() {
     return JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
@@ -23,242 +23,285 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const session = getSession();
-  if (!session) return (window.location.href = "index.html");
-  const users = getUsers();
-  const currentUser = users.find((u) => u.id === session.id);
-  if (!currentUser) return (window.location.href = "index.html");
+  /* ── Session guard ── */
+  var session = getSession();
+  if (!session) {
+    window.location.href = "index.html";
+    return;
+  }
+  if (window.checkSuspended && window.checkSuspended()) return;
 
-  /* balance — falls back logs with no targetAccount to user's primary account */
+  var users = getUsers();
+  var currentUser = users.find(function (u) {
+    return u.id === session.id;
+  });
+  if (!currentUser) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  /* ── Balance ── */
   function calcBalance(accountType) {
-    const primary = (currentUser.accountType || "checking").toLowerCase();
-    let bal = 0;
-    getLogs()
-      .filter((l) => l.userId === session.id && l.amount != null)
-      .forEach((l) => {
-        const acct = (l.targetAccount || primary).toLowerCase();
-        if (acct !== accountType.toLowerCase()) return;
-        if (l.txnType === "credit") bal += parseFloat(l.amount);
-        else if (l.txnType === "debit") bal -= parseFloat(l.amount);
-      });
+    var primary = (currentUser.accountType || "checking").toLowerCase();
+    var bal = 0;
+    getLogs().forEach(function (l) {
+      if (l.userId !== session.id || l.amount == null) return;
+      var acct = (l.targetAccount || primary).toLowerCase();
+      if (acct !== accountType.toLowerCase()) return;
+      if (l.txnType === "credit") bal += parseFloat(l.amount);
+      else if (l.txnType === "debit") bal -= parseFloat(l.amount);
+    });
     return bal;
   }
 
-  const form = document.getElementById("intlForm");
-  const loading = document.getElementById("loadingScreen");
-  const otpModal = document.getElementById("otpModal");
-  const otpInput = document.getElementById("otpInput");
-  const verifyBtn = document.getElementById("verifyOtpBtn");
-  const fromSelect = form ? form.querySelector("select") : null;
+  /* ── Elements ── */
+  var form = document.getElementById("intlForm");
+  var loading = document.getElementById("loadingScreen");
+  var otpModal = document.getElementById("otpModal");
+  var otpInput = document.getElementById("otpInput");
+  var verifyBtn = document.getElementById("verifyOtpBtn");
 
-  /* Build dropdown from admin-set accounts */
-  function buildDropdown() {
-    if (!fromSelect) return;
-    const accts = currentUser.accounts || {
-      [currentUser.accountType || "checking"]: true,
-    };
-    const last4 = currentUser.accountNumber
+  /* ── Build account dropdown ── */
+  var fromAccSelect =
+    document.getElementById("intlFromAccount") ||
+    (form ? form.querySelector("select") : null);
+  if (fromAccSelect) {
+    var accts = currentUser.accounts
+      ? JSON.parse(JSON.stringify(currentUser.accounts))
+      : {};
+    accts[currentUser.accountType || "checking"] = true;
+    var last4 = currentUser.accountNumber
       ? String(currentUser.accountNumber).slice(-4)
       : "****";
-    let html = '<option value="">Select Account</option>';
+    var opts = "<option value=''>Select Account</option>";
     if (accts.checking)
-      html += `<option value="checking">Checking ••••${last4}</option>`;
+      opts +=
+        "<option value='checking'>Checking \u2022\u2022\u2022\u2022" +
+        last4 +
+        "</option>";
     if (accts.savings)
-      html += `<option value="savings">Savings ••••${last4}</option>`;
-    if (accts.business)
-      html += `<option value="business">Business ••••${last4}</option>`;
-    fromSelect.innerHTML = html;
+      opts +=
+        "<option value='savings'>Savings \u2022\u2022\u2022\u2022" +
+        last4 +
+        "</option>";
+    Object.keys(accts).forEach(function (k) {
+      if (k === "checking" || k === "savings") return;
+      if (!accts[k]) return;
+      var label =
+        typeof accts[k] === "object" && accts[k].name
+          ? accts[k].name
+          : currentUser.businessName || "Business";
+      opts +=
+        "<option value='" +
+        k +
+        "'>" +
+        label +
+        " \u2022\u2022\u2022\u2022" +
+        last4 +
+        "</option>";
+    });
+    fromAccSelect.innerHTML = opts;
+
+    /* Live balance */
+    var balTag = document.createElement("p");
+    balTag.style.cssText = "font-size:.84rem;font-weight:700;margin-top:6px";
+    fromAccSelect.parentNode.appendChild(balTag);
+    function updateBal() {
+      var acc = fromAccSelect.value;
+      if (!acc) {
+        balTag.textContent = "";
+        return;
+      }
+      var b = calcBalance(acc);
+      balTag.textContent = "Available: $" + fmt(b);
+      balTag.style.color = b <= 0 ? "#e53935" : "#2e7d32";
+    }
+    fromAccSelect.addEventListener("change", updateBal);
     updateBal();
   }
-  buildDropdown();
 
-  /* Live balance */
-  const balTag = document.createElement("p");
-  balTag.style.cssText = "font-size:.83rem;font-weight:700;margin-top:7px";
-  if (fromSelect) fromSelect.parentNode.appendChild(balTag);
+  var otp = "";
+  var pending = {};
 
-  function updateBal() {
-    const acc = fromSelect ? fromSelect.value : "";
+  /* ── Submit ── */
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    var acc = fromAccSelect ? fromAccSelect.value : "";
+    var amtRaw = parseFloat(
+      document.querySelector(".amount-input")
+        ? document.querySelector(".amount-input").value
+        : 0,
+    );
+
     if (!acc) {
-      balTag.textContent = "";
+      alert("Please select an account to send from.");
       return;
     }
-    const b = calcBalance(acc);
-    balTag.textContent = "Available: $" + fmt(b);
-    balTag.style.color = b <= 0 ? "#e53935" : "#2e7d32";
-  }
-  if (fromSelect) fromSelect.addEventListener("change", updateBal);
+    if (!amtRaw || amtRaw <= 0) {
+      alert("Please enter a valid transfer amount.");
+      return;
+    }
 
-  let generatedOTP = "";
-  let pendingTxn = {};
+    var tax = parseFloat((amtRaw * TAX_RATE).toFixed(2));
+    var total = parseFloat((amtRaw + tax).toFixed(2));
+    var bal = calcBalance(acc);
 
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const amtRaw = parseFloat(
-        document.querySelector(".amount-input")?.value || 0,
+    if (total > bal) {
+      alert(
+        "\u274C Insufficient Balance\n\nTransfer:   $" +
+          fmt(amtRaw) +
+          "\nFee (2%):  $" +
+          fmt(tax) +
+          "\nTotal:      $" +
+          fmt(total) +
+          "\nAvailable:  $" +
+          fmt(bal),
       );
-      if (!amtRaw || amtRaw <= 0) {
-        alert("Please enter a valid amount.");
-        return;
-      }
+      return;
+    }
 
-      const acc = fromSelect ? fromSelect.value : "";
-      if (!acc) {
-        alert("Please select an account.");
-        return;
-      }
+    var selOpt = fromAccSelect
+      ? fromAccSelect.options[fromAccSelect.selectedIndex]
+      : null;
+    var accLabel = selOpt ? selOpt.text : acc;
+    var bankEl = form.querySelector("input[type=text]");
+    var bank = bankEl ? bankEl.value : "";
+    var benef = document.getElementById("beneficiary")
+      ? document.getElementById("beneficiary").value
+      : "";
+    var acctNo = document.getElementById("account")
+      ? document.getElementById("account").value
+      : "";
+    var swift = document.getElementById("swift")
+      ? document.getElementById("swift").value
+      : "";
+    var bankAddr = document.getElementById("bankAddress")
+      ? document.getElementById("bankAddress").value
+      : "";
 
-      const tax = parseFloat((amtRaw * TAX_RATE).toFixed(2));
-      const total = parseFloat((amtRaw + tax).toFixed(2));
-      const bal = calcBalance(acc);
+    pending = {
+      acc: acc,
+      accLabel: accLabel,
+      amtRaw: amtRaw,
+      tax: tax,
+      total: total,
+      bank: bank,
+      benef: benef,
+      acctNo: acctNo,
+      swift: swift,
+      bankAddr: bankAddr,
+      txnId: "INTL" + Date.now(),
+      date: new Date().toLocaleString(),
+    };
 
-      if (total > bal) {
-        alert(
-          "❌ Insufficient Balance\n\nTransfer:  $" +
-            fmt(amtRaw) +
-            "\nFee (2%): $" +
-            fmt(tax) +
-            "\nTotal:    $" +
-            fmt(total) +
-            "\nAvailable: $" +
-            fmt(bal),
-        );
-        return;
-      }
+    /* Step 1: PIN */
+    if (window.PinVerify) {
+      PinVerify.prompt(
+        function () {
+          startLoadingOTP();
+        },
+        function () {},
+      );
+    } else {
+      startLoadingOTP();
+    }
+  });
 
-      const last4 = currentUser.accountNumber
-        ? String(currentUser.accountNumber).slice(-4)
-        : "****";
-      pendingTxn = {
-        amtRaw,
-        tax,
-        total,
-        acc,
-        accLabel: acc.charAt(0).toUpperCase() + acc.slice(1) + " ••••" + last4,
-        bank: form.querySelector("input[type=text]")?.value || "—",
-        name: document.getElementById("beneficiary")?.value || "—",
-        toAcct: document.getElementById("account")?.value || "—",
-        swift: document.getElementById("swift")?.value || "—",
-        address: document.getElementById("bankAddress")?.value || "—",
-        note: form.querySelector("textarea")?.value.trim() || "",
-        txnId: "INTL" + Date.now(),
-        date: new Date().toLocaleString(),
-      };
-
-      loading.style.display = "flex";
-      setTimeout(() => {
-        loading.style.display = "none";
-        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-        if (window._sendOTP)
-          window._sendOTP(
-            currentUser.email || currentUser.contactEmail,
-            generatedOTP,
-            currentUser.firstName,
-          );
-        else console.log("Intl Wire OTP:", generatedOTP);
-        otpModal.style.display = "flex";
-      }, 2000);
-    });
-  }
-
-  if (verifyBtn) {
-    verifyBtn.addEventListener("click", () => {
-      if (!otpInput.value.trim()) return;
-      if (otpInput.value.trim() !== generatedOTP) {
-        otpInput.style.borderColor = "#e53935";
-        setTimeout(() => {
-          otpInput.style.borderColor = "";
-        }, 1500);
-        alert("Invalid code. Try again.");
-        return;
-      }
-      otpModal.style.display = "none";
-      otpInput.value = "";
-
-      const logs = getLogs();
-      const ts = new Date().toISOString();
-      const uName = currentUser.firstName + " " + currentUser.lastName;
-      logs.push({
-        id: Date.now(),
-        userId: session.id,
-        userName: uName,
-        action: "International Wire",
-        details:
-          "Wire to " +
-          pendingTxn.name +
-          " — " +
-          pendingTxn.bank +
-          (pendingTxn.note ? " | " + pendingTxn.note : ""),
-        reason: pendingTxn.note || "",
-        amount: pendingTxn.amtRaw,
-        txnType: "debit",
-        targetAccount: pendingTxn.acc,
-        timestamp: ts,
-        status: "completed",
-        txnId: pendingTxn.txnId,
-      });
-      logs.push({
-        id: Date.now() + 1,
-        userId: session.id,
-        userName: uName,
-        action: "Transfer Fee (2%)",
-        details: "Fee for international wire to " + pendingTxn.name,
-        reason: "2% international wire fee",
-        amount: pendingTxn.tax,
-        txnType: "debit",
-        targetAccount: pendingTxn.acc,
-        timestamp: ts,
-        status: "completed",
-        txnId: pendingTxn.txnId + "-FEE",
-      });
-      saveLogs(logs.length > 500 ? logs.slice(-500) : logs);
-
-      const newBal = calcBalance(pendingTxn.acc);
-      if (window._sendDebitAlert)
-        window._sendDebitAlert(
+  function startLoadingOTP() {
+    loading.style.display = "flex";
+    setTimeout(function () {
+      loading.style.display = "none";
+      otp = Math.floor(100000 + Math.random() * 900000).toString();
+      if (window._sendOTP) {
+        window._sendOTP(
           currentUser.email || currentUser.contactEmail,
-          pendingTxn.total,
-          "International Wire to " + pendingTxn.name,
-          newBal,
+          otp,
           currentUser.firstName,
         );
-
-      // Populate receipt
-      const set = (id, v) => {
-        const el = document.getElementById(id);
-        if (el) el.innerText = v;
-      };
-      set("rFrom", pendingTxn.accLabel);
-      set("rAmount", "$" + fmt(pendingTxn.amtRaw));
-      set("rBank", pendingTxn.bank);
-      set("rAccount", "••••" + pendingTxn.toAcct.slice(-4));
-      set("rName", pendingTxn.name);
-      set("rSwift", pendingTxn.swift);
-      set("rAddress", pendingTxn.address);
-
-      const rm = document.getElementById("receiptModal");
-      if (rm) {
-        rm.querySelectorAll(".injected-row").forEach((r) => r.remove());
-        const last = rm.querySelector(
-          ".receipt-details .detail-row:last-child",
+      } else {
+        console.log(
+          "%c\uD83D\uDD11 Intl Wire OTP: " + otp,
+          "background:#4b38f5;color:#fff;padding:4px 12px;border-radius:4px;font-weight:700",
         );
-        const html =
-          `<div class="detail-row injected-row"><span>Transfer Fee (2%)</span><span style="color:#e53935;font-weight:700">-$${fmt(pendingTxn.tax)}</span></div>` +
-          `<div class="detail-row injected-row" style="border-top:2px solid #e8eaf0;padding-top:12px;margin-top:4px"><span style="font-weight:700">Total Debited</span><span style="color:#c62828;font-weight:700">-$${fmt(pendingTxn.total)}</span></div>` +
-          `<div class="detail-row injected-row"><span>New Balance</span><span style="color:#2e7d32;font-weight:700">$${fmt(newBal)}</span></div>`;
-        if (last) last.insertAdjacentHTML("afterend", html);
-        rm.style.display = "flex";
       }
-
-      form.reset();
-      updateBal();
-    });
+      otpModal.style.display = "flex";
+    }, 2000);
   }
 
-  document.getElementById("doneBtn")?.addEventListener("click", () => {
-    const rm = document.getElementById("receiptModal");
-    if (rm) rm.style.display = "none";
-    pendingTxn = {};
+  /* ── Verify OTP ── */
+  verifyBtn.addEventListener("click", function () {
+    if (otpInput.value.trim() !== otp) {
+      otpInput.style.borderColor = "#e53935";
+      setTimeout(function () {
+        otpInput.style.borderColor = "";
+      }, 1500);
+      alert("Invalid OTP. Try again.");
+      return;
+    }
+    otpModal.style.display = "none";
+    otpInput.value = "";
+
+    /* Log debit + fee */
+    var logs = getLogs();
+    var ts = new Date().toISOString();
+    var uName = currentUser.firstName + " " + currentUser.lastName;
+    logs.push({
+      id: Date.now(),
+      userId: session.id,
+      userName: uName,
+      action: "International Wire",
+      details: "Wire to " + pending.benef + " \u2014 " + pending.bank,
+      amount: pending.amtRaw,
+      txnType: "debit",
+      targetAccount: pending.acc,
+      timestamp: ts,
+      status: "completed",
+      txnId: pending.txnId,
+    });
+    logs.push({
+      id: Date.now() + 1,
+      userId: session.id,
+      userName: uName,
+      action: "Transfer Fee (2%)",
+      details: "Fee for international wire to " + pending.benef,
+      amount: pending.tax,
+      txnType: "debit",
+      targetAccount: pending.acc,
+      timestamp: ts,
+      status: "completed",
+      txnId: pending.txnId + "-FEE",
+    });
+    saveLogs(logs.length > 500 ? logs.slice(-500) : logs);
+
+    if (fromAccSelect) fromAccSelect.dispatchEvent(new Event("change"));
+
+    showReceipt();
+    form.reset();
   });
+
+  /* ── Receipt ── */
+  function showReceipt() {
+    function s(id, v) {
+      var el = document.getElementById(id);
+      if (el) el.innerText = v;
+    }
+    s("rFrom", pending.accLabel);
+    s("rAmount", "$" + fmt(pending.amtRaw));
+    s("rBank", pending.bank);
+    s(
+      "rAccount",
+      "\u2022\u2022\u2022\u2022" + (pending.acctNo.slice(-4) || "****"),
+    );
+    s("rName", pending.benef);
+    s("rSwift", pending.swift);
+    s("rAddress", pending.bankAddr);
+    document.getElementById("receiptModal").style.display = "flex";
+  }
+
+  document.getElementById("doneBtn") &&
+    document.getElementById("doneBtn").addEventListener("click", function () {
+      document.getElementById("receiptModal").style.display = "none";
+      pending = {};
+    });
 });

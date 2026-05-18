@@ -57,7 +57,7 @@ nav a.active {
 
 .security-hero {
   height: 80vh;
-  background-image: url("../images/hero.jpeg");
+  background-image: url("assets/images/hero.jpeg");
 
   background-size: cover;
   background-position: center;
@@ -515,4 +515,15 @@ nav a.active {
     gap: 8px;
     text-align: center;
   }
+}
+
+/* ── Security card backgrounds (moved from inline styles) ── */
+.card-fraud {
+  background-image: url("assest/images/cybersecurity.jpeg");
+}
+.card-encrypt {
+  background-image: url("assest/images/encrption.jpeg");
+}
+.card-login {
+  background-image: url("assest/images/safelogin.jpeg");
 }
