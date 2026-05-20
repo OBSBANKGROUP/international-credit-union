@@ -451,118 +451,65 @@
     loginBtn.addEventListener("click", function (e) {
       e.preventDefault();
 
-      // Lockout check
       if (isLockedOut()) {
         return showLoginError(
           "Too many failed attempts. Try again in " + lockoutTimeLeft() + ".",
         );
       }
 
-      // Clear error
       var errorEl = document.getElementById("loginError");
       if (errorEl) {
         errorEl.style.display = "none";
         errorEl.textContent = "";
       }
 
-      // Read raw values from inputs
       var emailInput = document.getElementById("loginUserId");
       var passwordInput = document.getElementById("loginPassword");
       if (!emailInput || !passwordInput) return;
 
-      var rawEmail = emailInput.value;
-      var rawPassword = passwordInput.value;
+      // Strip everything that mobile keyboards can inject
+      var enteredEmail = emailInput.value
+        .toLowerCase()
+        .replace(/\s/g, "")
+        .replace(/[^\x20-\x7E]/g, "");
+      var enteredPassword = passwordInput.value
+        .replace(/\r|\n/g, "")
+        .replace(/[^\x20-\x7E]/g, "")
+        .trim();
 
-      // Normalize email — lowercase + trim always safe
-      var enteredEmail = rawEmail.trim().toLowerCase();
       if (!enteredEmail)
         return showLoginError("Please enter your email address.");
-      if (!rawPassword) return showLoginError("Please enter your password.");
+      if (!enteredPassword)
+        return showLoginError("Please enter your password.");
 
-      // Clean password — strip invisible/problematic mobile characters
-      // but PRESERVE case and visible characters exactly
-      function sanitize(str) {
-        if (!str) return "";
-        var s = String(str);
-        // Remove newlines (mobile Go/Enter key appends these)
-        s = s.replace(/\r/g, "").replace(/\n/g, "");
-        // Remove zero-width spaces inserted by some mobile keyboards
-        s = s
-          .replace(/\u200B/g, "")
-          .replace(/\u200C/g, "")
-          .replace(/\u200D/g, "")
-          .replace(/\uFEFF/g, "");
-        // Normalize curly quotes to straight quotes
-        s = s.replace(/\u2018/g, "'").replace(/\u2019/g, "'");
-        s = s.replace(/\u201C/g, '"').replace(/\u201D/g, '"');
-        // Normalize dashes
-        s = s.replace(/\u2013/g, "-").replace(/\u2014/g, "-");
-        return s;
-      }
-
-      var enteredPassword = sanitize(rawPassword);
-
-      // Load users
       var allUsers = getUsers();
 
-      // VISIBLE DEBUG — shows on screen so you can see it on mobile
-      // Remove this block once login works
-      var dbg =
-        document.getElementById("_icuDbg") || document.createElement("div");
-      dbg.id = "_icuDbg";
-      dbg.style.cssText =
-        "position:fixed;bottom:0;left:0;right:0;background:#000;color:#0f0;font-size:11px;padding:8px;z-index:99999;max-height:40vh;overflow-y:auto;font-family:monospace;white-space:pre-wrap";
-      dbg.textContent = "USERS STORED: " + allUsers.length + "\n";
-      if (allUsers.length > 0) {
-        allUsers.forEach(function (u, i) {
-          dbg.textContent +=
-            "User " +
-            i +
-            ": email=[" +
-            (u.email || "") +
-            "] pass=[" +
-            (u.password || "") +
-            "]\n";
-        });
+      if (allUsers.length === 0) {
+        return showLoginError(
+          "No accounts found. Please ask your administrator to create your account on the live site.",
+        );
       }
-      dbg.textContent +=
-        "\nENTERED: email=[" +
-        enteredEmail +
-        "] pass=[" +
-        enteredPassword +
-        "]";
-      document.body.appendChild(dbg);
 
-      // Find user
       var user = null;
       for (var i = 0; i < allUsers.length; i++) {
         var u = allUsers[i];
+        var storedEmail = (u.email || "")
+          .toLowerCase()
+          .replace(/\s/g, "")
+          .replace(/[^\x20-\x7E]/g, "");
+        var storedPassword = (u.password || "")
+          .replace(/\r|\n/g, "")
+          .replace(/[^\x20-\x7E]/g, "")
+          .trim();
 
-        var storedEmail = sanitize(u.email || "")
-          .trim()
-          .toLowerCase();
         if (storedEmail !== enteredEmail) continue;
 
-        var sp = sanitize(u.password || "");
-        var ep = enteredPassword;
-
-        var match =
-          sp === ep ||
-          sp.trim() === ep.trim() ||
-          sp === ep.trim() ||
-          sp.trim() === ep ||
-          sp.toLowerCase() === ep.toLowerCase() ||
-          sp.trim().toLowerCase() === ep.trim().toLowerCase();
-
-        dbg.textContent +=
-          "\nMATCH CHECK: stored=[" +
-          sp +
-          "] entered=[" +
-          ep +
-          "] result=" +
-          match;
-
-        if (match) {
+        if (
+          storedPassword === enteredPassword ||
+          storedPassword === enteredPassword.trim() ||
+          storedPassword.trim() === enteredPassword ||
+          storedPassword.toLowerCase() === enteredPassword.toLowerCase()
+        ) {
           user = u;
           break;
         }
