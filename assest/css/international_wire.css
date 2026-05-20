@@ -209,6 +209,7 @@ input[readonly] {
 }
 
 .amount-input {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 

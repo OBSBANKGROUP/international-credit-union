@@ -458,80 +458,89 @@
         );
       }
 
-      // Clear any previous error
+      // Clear error
       var errorEl = document.getElementById("loginError");
       if (errorEl) {
         errorEl.style.display = "none";
         errorEl.textContent = "";
       }
 
-      // Read values directly — bypass any Google Translate DOM manipulation
+      // Read raw values from inputs
       var emailInput = document.getElementById("loginUserId");
       var passwordInput = document.getElementById("loginPassword");
+      if (!emailInput || !passwordInput) return;
 
-      var enteredEmail = emailInput
-        ? emailInput.value.trim().toLowerCase()
-        : "";
-      var enteredPassword = passwordInput ? passwordInput.value : "";
-      // Basic validation
+      var rawEmail = emailInput.value;
+      var rawPassword = passwordInput.value;
+
+      // Normalize email — lowercase + trim always safe
+      var enteredEmail = rawEmail.trim().toLowerCase();
       if (!enteredEmail)
         return showLoginError("Please enter your email address.");
-      if (!enteredPassword)
-        return showLoginError("Please enter your password.");
+      if (!rawPassword) return showLoginError("Please enter your password.");
 
-      // Load all users
-      var allUsers = getUsers();
-
-      // DEBUG: log what we're searching for (remove after fixing)
-      console.log(
-        "Login attempt — email:",
-        enteredEmail,
-        "| users stored:",
-        allUsers.length,
-      );
-
-      // Sanitize entered values — fix common mobile keyboard issues
-      function cleanInput(str) {
-        return (str || "")
-          .replace(/\r\n|\r|\n/g, "") // remove newlines (mobile "Go" key)
-          .replace(/[\u200B-\u200D\uFEFF]/g, "") // remove zero-width spaces
-          .replace(/[\u2018\u2019]/g, "'") // smart single quotes → straight
-          .replace(/[\u201C\u201D]/g, '"'); // smart double quotes → straight
+      // Clean password — strip invisible/problematic mobile characters
+      // but PRESERVE case and visible characters exactly
+      function sanitize(str) {
+        if (!str) return "";
+        var s = String(str);
+        // Remove newlines (mobile Go/Enter key appends these)
+        s = s.replace(/\r/g, "").replace(/\n/g, "");
+        // Remove zero-width spaces inserted by some mobile keyboards
+        s = s
+          .replace(/\u200B/g, "")
+          .replace(/\u200C/g, "")
+          .replace(/\u200D/g, "")
+          .replace(/\uFEFF/g, "");
+        // Normalize curly quotes to straight quotes
+        s = s.replace(/\u2018/g, "'").replace(/\u2019/g, "'");
+        s = s.replace(/\u201C/g, '"').replace(/\u201D/g, '"');
+        // Normalize dashes
+        s = s.replace(/\u2013/g, "-").replace(/\u2014/g, "-");
+        return s;
       }
 
-      var cleanEmail = cleanInput(enteredEmail);
-      var cleanPassword = cleanInput(enteredPassword);
+      var enteredPassword = sanitize(rawPassword);
 
+      // Load users
+      var allUsers = getUsers();
       console.log(
-        "Login attempt — email: [" +
-          cleanEmail +
-          "] | users stored: " +
-          allUsers.length,
+        "Login — email: [" + enteredEmail + "] | users: " + allUsers.length,
       );
 
-      // Find matching user
+      // Find user
       var user = null;
       for (var i = 0; i < allUsers.length; i++) {
         var u = allUsers[i];
-        var storedEmail = cleanInput(u.email || "").toLowerCase();
-        var storedPassword = cleanInput(u.password || "");
 
-        console.log("Checking: [" + storedEmail + "] vs [" + cleanEmail + "]");
+        // Email match — normalize stored email same way
+        var storedEmail = sanitize(u.email || "")
+          .trim()
+          .toLowerCase();
+        if (storedEmail !== enteredEmail) continue;
 
-        if (storedEmail !== cleanEmail) continue;
+        // Password match — try every reasonable combination
+        var sp = sanitize(u.password || ""); // stored password cleaned
+        var ep = enteredPassword; // entered password cleaned
 
-        // Password — try exact, trimmed, and cleaned combinations
-        var passwordMatch =
-          storedPassword === cleanPassword ||
-          storedPassword.trim() === cleanPassword.trim() ||
-          storedPassword === cleanPassword.trim() ||
-          storedPassword.trim() === cleanPassword ||
-          storedPassword === enteredPassword ||
-          storedPassword.trim() === enteredPassword.trim();
+        var match =
+          sp === ep ||
+          sp.trim() === ep.trim() ||
+          sp === ep.trim() ||
+          sp.trim() === ep ||
+          sp.toLowerCase() === ep.toLowerCase() ||
+          sp.trim().toLowerCase() === ep.trim().toLowerCase();
 
-        console.log("Password match:", passwordMatch);
+        console.log(
+          "Password check — stored:[" +
+            sp +
+            "] entered:[" +
+            ep +
+            "] match:" +
+            match,
+        );
 
-        if (passwordMatch) {
+        if (match) {
           user = u;
           break;
         }

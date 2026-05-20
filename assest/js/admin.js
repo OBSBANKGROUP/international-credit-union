@@ -1735,7 +1735,7 @@
               accountNumber: genAcctNum(nextId),
               ssn: ssn,
               address: address,
-              password: password,
+              password: (password || "").trim(), // trim whitespace on save
               transactionPin: pin,
               accounts: selectedAccounts,
               businessName: (function () {
