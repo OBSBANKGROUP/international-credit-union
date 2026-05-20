@@ -504,24 +504,47 @@
 
       // Load users
       var allUsers = getUsers();
-      console.log(
-        "Login — email: [" + enteredEmail + "] | users: " + allUsers.length,
-      );
+
+      // VISIBLE DEBUG — shows on screen so you can see it on mobile
+      // Remove this block once login works
+      var dbg =
+        document.getElementById("_icuDbg") || document.createElement("div");
+      dbg.id = "_icuDbg";
+      dbg.style.cssText =
+        "position:fixed;bottom:0;left:0;right:0;background:#000;color:#0f0;font-size:11px;padding:8px;z-index:99999;max-height:40vh;overflow-y:auto;font-family:monospace;white-space:pre-wrap";
+      dbg.textContent = "USERS STORED: " + allUsers.length + "\n";
+      if (allUsers.length > 0) {
+        allUsers.forEach(function (u, i) {
+          dbg.textContent +=
+            "User " +
+            i +
+            ": email=[" +
+            (u.email || "") +
+            "] pass=[" +
+            (u.password || "") +
+            "]\n";
+        });
+      }
+      dbg.textContent +=
+        "\nENTERED: email=[" +
+        enteredEmail +
+        "] pass=[" +
+        enteredPassword +
+        "]";
+      document.body.appendChild(dbg);
 
       // Find user
       var user = null;
       for (var i = 0; i < allUsers.length; i++) {
         var u = allUsers[i];
 
-        // Email match — normalize stored email same way
         var storedEmail = sanitize(u.email || "")
           .trim()
           .toLowerCase();
         if (storedEmail !== enteredEmail) continue;
 
-        // Password match — try every reasonable combination
-        var sp = sanitize(u.password || ""); // stored password cleaned
-        var ep = enteredPassword; // entered password cleaned
+        var sp = sanitize(u.password || "");
+        var ep = enteredPassword;
 
         var match =
           sp === ep ||
@@ -531,14 +554,13 @@
           sp.toLowerCase() === ep.toLowerCase() ||
           sp.trim().toLowerCase() === ep.trim().toLowerCase();
 
-        console.log(
-          "Password check — stored:[" +
-            sp +
-            "] entered:[" +
-            ep +
-            "] match:" +
-            match,
-        );
+        dbg.textContent +=
+          "\nMATCH CHECK: stored=[" +
+          sp +
+          "] entered=[" +
+          ep +
+          "] result=" +
+          match;
 
         if (match) {
           user = u;
