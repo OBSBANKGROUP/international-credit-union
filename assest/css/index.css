@@ -1,9 +1,6 @@
 /* ================================================================
-   ICU INDEX PAGE — STYLESHEET
-   index.css  |  goes in assets/css/
+   ICU INDEX PAGE — STYLESHEET  |  assets/css/index.css
 ================================================================ */
-
-/* ── Variables ── */
 :root {
   --navy: #021633;
   --blue: #0a2342;
@@ -14,8 +11,6 @@
   --muted: #64748b;
   --white: #ffffff;
 }
-
-/* ── Reset ── */
 *,
 *::before,
 *::after {
@@ -40,17 +35,13 @@ img {
   max-width: 100%;
   display: block;
 }
-
-/* ── Container ── */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
-/* ================================================================
-   TOP BAR
-================================================================ */
+/* ── TOP BAR ── */
 .top-bar {
   background: var(--navy);
   color: rgba(255, 255, 255, 0.7);
@@ -65,9 +56,7 @@ img {
   margin-left: 8px;
 }
 
-/* ================================================================
-   CATEGORY NAV
-================================================================ */
+/* ── CATEGORY NAV ── */
 .cat-nav {
   background: #f8fafc;
   border-bottom: 1px solid #e8eaf0;
@@ -140,9 +129,7 @@ img {
   display: none !important;
 }
 
-/* ================================================================
-   MAIN HEADER
-================================================================ */
+/* ── HEADER ── */
 .main-header {
   position: sticky;
   top: 0;
@@ -153,23 +140,29 @@ img {
 .header-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
   height: 68px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
+
+/* LOGO — fixed to always show fully */
 .brand {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  text-decoration: none;
 }
 .brand-logo {
-  height: 46px;
-  width: 46px;
+  height: 48px;
+  width: 48px;
   object-fit: cover;
+  object-position: center;
   border-radius: 10px;
+  flex-shrink: 0;
+  display: block;
 }
 .brand-text {
   display: flex;
@@ -177,16 +170,18 @@ img {
 }
 .brand-name {
   font-family: "Sora", sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--navy);
   white-space: nowrap;
+  line-height: 1.2;
 }
 .brand-sub {
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   color: var(--muted);
   letter-spacing: 0.3px;
 }
+
 .header-nav {
   margin-left: auto;
   display: flex;
@@ -225,10 +220,9 @@ img {
 .nav-solid:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(75, 56, 245, 0.4);
-  background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
 }
 
-/* Hamburger */
+/* HAMBURGER */
 .hamburger {
   display: none;
   flex-direction: column;
@@ -238,31 +232,30 @@ img {
   background: none;
   padding: 8px;
   margin-left: auto;
+  flex-shrink: 0;
 }
 .hamburger span {
   width: 24px;
-  height: 2px;
+  height: 2.5px;
   background: var(--navy);
   border-radius: 2px;
-  transition: 0.3s;
   display: block;
+  transition: 0.3s;
 }
 
-/* ================================================================
-   MOBILE DRAWER
-================================================================ */
+/* ── MOBILE DRAWER ── */
 .drawer-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55);
   z-index: 300;
 }
 .drawer-overlay.open {
   display: block;
 }
 .drawer {
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0;
   width: 280px;
@@ -270,20 +263,29 @@ img {
   background: var(--white);
   padding: 20px;
   overflow-y: auto;
-  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.2);
+  transform: translateX(100%);
+  transition: transform 0.28s ease;
+  z-index: 301;
+}
+.drawer-overlay.open .drawer {
+  transform: translateX(0);
 }
 .drawer-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f2f5;
 }
 .drawer-header button {
   background: none;
   border: none;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   cursor: pointer;
   color: var(--muted);
+  line-height: 1;
 }
 .drawer-links {
   display: flex;
@@ -309,25 +311,24 @@ img {
   margin: 8px 0;
 }
 .drawer-btn-outline {
-  border: 1.5px solid #e0e4ee !important;
-  text-align: center !important;
-  border-radius: 22px !important;
-  padding: 12px 16px !important;
+  border: 1.5px solid #e0e4ee;
+  text-align: center;
+  border-radius: 22px;
+  padding: 12px 16px;
   margin-top: 8px;
+  color: var(--navy);
 }
 .drawer-btn-solid {
-  background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: white !important;
-  text-align: center !important;
-  border-radius: 22px !important;
-  padding: 12px 16px !important;
+  text-align: center;
+  border-radius: 22px;
+  padding: 12px 16px;
   margin-top: 6px;
-  font-weight: 700 !important;
+  font-weight: 700;
 }
 
-/* ================================================================
-   HERO
-================================================================ */
+/* ── HERO ── */
 .hero {
   background: linear-gradient(135deg, var(--navy) 0%, #0d2d5e 100%);
   min-height: calc(100vh - 110px);
@@ -344,7 +345,7 @@ img {
   align-items: center;
 }
 
-/* ── Login Panel ── */
+/* LOGIN PANEL */
 .login-panel {
   background: var(--white);
   border-radius: 20px;
@@ -425,9 +426,6 @@ img {
   color: var(--accent);
   font-weight: 600;
 }
-.forgot-link:hover {
-  text-decoration: underline;
-}
 .login-error {
   display: none;
   font-size: 0.82rem;
@@ -506,7 +504,7 @@ img {
   font-weight: 600;
 }
 
-/* ── Hero Right ── */
+/* HERO RIGHT — CARD OFFERS */
 .hero-right {
   flex: 1;
   min-width: 0;
@@ -514,22 +512,22 @@ img {
 }
 .hero-right h1 {
   font-family: "Sora", sans-serif;
-  font-size: 2.4rem;
+  font-size: 2.2rem;
   font-weight: 800;
-  line-height: 1.15;
-  margin-bottom: 14px;
+  line-height: 1.2;
+  margin-bottom: 12px;
 }
 .gold {
   color: var(--gold);
 }
 .hero-sub {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: rgba(255, 255, 255, 0.65);
   line-height: 1.6;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
-/* ── Cards Grid ── */
+/* CARDS GRID */
 .cards-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -539,7 +537,7 @@ img {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
-  padding: 16px;
+  padding: 14px;
   cursor: pointer;
   transition: 0.3s;
   display: flex;
@@ -559,7 +557,7 @@ img {
 }
 .tile-amt {
   font-family: "Sora", sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 800;
   color: var(--gold);
   line-height: 1;
@@ -567,15 +565,17 @@ img {
 .tile-label {
   font-size: 0.68rem;
   color: rgba(255, 255, 255, 0.5);
-  font-weight: 500;
 }
+
+/* CARD IMAGE — full width, fixed height, no cropping sides */
 .card-tile img {
   width: 100%;
-  height: 80px;
+  height: 90px;
   object-fit: cover;
-  object-position: center;
+  object-position: center center;
   border-radius: 10px;
   display: block;
+  flex-shrink: 0;
 }
 .tile-name {
   font-size: 0.78rem;
@@ -583,9 +583,7 @@ img {
   color: rgba(255, 255, 255, 0.8);
 }
 
-/* ================================================================
-   FEATURES
-================================================================ */
+/* ── FEATURES ── */
 .features-section {
   padding: 80px 0;
   background: var(--light);
@@ -668,9 +666,7 @@ img {
   color: var(--accent);
 }
 
-/* ================================================================
-   INFO ROWS
-================================================================ */
+/* ── INFO ROWS ── */
 .info-section {
   padding: 80px 0;
   background: var(--white);
@@ -771,9 +767,7 @@ img {
   opacity: 1;
 }
 
-/* ================================================================
-   STATS
-================================================================ */
+/* ── STATS ── */
 .stats-strip {
   background: linear-gradient(135deg, var(--navy), #0d2d5e);
   padding: 60px 0;
@@ -798,9 +792,7 @@ img {
   color: rgba(255, 255, 255, 0.6);
 }
 
-/* ================================================================
-   SERVICES
-================================================================ */
+/* ── SERVICES ── */
 .services-section {
   padding: 80px 0;
   background: var(--white);
@@ -853,9 +845,7 @@ img {
   margin-top: 4px;
 }
 
-/* ================================================================
-   FOOTER
-================================================================ */
+/* ── FOOTER ── */
 .main-footer {
   background: var(--navy);
   color: rgba(255, 255, 255, 0.65);
@@ -948,9 +938,7 @@ img {
   color: rgba(255, 255, 255, 0.4);
 }
 
-/* ================================================================
-   MODALS
-================================================================ */
+/* ── MODALS ── */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -1031,9 +1019,7 @@ img {
   background: #eee;
 }
 
-/* ================================================================
-   RESPONSIVE
-================================================================ */
+/* ── RESPONSIVE ── */
 @media (max-width: 1024px) {
   .features-grid {
     grid-template-columns: 1fr 1fr;
@@ -1047,7 +1033,7 @@ img {
   }
   .login-panel {
     width: 100%;
-    max-width: 480px;
+    max-width: 500px;
     min-width: unset;
   }
   .hero-right {
@@ -1057,7 +1043,10 @@ img {
     font-size: 1.9rem;
   }
   .cards-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
+  }
+  .card-tile img {
+    height: 80px;
   }
   .info-row {
     grid-template-columns: 1fr;
@@ -1086,6 +1075,9 @@ img {
   .header-nav {
     display: none;
   }
+  .brand-name {
+    font-size: 0.82rem;
+  }
 }
 
 @media (max-width: 600px) {
@@ -1100,10 +1092,9 @@ img {
     font-size: 1.3rem;
   }
   .hero-right h1 {
-    font-size: 1.55rem;
+    font-size: 1.5rem;
   }
   .cards-grid {
-    grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
   .card-tile {
@@ -1113,7 +1104,7 @@ img {
     font-size: 1.2rem;
   }
   .card-tile img {
-    height: 65px;
+    height: 70px;
   }
   .features-grid {
     grid-template-columns: 1fr;
@@ -1149,5 +1140,11 @@ img {
   }
   .modal-box {
     padding: 32px 22px;
+  }
+  .brand-name {
+    display: none;
+  }
+  .brand-sub {
+    display: none;
   }
 }
