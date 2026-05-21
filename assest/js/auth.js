@@ -453,7 +453,7 @@
 
       if (isLockedOut()) {
         return showLoginError(
-          "Too many failed attempts. Try again in " + lockoutTimeLeft() + ".",
+          "Too many failed attempts. Please try again later.",
         );
       }
 
@@ -482,60 +482,83 @@
       if (!enteredPassword)
         return showLoginError("Please enter your password.");
 
-      var allUsers = getUsers();
-
-      if (allUsers.length === 0) {
-        return showLoginError(
-          "No accounts found. Please ask your administrator to create your account on the live site.",
-        );
-      }
-
-      var user = null;
-      for (var i = 0; i < allUsers.length; i++) {
-        var u = allUsers[i];
-        var storedEmail = (u.email || "")
-          .toLowerCase()
-          .replace(/\s/g, "")
-          .replace(/[^\x20-\x7E]/g, "");
-        var storedPassword = (u.password || "")
-          .replace(/\r|\n/g, "")
-          .replace(/[^\x20-\x7E]/g, "")
-          .trim();
-
-        if (storedEmail !== enteredEmail) continue;
-
-        if (
-          storedPassword === enteredPassword ||
-          storedPassword === enteredPassword.trim() ||
-          storedPassword.trim() === enteredPassword ||
-          storedPassword.toLowerCase() === enteredPassword.toLowerCase()
-        ) {
-          user = u;
-          break;
+      // Login via Supabase (works on any device) with localStorage fallback
+      function attemptLogin(allUsers) {
+        var user = null;
+        for (var i = 0; i < allUsers.length; i++) {
+          var u = allUsers[i];
+          var sEmail = (u.email || "")
+            .toLowerCase()
+            .replace(/\s/g, "")
+            .replace(/[^\x20-\x7E]/g, "");
+          var sPass = (u.password || "")
+            .replace(/\r|\n/g, "")
+            .replace(/[^\x20-\x7E]/g, "")
+            .trim();
+          if (sEmail !== enteredEmail) continue;
+          if (
+            sPass === enteredPassword ||
+            sPass === enteredPassword.trim() ||
+            sPass.trim() === enteredPassword ||
+            sPass.toLowerCase() === enteredPassword.toLowerCase()
+          ) {
+            user = u;
+            break;
+          }
         }
-      }
-
-      if (!user) {
-        const att = recordFailedAttempt();
-        const left = MAX_LOGIN_ATTEMPTS - att.count;
-        if (att.lockedUntil) {
-          return showLoginError(
-            "Account locked for 15 minutes due to too many failed attempts.",
+        if (!user) {
+          var att = recordFailedAttempt();
+          if (att.lockedUntil)
+            return showLoginError(
+              "Account temporarily locked. Please try again in 15 minutes.",
+            );
+          return showLoginError("Incorrect email or password.");
+        }
+        if (user.status === "suspended") {
+          window.showSuspendedOverlay && window.showSuspendedOverlay();
+          return;
+        }
+        pendingLoginUser = user;
+        loginOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        if (window._sendOTP)
+          window._sendOTP(user.email, loginOTP, user.firstName);
+        else
+          console.log(
+            "%c🔑 LOGIN OTP: " + loginOTP,
+            "background:#4b38f5;color:#fff;padding:4px 12px;border-radius:4px;font-weight:700",
           );
+        var emailTo = document.getElementById("loginOtpEmailTo");
+        if (emailTo) {
+          var masked = (user.email || "").replace(
+            /(.{2})(.*)(@.*)/,
+            function (_, a, b, c) {
+              return a + b.replace(/./g, "•") + c;
+            },
+          );
+          emailTo.textContent = masked;
         }
-        return showLoginError(
-          "Invalid email or password." +
-            (left > 0 && left < MAX_LOGIN_ATTEMPTS
-              ? " " + left + " attempt" + (left > 1 ? "s" : "") + " remaining."
-              : ""),
-        );
+        if (document.getElementById("loginOtpInput"))
+          document.getElementById("loginOtpInput").value = "";
+        if (document.getElementById("loginOtpErr"))
+          document.getElementById("loginOtpErr").textContent = "";
+        if (document.getElementById("loginOtpOverlay"))
+          document.getElementById("loginOtpOverlay").classList.add("open");
       }
 
-      // Check suspension before OTP
-      if (user.status === "suspended") {
-        window.showSuspendedOverlay();
+      // Use Supabase if available, else fall back to localStorage
+      if (window._dbGetUserByEmail) {
+        window
+          ._dbGetUserByEmail(enteredEmail)
+          .then(function (u) {
+            attemptLogin(u ? [u] : []);
+          })
+          .catch(function () {
+            attemptLogin(getUsers());
+          });
         return;
       }
+      attemptLogin(getUsers());
+      return; // everything handled inside attemptLogin
 
       clearLoginAttempts();
 

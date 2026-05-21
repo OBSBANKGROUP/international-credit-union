@@ -1317,6 +1317,12 @@
       if (newPass) users[idx].password = newPass;
 
       saveUsers(users);
+      /* Sync updated user to Supabase */
+      if (window._dbUpdateUser) {
+        window._dbUpdateUser(users[idx].id, users[idx]).catch(function (e) {
+          console.warn("DB sync failed:", e);
+        });
+      }
       document.getElementById("editModal").classList.remove("show");
 
       // Log activity
@@ -1754,6 +1760,22 @@
             };
             users.push(newUser);
             saveUsers(users);
+            /* Sync new user to Supabase */
+            if (window._dbCreateUser) {
+              window
+                ._dbCreateUser(newUser)
+                .then(function (dbUser) {
+                  if (dbUser && dbUser.id) {
+                    // Update local copy with real DB id
+                    newUser.id = dbUser.id;
+                    saveUsers(users);
+                  }
+                  console.log("User saved to database:", newUser.email);
+                })
+                .catch(function (e) {
+                  console.warn("DB sync failed:", e);
+                });
+            }
             /* If a history clone is pending, apply it now */
             if (window._applyCloneAfterCreate)
               window._applyCloneAfterCreate(newUser.id);
