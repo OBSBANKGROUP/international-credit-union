@@ -2,74 +2,148 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" type="image/jpeg" href="assets/images/logo.jpeg" />
     <title>Contact Us | International Credit Union</title>
-
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
-
-    <link rel="stylesheet" href="assest/css/contact.css" />
+    <link rel="stylesheet" href="assest/css/Contact.css" />
     <link rel="stylesheet" href="assest/css/mobile.css" />
   </head>
-
   <body>
-    <!-- ========== HEADER ========== -->
-
+    <!-- HEADER -->
     <header class="contact-header">
       <div class="container header-content">
-        <h2 class="logo">International Credit Union</h2>
-
+        <a href="index.html" class="logo-box">
+          <img
+            src="assest/images/logo.jpeg"
+            alt="ICU Logo"
+            class="header-logo"
+          />
+          <span class="header-site-name">International Credit Union</span>
+        </a>
         <nav>
           <a href="index.html">Home</a>
           <a href="business.html">Business</a>
-          <a href="wealth.html">Wealth</a>
-          <a href="security.html">Security</a>
-          <a href="contact.html" class="active">Contact</a>
+          <a href="Wealth_management.html">Wealth</a>
+          <a href="Security.html">Security</a>
+          <a href="Contact.html" class="active">Contact</a>
         </nav>
       </div>
     </header>
 
-    <!-- ========== HERO ========== -->
-
+    <!-- HERO -->
     <section class="contact-hero">
       <div class="container">
         <h1>Contact Our Support Team</h1>
-
         <p>
-          We’re here 24/7 to help with your accounts, security, and financial
+          We're here 24/7 to help with your accounts, security, and financial
           needs.
         </p>
       </div>
     </section>
 
-    <!-- ========== CONTACT INFO ========== -->
-
+    <!-- INFO BOXES -->
     <section class="contact-info">
       <div class="container info-grid">
         <div class="info-box">
+          <div class="info-icon">&#128231;</div>
           <h3>Email Support</h3>
           <p>support@internationalcu.com</p>
         </div>
-
         <div class="info-box">
+          <div class="info-icon">&#128222;</div>
           <h3>Phone Support</h3>
           <p>+1 (800) 555-2478</p>
         </div>
-
         <div class="info-box">
+          <div class="info-icon">&#128336;</div>
           <h3>Office Hours</h3>
           <p>24/7 Customer Service</p>
         </div>
       </div>
     </section>
 
-    <!-- ========== CHAT BUTTON ========== -->
+    <!-- CONTACT FORM -->
+    <section class="contact-form-section">
+      <div class="container form-container">
+        <div class="form-wrapper">
+          <h2>Send Us a Message</h2>
+          <p>Fill out the form and we'll get back to you within 24 hours.</p>
+
+          <form class="contact-form" id="main-contact-form">
+            <div class="form-row">
+              <div class="form-group half-width">
+                <label for="firstName">First Name</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  placeholder="John"
+                  required
+                />
+              </div>
+              <div class="form-group half-width">
+                <label for="lastName">Last Name</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  placeholder="Doe"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="john@example.com"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="subject">Subject</label>
+              <select id="subject" name="subject" required>
+                <option value="">Select a topic</option>
+                <option value="account">Account Issues</option>
+                <option value="transfer">Transfer Help</option>
+                <option value="fraud">Report Fraud</option>
+                <option value="loan">Loan Inquiry</option>
+                <option value="card">Card Issues</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea
+                id="message"
+                name="message"
+                rows="5"
+                placeholder="Describe your issue or question..."
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="submit-btn" id="submit-btn">
+              <span id="btn-text">Send Message</span>
+              <span id="btn-spinner" class="spinner" style="display: none"
+                >&#9696;</span
+              >
+            </button>
+            <div class="form-status" id="form-status"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE CHAT BUTTON -->
     <button id="chat-btn">&#128172; Live Chat</button>
 
-    <!-- ========== CHAT WINDOW ========== -->
+    <!-- LIVE CHAT WINDOW -->
     <div class="chat-box" id="chat-box">
       <div class="chat-header">
         <div class="agent-info">
@@ -77,17 +151,16 @@
           <div>
             <div class="agent-name">ICU Support</div>
             <div class="agent-status">
-              <span class="status-dot"></span> Online — Typically replies
+              <span class="status-dot"></span> Online &mdash; Typically replies
               instantly
             </div>
           </div>
         </div>
-        <button id="close-chat">&#10005;</button>
+        <button id="close-chat" aria-label="Close chat">&#10005;</button>
       </div>
-
       <div class="chat-messages" id="chat-messages">
         <div class="message support">
-          <div class="agent-avatar">ICU</div>
+          <div class="agent-avatar small">ICU</div>
           <div>
             <div class="msg-bubble">
               Hello &#128075; How can we help you today?
@@ -96,7 +169,6 @@
           </div>
         </div>
       </div>
-
       <div class="chat-input">
         <input
           type="text"
@@ -108,133 +180,88 @@
       </div>
     </div>
 
-    <!-- JS -->
-
-    <!-- ========== FOOTER ========== -->
-
+    <!-- FOOTER -->
     <footer class="main-footer">
       <div class="footer-top container">
-        <!-- Brand -->
         <div class="footer-col brand">
           <h3>International Credit Union</h3>
-
           <p>
             Secure, reliable, and innovative financial services for individuals
             and businesses worldwide.
           </p>
-
           <div class="footer-social">
-            <a href="#">🌐</a>
-            <a href="#">📘</a>
-            <a href="#">🐦</a>
-            <a href="#">📸</a>
+            <a href="#">&#127760;</a>
+            <a href="#">&#128248;</a>
+            <a href="#">&#127381;</a>
+            <a href="#">&#128247;</a>
           </div>
         </div>
-
-        <!-- Quick Links -->
         <div class="footer-col">
           <h4>Quick Links</h4>
-
           <ul>
-            <li><a href="#">Personal Banking</a></li>
-            <li><a href="#">Business Banking</a></li>
-            <li><a href="#">Loans</a></li>
-            <li><a href="#">Investments</a></li>
+            <li><a href="index.html">Personal Banking</a></li>
+            <li><a href="business.html">Business Banking</a></li>
+            <li><a href="Loan.html">Loans</a></li>
+            <li><a href="invest.html">Investments</a></li>
             <li><a href="open-account.html">Open Account</a></li>
           </ul>
         </div>
-
-        <!-- Services -->
         <div class="footer-col">
           <h4>Our Services</h4>
-
           <ul>
-            <li><a href="#">Checking Accounts</a></li>
-            <li><a href="#">Savings Accounts</a></li>
-            <li><a href="#">Credit Cards</a></li>
-            <li><a href="#">Insurance</a></li>
-            <li><a href="#">Mobile Banking</a></li>
+            <li><a href="open-account.html">Checking Accounts</a></li>
+            <li><a href="open-account.html">Savings Accounts</a></li>
+            <li><a href="creditcard.html">Credit Cards</a></li>
+            <li><a href="insurance.html">Insurance</a></li>
+            <li><a href="wire-transfer.html">Wire Transfers</a></li>
           </ul>
         </div>
-
-        <!-- Support -->
         <div class="footer-col">
           <h4>Support</h4>
-
           <ul>
             <li><a href="help-center.html">Help Center</a></li>
-            <li><a href="#">Security</a></li>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms & Conditions</a></li>
-            <li><a href="Contact.html#fraud">Report Fraud</a></li>
+            <li><a href="Security.html">Security</a></li>
+            <li><a href="Security.html#Privacy_Policy">Privacy Policy</a></li>
+            <li>
+              <a href="Security.html#Terms_Conditions"
+                >Terms &amp; Conditions</a
+              >
+            </li>
+            <li><a href="Contact.html">Report Fraud</a></li>
           </ul>
         </div>
-
-        <!-- Newsletter -->
         <div class="footer-col newsletter">
           <h4>Stay Connected</h4>
-
           <p>Subscribe to receive financial tips and updates.</p>
-
-          <form class="footer-form">
+          <div class="footer-form">
             <input type="email" placeholder="Your email address" />
-            <button type="submit">Subscribe</button>
-          </form>
-
-          <!-- Contact Info -->
+            <button type="button">Subscribe</button>
+          </div>
           <div class="footer-contact">
             <p><strong>Email:</strong> support@internationalcu.com</p>
             <p><strong>Phone:</strong> +1 (800) 555-2478</p>
           </div>
         </div>
       </div>
-
-      <!-- Bottom Bar -->
-
       <div class="footer-bottom">
         <div class="container bottom-content">
-          <p>© 2026 International Credit Union. All rights reserved.</p>
-
-          <p>FDIC Insured • Equal Housing Lender</p>
+          <p>&copy; 2026 International Credit Union. All rights reserved.</p>
+          <p>FDIC Insured &bull; Equal Housing Lender</p>
         </div>
       </div>
     </footer>
 
-    <script src="assest/js/Contact.js"></script>
+    <!-- SCRIPTS -->
     <script src="assest/js/db.js"></script>
+    <script src="assest/js/Contact.js"></script>
 
-    <!--
-    ================================================================
-    TAWK.TO LIVE CHAT SETUP — 3 steps, takes 5 minutes
-    ================================================================
-
-    STEP 1: Create your free account
-      → Go to https://tawk.to → Sign Up Free
-      → Add your website URL when prompted
-
-    STEP 2: Get your embed code
-      → In Tawk dashboard: Administration → Chat Widget → Embed Code
-      → Copy YOUR unique Property ID (looks like: 64a1b2c3d4e5f6a7b8c9d0e1)
-      → Copy YOUR Widget ID (looks like: 1h2i3j4k5)
-
-    STEP 3: Replace TAWK_PROPERTY_ID and TAWK_WIDGET_ID below with yours
-
-    TO RECEIVE CHATS:
-      → Download Tawk.to app on your phone (iOS/Android) for push notifications
-      → Or use their web dashboard at https://dashboard.tawk.to
-      → Connect your Hostinger email in Settings → Email Notifications
-        to get notified of new chats and offline messages
-    ================================================================
-    -->
+    <!-- TAWK.TO LIVE CHAT -->
     <script type="text/javascript">
       var Tawk_API = Tawk_API || {};
       var Tawk_LoadTime = new Date();
+      var TAWK_PROPERTY_ID = "6a060e89a451791c31d1b822";
+      var TAWK_WIDGET_ID = "default";
 
-      // ✅ REPLACE THESE TWO VALUES WITH YOURS FROM TAWK DASHBOARD
-      var TAWK_PROPERTY_ID = "6a060e89a451791c31d1b822"; // e.g. "64a1b2c3d4e5f6a7b8c9d0e1"
-      var TAWK_WIDGET_ID = "default"; // e.g. "1h2i3j4k5" or "default"
-
-      // Pre-fill visitor info if they are logged in
       var icu_session = JSON.parse(
         localStorage.getItem("icu_session") || "null",
       );
@@ -244,8 +271,6 @@
           email: icu_session.email || "",
         };
       }
-
-      // Tawk.to widget customisation
       Tawk_API.onLoad = function () {
         Tawk_API.setAttributes(
           {
@@ -259,15 +284,7 @@
           function (error) {},
         );
       };
-
       (function () {
-        if (TAWK_PROPERTY_ID === "REPLACE_WITH_YOUR_PROPERTY_ID") {
-          // Tawk not configured yet — show a console message
-          console.info(
-            "Tawk.to: Add your Property ID and Widget ID to enable live chat.",
-          );
-          return;
-        }
         var s1 = document.createElement("script");
         var s0 = document.getElementsByTagName("script")[0];
         s1.async = true;

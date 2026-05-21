@@ -1,42 +1,57 @@
 /* ================================================================
-   INDEX PAGE JS
-   - Mobile hamburger menu
-   - Google Translate init
-   ================================================================ */
+   INDEX PAGE JS  |  assets/js/index.js
+================================================================ */
 
-/* ── Mobile menu ── */
-(function () {
+document.addEventListener("DOMContentLoaded", function () {
+  /* ── Hamburger / Mobile Drawer ── */
   var hamburger = document.getElementById("hamburgerBtn");
-  var menu = document.getElementById("mobileMenu");
-  var panel = document.getElementById("mobilePanel");
-  var closeBtn = document.getElementById("closeMenuBtn");
+  var overlay = document.getElementById("drawerOverlay");
+  var closeBtn = document.getElementById("drawerCloseBtn");
 
-  function openMenu() {
-    menu.classList.add("open");
-    panel.classList.add("open");
-  }
-  function closeMenu() {
-    menu.classList.remove("open");
-    panel.classList.remove("open");
+  function openDrawer() {
+    if (overlay) overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
   }
 
-  if (hamburger) hamburger.addEventListener("click", openMenu);
-  if (closeBtn) closeBtn.addEventListener("click", closeMenu);
+  function closeDrawer() {
+    if (overlay) overlay.classList.remove("open");
+    document.body.style.overflow = "";
+  }
 
-  /* Close when clicking outside the panel */
-  if (menu) {
-    menu.addEventListener("click", function (e) {
-      if (e.target === menu) closeMenu();
+  if (hamburger)
+    hamburger.addEventListener("click", function (e) {
+      e.stopPropagation();
+      openDrawer();
     });
-  }
 
-  /* Close menu when a Sign In link inside it is clicked */
-  document.querySelectorAll(".m-btn").forEach(function (btn) {
-    btn.addEventListener("click", closeMenu);
+  if (overlay)
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay) closeDrawer();
+    });
+
+  if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
+
+  document.querySelectorAll(".drawer-links a").forEach(function (link) {
+    link.addEventListener("click", closeDrawer);
   });
-})();
 
-/* ── Google Translate init ── */
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeDrawer();
+  });
+
+  /* ── Protect login inputs from mobile interference ── */
+  ["loginUserId", "loginPassword"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.setAttribute("autocorrect", "off");
+    el.setAttribute("autocapitalize", "none");
+    el.setAttribute("spellcheck", "false");
+    el.setAttribute("translate", "no");
+    el.classList.add("notranslate");
+  });
+});
+
+/* ── Google Translate (must be global, not inside DOMContentLoaded) ── */
 function googleTranslateElementInit() {
   new google.translate.TranslateElement(
     {
@@ -49,15 +64,3 @@ function googleTranslateElementInit() {
     "google_translate_element",
   );
 }
-
-/* ── Protect login inputs from Google Translate DOM manipulation ── */
-(function protectLoginInputs() {
-  var protectedIds = ["loginUserId", "loginPassword", "loginOtpInput"];
-  protectedIds.forEach(function (id) {
-    var el = document.getElementById(id);
-    if (el) {
-      el.classList.add("notranslate");
-      el.setAttribute("translate", "no");
-    }
-  });
-})();

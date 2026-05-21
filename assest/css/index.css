@@ -1,5 +1,5 @@
 /* ================================================================
-   ICU INDEX PAGE — STYLESHEET  |  assets/css/index.css
+   ICU INDEX PAGE  |  assets/css/index.css
 ================================================================ */
 :root {
   --navy: #021633;
@@ -32,7 +32,6 @@ a {
   color: inherit;
 }
 img {
-  max-width: 100%;
   display: block;
 }
 .container {
@@ -48,7 +47,6 @@ img {
   text-align: center;
   padding: 9px 20px;
   font-size: 0.75rem;
-  letter-spacing: 0.3px;
 }
 .top-bar a {
   color: var(--gold);
@@ -135,19 +133,19 @@ img {
   top: 0;
   z-index: 200;
   background: var(--white);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
 }
 .header-inner {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
-  height: 68px;
+  height: 70px;
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-/* LOGO — fixed to always show fully */
+/* LOGO — exactly like business.html: natural width, fixed height only */
 .brand {
   display: flex;
   align-items: center;
@@ -156,41 +154,39 @@ img {
   text-decoration: none;
 }
 .brand-logo {
-  height: 48px;
-  width: 48px;
-  object-fit: cover;
-  object-position: center;
-  border-radius: 10px;
-  flex-shrink: 0;
+  height: 44px; /* same approach as business.css */
+  width: auto; /* let image keep its natural ratio — no cropping */
+  object-fit: contain;
   display: block;
+  border-radius: 8px;
 }
 .brand-text {
   display: flex;
   flex-direction: column;
+  line-height: 1.2;
 }
 .brand-name {
   font-family: "Sora", sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--navy);
   white-space: nowrap;
-  line-height: 1.2;
 }
 .brand-sub {
   font-size: 0.6rem;
   color: var(--muted);
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
 }
 
 .header-nav {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 .header-nav a {
-  padding: 8px 14px;
-  font-size: 0.83rem;
+  padding: 8px 12px;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--muted);
   border-radius: 22px;
@@ -204,7 +200,6 @@ img {
 .nav-outline {
   border: 1.5px solid #e0e4ee !important;
   color: var(--navy) !important;
-  padding: 7px 18px !important;
 }
 .nav-outline:hover {
   border-color: var(--accent) !important;
@@ -213,18 +208,16 @@ img {
 .nav-solid {
   background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
   color: white !important;
-  padding: 9px 22px !important;
   font-weight: 700 !important;
   box-shadow: 0 4px 14px rgba(75, 56, 245, 0.3);
 }
 .nav-solid:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(75, 56, 245, 0.4);
 }
 
-/* HAMBURGER */
+/* ── HAMBURGER ── */
 .hamburger {
-  display: none;
+  display: none; /* hidden on desktop */
   flex-direction: column;
   gap: 5px;
   cursor: pointer;
@@ -233,26 +226,33 @@ img {
   padding: 8px;
   margin-left: auto;
   flex-shrink: 0;
+  z-index: 10;
 }
 .hamburger span {
-  width: 24px;
+  width: 25px;
   height: 2.5px;
   background: var(--navy);
-  border-radius: 2px;
+  border-radius: 3px;
   display: block;
   transition: 0.3s;
+  pointer-events: none;
 }
 
 /* ── MOBILE DRAWER ── */
 .drawer-overlay {
-  display: none;
+  visibility: hidden;
+  opacity: 0;
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
   z-index: 300;
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
 }
 .drawer-overlay.open {
-  display: block;
+  visibility: visible;
+  opacity: 1;
 }
 .drawer {
   position: fixed;
@@ -275,17 +275,23 @@ img {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid #f0f2f5;
+}
+.drawer-header .d-logo {
+  height: 38px;
+  width: auto;
+  border-radius: 6px;
 }
 .drawer-header button {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   cursor: pointer;
   color: var(--muted);
   line-height: 1;
+  padding: 0 4px;
 }
 .drawer-links {
   display: flex;
@@ -316,7 +322,6 @@ img {
   border-radius: 22px;
   padding: 12px 16px;
   margin-top: 8px;
-  color: var(--navy);
 }
 .drawer-btn-solid {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -331,7 +336,7 @@ img {
 /* ── HERO ── */
 .hero {
   background: linear-gradient(135deg, var(--navy) 0%, #0d2d5e 100%);
-  min-height: calc(100vh - 110px);
+  min-height: calc(100vh - 112px);
   display: flex;
   align-items: center;
   padding: 60px 24px;
@@ -345,7 +350,7 @@ img {
   align-items: center;
 }
 
-/* LOGIN PANEL */
+/* ── LOGIN PANEL ── */
 .login-panel {
   background: var(--white);
   border-radius: 20px;
@@ -369,7 +374,7 @@ img {
 }
 .login-panel label {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #555;
   margin-bottom: 6px;
@@ -403,8 +408,8 @@ img {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  flex-wrap: wrap;
   gap: 8px;
+  flex-wrap: wrap;
 }
 .check-label {
   display: flex;
@@ -504,7 +509,7 @@ img {
   font-weight: 600;
 }
 
-/* HERO RIGHT — CARD OFFERS */
+/* ── HERO RIGHT — CARD OFFERS ── */
 .hero-right {
   flex: 1;
   min-width: 0;
@@ -544,6 +549,7 @@ img {
   flex-direction: column;
   gap: 8px;
   overflow: hidden;
+  min-width: 0;
 }
 .card-tile:hover {
   background: rgba(255, 255, 255, 0.14);
@@ -567,15 +573,16 @@ img {
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* CARD IMAGE — full width, fixed height, no cropping sides */
+/* CARD IMAGE — full width, fixed height, centered */
 .card-tile img {
   width: 100%;
   height: 90px;
   object-fit: cover;
-  object-position: center center;
+  object-position: center;
   border-radius: 10px;
   display: block;
   flex-shrink: 0;
+  max-width: 100%;
 }
 .tile-name {
   font-size: 0.78rem;
@@ -884,6 +891,7 @@ img {
   justify-content: center;
   font-size: 1rem;
   transition: 0.2s;
+  text-decoration: none;
 }
 .footer-social a:hover {
   background: rgba(75, 56, 245, 0.3);
@@ -1027,6 +1035,12 @@ img {
 }
 
 @media (max-width: 900px) {
+  .hamburger {
+    display: flex !important;
+  } /* force visible on tablet/phone */
+  .header-nav {
+    display: none;
+  }
   .hero-inner {
     flex-direction: column;
     gap: 36px;
@@ -1069,15 +1083,6 @@ img {
     grid-template-columns: 1fr 1fr;
     gap: 32px;
   }
-  .hamburger {
-    display: flex;
-  }
-  .header-nav {
-    display: none;
-  }
-  .brand-name {
-    font-size: 0.82rem;
-  }
 }
 
 @media (max-width: 600px) {
@@ -1085,14 +1090,14 @@ img {
     padding: 36px 16px;
     min-height: auto;
   }
+  .hero-right h1 {
+    font-size: 1.5rem;
+  }
   .login-panel {
-    padding: 26px 20px;
+    padding: 26px 18px;
   }
   .login-panel h3 {
     font-size: 1.3rem;
-  }
-  .hero-right h1 {
-    font-size: 1.5rem;
   }
   .cards-grid {
     gap: 10px;
@@ -1114,7 +1119,6 @@ img {
   }
   .stats-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
   }
   .stat-num {
     font-size: 2rem;
@@ -1139,12 +1143,12 @@ img {
     justify-content: flex-end;
   }
   .modal-box {
-    padding: 32px 22px;
-  }
-  .brand-name {
-    display: none;
+    padding: 32px 20px;
   }
   .brand-sub {
     display: none;
+  }
+  .header-inner {
+    padding: 0 14px;
   }
 }
