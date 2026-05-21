@@ -200,9 +200,11 @@
         return false;
       }
 
-      /* expiresAt must be a number in the future (within 40 mins of creation) */
-      var maxExpiry = session.createdAt + 41 * 60 * 1000;
-      if (session.expiresAt > maxExpiry) {
+      /* expiresAt must be reasonable — allow up to 2 hours + 10 min buffer.
+         Activity resets the timer so expiresAt can be up to 2h from NOW,
+         not from createdAt. We just check it is not absurdly far in the future. */
+      var maxAllowed = Date.now() + 2 * 60 * 60 * 1000 + 10 * 60 * 1000; // 2h 10m from now
+      if (session.expiresAt > maxAllowed) {
         console.warn("ICU: Session integrity check failed — expiry tampered.");
         localStorage.removeItem("icu_session");
         return false;
@@ -283,18 +285,23 @@
   document.addEventListener(
     "submit",
     function (e) {
-      var btn = e.target.querySelector(
-        "button[type=submit], .submit-btn, .login-btn",
-      );
-      if (btn && !btn.dataset.locked) {
-        btn.dataset.locked = "1";
-        btn.style.opacity = "0.65";
-        btn.style.cursor = "not-allowed";
-        setTimeout(function () {
-          btn.dataset.locked = "";
-          btn.style.opacity = "";
-          btn.style.cursor = "";
-        }, 3000);
+      // Only lock transfer/payment forms — never lock the login form
+      if (
+        e.target.id === "wireForm" ||
+        e.target.id === "intlForm" ||
+        e.target.classList.contains("transfer-form")
+      ) {
+        var btn = e.target.querySelector("button[type=submit], .submit-btn");
+        if (btn && !btn.dataset.locked) {
+          btn.dataset.locked = "1";
+          btn.style.opacity = "0.65";
+          btn.style.cursor = "not-allowed";
+          setTimeout(function () {
+            btn.dataset.locked = "";
+            btn.style.opacity = "";
+            btn.style.cursor = "";
+          }, 3000);
+        }
       }
     },
     true,

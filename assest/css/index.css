@@ -951,16 +951,18 @@ img {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   z-index: 500;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
 }
 .modal-overlay.open {
   display: flex;
 }
+
+/* Credit score modal — simple card */
 .modal-box {
   background: var(--white);
   border-radius: 24px;
@@ -1027,6 +1029,84 @@ img {
   background: #eee;
 }
 
+/* App modal — full image design */
+.app-modal-inner {
+  max-width: 440px;
+  width: 100%;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+  animation: modalIn 0.35s ease;
+  position: relative;
+}
+.app-modal-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.app-modal-body {
+  background: var(--white);
+  padding: 32px 28px 28px;
+  text-align: center;
+}
+.app-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff3e0;
+  color: #e65100;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.app-modal-body h2 {
+  font-family: "Sora", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+.app-modal-body p {
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+.app-modal-continue {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  border: none;
+  border-radius: 22px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  transition: 0.3s;
+  margin-bottom: 10px;
+}
+.app-modal-continue:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(75, 56, 245, 0.38);
+}
+.app-modal-close-link {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  cursor: pointer;
+  margin-top: 4px;
+}
+.app-modal-close-link:hover {
+  color: var(--navy);
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 1024px) {
   .features-grid {
@@ -1058,9 +1138,6 @@ img {
   }
   .cards-grid {
     grid-template-columns: 1fr 1fr;
-  }
-  .card-tile img {
-    height: 80px;
   }
   .info-row {
     grid-template-columns: 1fr;

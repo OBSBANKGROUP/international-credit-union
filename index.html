@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <meta
       name="description"
-      content="International Credit Union — Secure online banking, wire transfers, loans, investments and more."
+      content="International Credit Union — Secure online banking, wire transfers, loans and more."
     />
-    <link rel="icon" type="image/jpeg" href="assest/images/logo.jpeg" />
+    <link rel="icon" type="image/jpeg" href="assets/images/logo.jpeg" />
     <title>International Credit Union — Secure Banking</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="assest/css/index.css" />
-    <link rel="stylesheet" href="assest/css/mobile.css" />
-    <script src="assest/js/theme.js"></script>
+    <link rel="stylesheet" href="assets/css/index.css" />
+    <link rel="stylesheet" href="assets/css/mobile.css" />
+    <script src="assets/js/theme.js"></script>
   </head>
   <body>
     <!-- TOP BAR -->
@@ -52,10 +52,14 @@
       <div class="header-inner">
         <a href="index.html" class="brand">
           <img
-            src="assest/images/logo.jpeg"
+            src="assets/images/logo.jpeg"
             alt="ICU Logo"
             class="brand-logo"
           />
+          <div class="brand-text">
+            <span class="brand-name">International Credit Union</span>
+            <span class="brand-sub">Secure &bull; Trusted &bull; Global</span>
+          </div>
         </a>
         <nav class="header-nav">
           <a href="insurance.html">Insurance</a>
@@ -64,8 +68,15 @@
           <a href="open-account.html" class="nav-outline">Open Account</a>
           <a href="#hero" class="nav-solid">Sign In</a>
         </nav>
-        <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
-          <span></span><span></span><span></span>
+        <button
+          class="hamburger"
+          id="hamburgerBtn"
+          aria-label="Open menu"
+          type="button"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
       </div>
     </header>
@@ -74,8 +85,10 @@
     <div class="drawer-overlay" id="drawerOverlay">
       <div class="drawer" id="drawer">
         <div class="drawer-header">
-          <span class="brand-name">ICU</span>
-          <button id="drawerCloseBtn" aria-label="Close">&#10005;</button>
+          <img src="assest/images/logo.jpeg" alt="ICU" class="d-logo" />
+          <button id="drawerCloseBtn" aria-label="Close menu" type="button">
+            &#10005;
+          </button>
         </div>
         <div class="drawer-links">
           <a href="index.html">&#127968; Personal Banking</a>
@@ -95,7 +108,7 @@
           <a href="open-account.html" class="drawer-btn-outline"
             >Open Account</a
           >
-          <a href="#hero" class="drawer-btn-solid" id="drawerSignIn">Sign In</a>
+          <a href="#hero" class="drawer-btn-solid">Sign In</a>
         </div>
       </div>
     </div>
@@ -144,10 +157,11 @@
           </div>
 
           <p id="loginError" class="login-error"></p>
-          <button class="login-btn" id="loginBtn">Log In</button>
+          <button class="login-btn" id="loginBtn" type="button">Log In</button>
           <div class="login-divider"><span>or</span></div>
           <button
             class="enroll-btn"
+            type="button"
             onclick="window.location.href = 'open-account.html'"
           >
             Open an Account
@@ -157,14 +171,9 @@
           </p>
         </div>
 
-        <!-- CARD OFFERS -->
+        <!-- CARD OFFERS — original zip layout -->
         <div class="hero-right">
-          <h1>
-            Choose the card that<br /><span class="gold">works for you</span>
-          </h1>
-          <p class="hero-sub">
-            Earn rewards, cash back and exclusive benefits with every purchase.
-          </p>
+          <h1>Choose the card that works for you</h1>
           <div class="cards-grid">
             <div
               class="card-tile"
@@ -196,7 +205,7 @@
               onclick="window.location.href = 'creditcard.html'"
             >
               <div class="card-tile-top">
-                <span class="tile-amt">25K</span>
+                <span class="tile-amt">25,000</span>
                 <span class="tile-label">Bonus Points</span>
               </div>
               <img src="assest/images/goldcard.jpeg" alt="Travel Rewards" />
@@ -281,11 +290,12 @@
             <h2>Level up your Credit Score</h2>
             <p>
               Build your credit strategically and confidently with the right
-              banking partner behind you. Monitor your score in real time from
-              your dashboard.
+              banking partner. Monitor your score in real time from your
+              dashboard.
             </p>
             <button
               class="info-btn primary"
+              type="button"
               onclick="
                 document.getElementById('creditModal').classList.add('open')
               "
@@ -358,7 +368,7 @@
           <h2>Services &amp; Coverage We Offer</h2>
           <p>
             Protect what matters most with reliable financial and insurance
-            solutions for individuals, families, and businesses.
+            solutions.
           </p>
         </div>
         <div class="services-grid">
@@ -451,8 +461,12 @@
             <ul>
               <li><a href="help-center.html">Help Center</a></li>
               <li><a href="Security.html">Security</a></li>
-              <li><a href="Security.html">Privacy Policy</a></li>
-              <li><a href="Security.html">Terms &amp; Conditions</a></li>
+              <li><a href="Security.html#Privacy_Policy">Privacy Policy</a></li>
+              <li>
+                <a href="Security.html#Terms_Conditions"
+                  >Terms &amp; Conditions</a
+                >
+              </li>
               <li><a href="Contact.html">Report Fraud</a></li>
             </ul>
             <div class="footer-contact">
@@ -484,6 +498,7 @@
         </p>
         <button
           class="modal-btn primary"
+          type="button"
           onclick="
             document.getElementById('creditModal').classList.remove('open');
             document
@@ -495,6 +510,7 @@
         </button>
         <button
           class="modal-btn ghost"
+          type="button"
           onclick="
             document.getElementById('creditModal').classList.remove('open')
           "
@@ -504,36 +520,46 @@
       </div>
     </div>
 
-    <!-- APP MODAL -->
+    <!-- APP MODAL — image based design -->
     <div class="modal-overlay" id="appModal">
-      <div class="modal-box">
-        <div class="modal-icon">&#128242;</div>
-        <h2>App Not Available in Your Region</h2>
-        <p>
-          Our mobile app is currently not available in your region. Please
-          continue using our secure website &mdash; it works great on mobile
-          too!
-        </p>
-        <button
-          class="modal-btn primary"
-          onclick="document.getElementById('appModal').classList.remove('open')"
-        >
-          Continue Using Website
-        </button>
-        <button
-          class="modal-btn ghost"
-          onclick="document.getElementById('appModal').classList.remove('open')"
-        >
-          &larr; Go Back
-        </button>
+      <div class="app-modal-inner">
+        <img
+          src="assest/images/bankapp.jpeg"
+          alt="ICU Mobile App"
+          class="app-modal-img"
+        />
+        <div class="app-modal-body">
+          <div class="app-modal-badge">&#127758; Region Notice</div>
+          <h2>App Not Available in Your Region</h2>
+          <p>
+            Our mobile app is currently not available in your region. You can
+            continue using our fully secure website &mdash; it works perfectly
+            on any phone or tablet.
+          </p>
+          <button
+            class="app-modal-continue"
+            onclick="
+              document.getElementById('appModal').classList.remove('open')
+            "
+          >
+            Continue Using Website &rarr;
+          </button>
+          <span
+            class="app-modal-close-link"
+            onclick="
+              document.getElementById('appModal').classList.remove('open')
+            "
+            >Go Back</span
+          >
+        </div>
       </div>
     </div>
 
     <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="assest/js/emailjs-config.js"></script>
-    <script src="assest/js/main.js"></script>
     <script src="assest/js/db.js"></script>
+    <script src="assest/js/main.js"></script>
     <script src="assest/js/auth.js"></script>
     <script src="assest/js/index.js"></script>
     <script
