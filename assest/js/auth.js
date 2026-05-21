@@ -1,7 +1,7 @@
 /* ============================================================
    AUTH.JS — Registration, Login, Session Management
    + Login OTP verification
-   + 40-minute session timeout with warning
+   + 2-hour session timeout with warning
    + Brute-force protection (5 attempts → 15 min lockout)
    + Session integrity check on every page
    + XSS input sanitisation
@@ -17,7 +17,7 @@
   const LOG_KEY = "icu_activity_log";
 
   /* ── Session config ── */
-  const SESSION_DURATION_MS = 40 * 60 * 1000; // 40 minutes
+  const SESSION_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours
   const WARN_BEFORE_MS = 5 * 60 * 1000; // warn 5 mins before expiry
   const MAX_LOGIN_ATTEMPTS = 5;
   const LOCKOUT_MS = 15 * 60 * 1000; // 15-minute lockout
@@ -216,7 +216,7 @@
       '<div style="width:72px;height:72px;background:#fff3e0;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:2rem">&#9203;</div>' +
       '<div style="font-size:1.2rem;font-weight:800;color:#0a2342;margin-bottom:8px">Session Expired</div>' +
       '<div style="width:44px;height:3px;background:#f57c00;border-radius:2px;margin:0 auto 16px"></div>' +
-      '<p style="color:#555;font-size:.88rem;line-height:1.7;margin-bottom:24px">Your session has expired after 40 minutes of inactivity. Please sign in again to continue.</p>' +
+      '<p style="color:#555;font-size:.88rem;line-height:1.7;margin-bottom:24px">Your session has expired after 2 hours of inactivity. Please sign in again to continue.</p>' +
       '<a href="index.html" style="display:inline-block;padding:13px 32px;background:linear-gradient(135deg,#4b38f5,#6a5cff);color:white;border-radius:22px;font-weight:700;text-decoration:none;font-size:.9rem">Sign In Again</a>' +
       "</div>";
     document.body.appendChild(overlay);
@@ -698,7 +698,7 @@
     session.expiresAt = Date.now() + SESSION_DURATION_MS;
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
 
-    // Start the 40-minute countdown
+    // Start the 2-hour countdown
     startSessionTimer();
 
     // Greet user
