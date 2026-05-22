@@ -205,10 +205,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /* ── Balances ── */
-    var totalEl = document.querySelector(
-      ".total-balance,.balance-amount,#totalBalance,.bal-amount",
+    /* Total balance — update all matching elements */
+    var totalEls = document.querySelectorAll(
+      "#totalBalance,.total-balance,.balance-amount,.bal-amount,#panelBalance,.balance",
     );
-    if (totalEl) totalEl.textContent = formatCurrency(totalBal);
+    totalEls.forEach(function (el) {
+      el.textContent = formatCurrency(totalBal);
+    });
 
     var ckEl = document.getElementById("acctBal_checking");
     var svEl = document.getElementById("acctBal_savings");
@@ -294,5 +297,42 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* ── Session timer ── */
     if (window.startSessionTimer) window.startSessionTimer();
+
+    /* ── Profile button → menu panel toggle ── */
+    var profileBtn = document.getElementById("profileBtn");
+    var menuPanel = document.getElementById("menuPanel");
+    if (profileBtn && menuPanel) {
+      profileBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var isOpen =
+          menuPanel.classList.contains("open") ||
+          menuPanel.style.display === "block";
+        if (isOpen) {
+          menuPanel.classList.remove("open");
+          menuPanel.style.display = "none";
+        } else {
+          menuPanel.classList.add("open");
+          menuPanel.style.display = "block";
+        }
+      });
+      document.addEventListener("click", function () {
+        menuPanel.classList.remove("open");
+        menuPanel.style.display = "none";
+      });
+    }
+
+    /* ── Mobile hamburger (if any) ── */
+    var hamBtn = document.querySelector(
+      ".hamburger, .menu-toggle, #hamburgerBtn, #menuToggle",
+    );
+    var mobileNav = document.querySelector(
+      ".mobile-nav, .mobile-menu, #mobileMenu, .side-nav",
+    );
+    if (hamBtn && mobileNav) {
+      hamBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        mobileNav.classList.toggle("open");
+      });
+    }
   }
 });
