@@ -66,38 +66,39 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("intlFromAccount") ||
     (form ? form.querySelector("select") : null);
   if (fromAccSelect) {
-    var last4 = currentUser.accountNumber
+    var last4_fromAccSelect = currentUser.accountNumber
       ? String(currentUser.accountNumber).slice(-4)
       : "****";
-    var opts = "<option value=''>Select Account</option>";
-    opts +=
-      "<option value='checking'>Checking Account \u2022\u2022\u2022\u2022" +
-      last4 +
+    var ddOpts = '<option value="">Select Account</option>';
+    ddOpts +=
+      '<option value="checking">Checking Account ••••' +
+      last4_fromAccSelect +
       "</option>";
-    opts +=
-      "<option value='savings'>Savings Account \u2022\u2022\u2022\u2022" +
-      last4 +
+    ddOpts +=
+      '<option value="savings">Savings Account ••••' +
+      last4_fromAccSelect +
       "</option>";
-    var accts = currentUser.accounts
+    var ddAccts = currentUser.accounts
       ? JSON.parse(JSON.stringify(currentUser.accounts))
       : {};
-    Object.keys(accts).forEach(function (k) {
+    Object.keys(ddAccts).forEach(function (k) {
       if (k === "checking" || k === "savings") return;
-      if (!accts[k]) return;
-      var label =
-        typeof accts[k] === "object" && accts[k].name
-          ? accts[k].name
+      var v = ddAccts[k];
+      if (!v) return;
+      var lbl =
+        typeof v === "object" && v.name
+          ? v.name
           : currentUser.businessName || "Business Account";
-      opts +=
-        "<option value='" +
+      ddOpts +=
+        '<option value="' +
         k +
-        "'>" +
-        label +
-        " \u2022\u2022\u2022\u2022" +
-        last4 +
+        '">' +
+        lbl +
+        " ••••" +
+        last4_fromAccSelect +
         "</option>";
     });
-    fromAccSelect.innerHTML = opts;
+    fromAccSelect.innerHTML = ddOpts;
 
     /* Live balance */
     var balTag = document.createElement("p");

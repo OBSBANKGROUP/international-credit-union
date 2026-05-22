@@ -58,37 +58,39 @@ document.addEventListener("DOMContentLoaded", function () {
   /* ── Build account dropdown (includes business accounts) ── */
   var fromSelect = document.getElementById("fromAccount");
   if (fromSelect) {
-    var last4 = user.accountNumber
+    var last4_fromSelect = user.accountNumber
       ? String(user.accountNumber).slice(-4)
       : "****";
-    var html = "";
-
-    // Always show checking and savings
-    html +=
-      '<option value="checking">Checking Account ••••' + last4 + "</option>";
-    html +=
-      '<option value="savings">Savings Account ••••' + last4 + "</option>";
-
-    // Add business accounts if they exist
-    var rawAccts = user.accounts
+    var ddOpts = '<option value="">Select Account</option>';
+    ddOpts +=
+      '<option value="checking">Checking Account ••••' +
+      last4_fromSelect +
+      "</option>";
+    ddOpts +=
+      '<option value="savings">Savings Account ••••' +
+      last4_fromSelect +
+      "</option>";
+    var ddAccts = user.accounts
       ? JSON.parse(JSON.stringify(user.accounts))
       : {};
-    Object.keys(rawAccts).forEach(function (k) {
+    Object.keys(ddAccts).forEach(function (k) {
       if (k === "checking" || k === "savings") return;
-      var val = rawAccts[k];
-      if (!val) return;
-      var label =
-        typeof val === "object" && val.name
-          ? val.name
+      var v = ddAccts[k];
+      if (!v) return;
+      var lbl =
+        typeof v === "object" && v.name
+          ? v.name
           : user.businessName || "Business Account";
-      html +=
-        '<option value="' + k + '">' + label + " ••••" + last4 + "</option>";
+      ddOpts +=
+        '<option value="' +
+        k +
+        '">' +
+        lbl +
+        " ••••" +
+        last4_fromSelect +
+        "</option>";
     });
-
-    if (!html)
-      html =
-        '<option value="checking">Checking Account ••••' + last4 + "</option>";
-    fromSelect.innerHTML = html;
+    fromSelect.innerHTML = ddOpts;
   }
 
   /* ── Live balance ── */

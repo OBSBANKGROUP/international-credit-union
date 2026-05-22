@@ -62,44 +62,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (fromAccSelect) {
     /* Supports both legacy {checking:true} and new {business_0:{name:"..."}} */
-    var rawAccts = currentUser.accounts
-      ? JSON.parse(JSON.stringify(currentUser.accounts))
-      : {};
-    rawAccts[currentUser.accountType || "checking"] = true;
-    var last4 = currentUser.accountNumber
+    var last4_fromAccSelect = currentUser.accountNumber
       ? String(currentUser.accountNumber).slice(-4)
       : "****";
-
-    var opts = '<option value="">Select Account</option>';
-    if (rawAccts.checking)
-      opts +=
-        '<option value="checking">Checking \u2022\u2022\u2022\u2022' +
-        last4 +
-        "</option>";
-    if (rawAccts.savings)
-      opts +=
-        '<option value="savings">Savings \u2022\u2022\u2022\u2022' +
-        last4 +
-        "</option>";
-    /* Business accounts */
-    Object.keys(rawAccts).forEach(function (k) {
+    var ddOpts = '<option value="">Select Account</option>';
+    ddOpts +=
+      '<option value="checking">Checking Account ••••' +
+      last4_fromAccSelect +
+      "</option>";
+    ddOpts +=
+      '<option value="savings">Savings Account ••••' +
+      last4_fromAccSelect +
+      "</option>";
+    var ddAccts = currentUser.accounts
+      ? JSON.parse(JSON.stringify(currentUser.accounts))
+      : {};
+    Object.keys(ddAccts).forEach(function (k) {
       if (k === "checking" || k === "savings") return;
-      var val = rawAccts[k];
-      if (!val) return;
-      var label =
-        typeof val === "object" && val.name
-          ? val.name
+      var v = ddAccts[k];
+      if (!v) return;
+      var lbl =
+        typeof v === "object" && v.name
+          ? v.name
           : currentUser.businessName || "Business Account";
-      opts +=
+      ddOpts +=
         '<option value="' +
         k +
         '">' +
-        label +
-        " \u2022\u2022\u2022\u2022" +
-        last4 +
+        lbl +
+        " ••••" +
+        last4_fromAccSelect +
         "</option>";
     });
-    fromAccSelect.innerHTML = opts;
+    fromAccSelect.innerHTML = ddOpts;
 
     /* Live balance tag */
     var balTag = document.createElement("p");
