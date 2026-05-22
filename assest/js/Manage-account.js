@@ -139,12 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* ── Hero ── */
   el("totalBalance").textContent = fmt(totalBal);
-  el("memberName").textContent =
-    user.firstName +
-    " " +
-    user.lastName +
-    " — Member since " +
-    new Date(user.createdAt || Date.now()).getFullYear();
+  el("memberName").textContent = user.firstName + " " + user.lastName;
 
   var heroAccNum = el("heroAccNum");
   var heroRouting = el("heroRouting");

@@ -215,8 +215,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var ckEl = document.getElementById("acctBal_checking");
     var svEl = document.getElementById("acctBal_savings");
+    var bzEl = document.getElementById("acctBal_business");
     if (ckEl) ckEl.textContent = formatCurrency(checkingBal);
     if (svEl) svEl.textContent = formatCurrency(savingsBal);
+
+    /* Business balance — sum all non-checking/savings accounts */
+    var businessBal = 0;
+    var accts = currentUser.accounts || {};
+    var hasBusiness = false;
+    Object.keys(accts).forEach(function (k) {
+      if (k === "checking" || k === "savings") return;
+      if (!accts[k]) return;
+      hasBusiness = true;
+      businessBal += calcBalance(k);
+    });
+    if (bzEl) {
+      bzEl.textContent = formatCurrency(businessBal);
+      var bizBox = document.getElementById("acctBox_business");
+      if (bizBox) bizBox.style.display = hasBusiness ? "" : "none";
+    }
 
     /* Generic account boxes fallback */
     var boxes = document.querySelectorAll(".account-balance,.acct-bal");
@@ -304,29 +321,62 @@ document.addEventListener("DOMContentLoaded", function () {
     if (profileBtn && menuPanel) {
       profileBtn.addEventListener("click", function (e) {
         e.stopPropagation();
-        var isOpen =
-          menuPanel.classList.contains("open") ||
-          menuPanel.style.display === "block";
-        if (isOpen) {
-          menuPanel.classList.remove("open");
-          menuPanel.style.display = "none";
-        } else {
-          menuPanel.classList.add("open");
-          menuPanel.style.display = "block";
-        }
+        var isOpen = menuPanel.style.display === "block";
+        menuPanel.style.display = isOpen ? "none" : "block";
       });
       document.addEventListener("click", function () {
-        menuPanel.classList.remove("open");
-        menuPanel.style.display = "none";
+        if (menuPanel) menuPanel.style.display = "none";
+      });
+      menuPanel.addEventListener("click", function (e) {
+        e.stopPropagation();
       });
     }
 
-    /* ── Mobile hamburger (if any) ── */
+    /* ── Logout buttons ── */
+    document
+      .querySelectorAll(".logout-btn, #logoutBtn, .sign-out-btn")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("icu_session");
+          window.location.href = "index.html";
+        });
+      });
+
+    /* ── Link Account button → show modal ── */
+    var linkBtn = document.getElementById("linkAccountBtn");
+    var linkModal = document.getElementById("linkAccountModal");
+    if (linkBtn && linkModal) {
+      linkBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        linkModal.classList.remove("hidden");
+        linkModal.style.display = "flex";
+      });
+    }
+    /* Close modals on overlay click */
+    document.querySelectorAll(".modal").forEach(function (m) {
+      m.addEventListener("click", function (e) {
+        if (e.target === m) {
+          m.classList.add("hidden");
+          m.style.display = "none";
+        }
+      });
+    });
+
+    /* ── Switch Account button → go to manage account ── */
+    var switchBtn = document.getElementById("switchBtnCard");
+    if (switchBtn) {
+      switchBtn.addEventListener("click", function () {
+        window.location.href = "Manage-account.html";
+      });
+    }
+
+    /* ── Mobile hamburger ── */
     var hamBtn = document.querySelector(
-      ".hamburger, .menu-toggle, #hamburgerBtn, #menuToggle",
+      ".hamburger,#hamburgerBtn,#menuToggle,.menu-toggle",
     );
     var mobileNav = document.querySelector(
-      ".mobile-nav, .mobile-menu, #mobileMenu, .side-nav",
+      ".mobile-nav,#mobileMenu,.side-nav,.nav-drawer",
     );
     if (hamBtn && mobileNav) {
       hamBtn.addEventListener("click", function (e) {

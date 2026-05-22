@@ -126,9 +126,16 @@ document.addEventListener("DOMContentLoaded", function () {
         '<option value="savings">Savings Account ••••' +
         last4_fromAccSelect +
         "</option>";
-      var ddAccts = currentUser.accounts
-        ? JSON.parse(JSON.stringify(currentUser.accounts))
-        : {};
+
+      /* Add business accounts — from Supabase accounts field */
+      var ddAccts = {};
+      if (currentUser.accounts && typeof currentUser.accounts === "object") {
+        ddAccts = currentUser.accounts;
+      }
+      /* Also check data field for legacy format */
+      if (currentUser.data && currentUser.data.accounts) {
+        Object.assign(ddAccts, currentUser.data.accounts);
+      }
       Object.keys(ddAccts).forEach(function (k) {
         if (k === "checking" || k === "savings") return;
         var v = ddAccts[k];
@@ -146,6 +153,20 @@ document.addEventListener("DOMContentLoaded", function () {
           last4_fromAccSelect +
           "</option>";
       });
+      /* If admin set businessName but no business key, add a generic one */
+      if (
+        currentUser.businessName &&
+        Object.keys(ddAccts).filter(function (k) {
+          return k !== "checking" && k !== "savings";
+        }).length === 0
+      ) {
+        ddOpts +=
+          '<option value="business">' +
+          currentUser.businessName +
+          " ••••" +
+          last4_fromAccSelect +
+          "</option>";
+      }
       fromAccSelect.innerHTML = ddOpts;
 
       /* Live balance tag */
