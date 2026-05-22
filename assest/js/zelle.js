@@ -58,26 +58,21 @@ document.addEventListener("DOMContentLoaded", function () {
   /* ── Build account dropdown (includes business accounts) ── */
   var fromSelect = document.getElementById("fromAccount");
   if (fromSelect) {
-    var rawAccts = user.accounts
-      ? JSON.parse(JSON.stringify(user.accounts))
-      : {};
-    // Always include primary account type
-    rawAccts[user.accountType || "checking"] = true;
     var last4 = user.accountNumber
       ? String(user.accountNumber).slice(-4)
       : "****";
     var html = "";
-    if (rawAccts.checking)
-      html +=
-        '<option value="checking">Checking \u2022\u2022\u2022\u2022' +
-        last4 +
-        "</option>";
-    if (rawAccts.savings)
-      html +=
-        '<option value="savings">Savings \u2022\u2022\u2022\u2022' +
-        last4 +
-        "</option>";
-    // Add all business accounts — supports legacy {business:true} and new {business_0:{name:...}}
+
+    // Always show checking and savings
+    html +=
+      '<option value="checking">Checking Account ••••' + last4 + "</option>";
+    html +=
+      '<option value="savings">Savings Account ••••' + last4 + "</option>";
+
+    // Add business accounts if they exist
+    var rawAccts = user.accounts
+      ? JSON.parse(JSON.stringify(user.accounts))
+      : {};
     Object.keys(rawAccts).forEach(function (k) {
       if (k === "checking" || k === "savings") return;
       var val = rawAccts[k];
@@ -85,19 +80,14 @@ document.addEventListener("DOMContentLoaded", function () {
       var label =
         typeof val === "object" && val.name
           ? val.name
-          : k === "business"
-            ? user.businessName || "Business Account"
-            : user.businessName || "Business Account";
+          : user.businessName || "Business Account";
       html +=
-        '<option value="' +
-        k +
-        '">' +
-        label +
-        " \u2022\u2022\u2022\u2022" +
-        last4 +
-        "</option>";
+        '<option value="' + k + '">' + label + " ••••" + last4 + "</option>";
     });
-    if (!html) html = '<option value="">No accounts available</option>';
+
+    if (!html)
+      html =
+        '<option value="checking">Checking Account ••••' + last4 + "</option>";
     fromSelect.innerHTML = html;
   }
 

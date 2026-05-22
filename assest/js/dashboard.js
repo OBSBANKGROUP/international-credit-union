@@ -56,24 +56,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ================= CALCULATE BALANCE ================= */
   const logs = getLogs();
+  const primary = (currentUser.accountType || "checking").toLowerCase();
+
   function getAccBalance(userId, type) {
     let bal = 0;
     logs.forEach((l) => {
-      if (l.userId === userId && l.amount) {
-        if (type && l.targetAccount !== type) return;
-        if (l.txnType === "credit") bal += parseFloat(l.amount);
-        else if (l.txnType === "debit") bal -= parseFloat(l.amount);
-      }
+      if (l.userId !== userId || !l.amount) return;
+      // Use explicit targetAccount if set; otherwise fall back to user's primary
+      const acct = (l.targetAccount || primary).toLowerCase();
+      if (type && acct !== type.toLowerCase()) return;
+      if (l.txnType === "credit") bal += parseFloat(l.amount);
+      else if (l.txnType === "debit") bal -= parseFloat(l.amount);
     });
     return bal;
   }
-
-  /* ── Fixed balance calculation ──
-     Logs with no targetAccount fall back to the user's primary accountType.
-     Logs that explicitly have targetAccount="checking" or "savings" always
-     count for that specific account regardless of primary type.
-  ── */
-  const primary = (currentUser.accountType || "checking").toLowerCase();
 
   function getAccBalFixed(userId, type) {
     let bal = 0;

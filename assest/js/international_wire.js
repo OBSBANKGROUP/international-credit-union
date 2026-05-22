@@ -66,31 +66,28 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("intlFromAccount") ||
     (form ? form.querySelector("select") : null);
   if (fromAccSelect) {
-    var accts = currentUser.accounts
-      ? JSON.parse(JSON.stringify(currentUser.accounts))
-      : {};
-    accts[currentUser.accountType || "checking"] = true;
     var last4 = currentUser.accountNumber
       ? String(currentUser.accountNumber).slice(-4)
       : "****";
     var opts = "<option value=''>Select Account</option>";
-    if (accts.checking)
-      opts +=
-        "<option value='checking'>Checking \u2022\u2022\u2022\u2022" +
-        last4 +
-        "</option>";
-    if (accts.savings)
-      opts +=
-        "<option value='savings'>Savings \u2022\u2022\u2022\u2022" +
-        last4 +
-        "</option>";
+    opts +=
+      "<option value='checking'>Checking Account \u2022\u2022\u2022\u2022" +
+      last4 +
+      "</option>";
+    opts +=
+      "<option value='savings'>Savings Account \u2022\u2022\u2022\u2022" +
+      last4 +
+      "</option>";
+    var accts = currentUser.accounts
+      ? JSON.parse(JSON.stringify(currentUser.accounts))
+      : {};
     Object.keys(accts).forEach(function (k) {
       if (k === "checking" || k === "savings") return;
       if (!accts[k]) return;
       var label =
         typeof accts[k] === "object" && accts[k].name
           ? accts[k].name
-          : currentUser.businessName || "Business";
+          : currentUser.businessName || "Business Account";
       opts +=
         "<option value='" +
         k +
