@@ -3,242 +3,721 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>Settings | International Credit Union</title>
-
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
-
-    <link rel="stylesheet" href="assest/css/settings.css" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
     <script src="assest/js/theme.js"></script>
+    <link rel="stylesheet" href="assest/css/settings.css" />
   </head>
-
   <body>
-    <!-- ===== HEADER ===== -->
-
     <header class="settings-header">
-      <div class="container">
-        <a href="dashboard.html" class="back-btn">← Back</a>
+      <div class="hc">
+        <a href="dashboard.html" class="back-btn">&#8592; Back</a>
         <h2>Account Settings</h2>
       </div>
     </header>
 
-    <!-- ===== MAIN ===== -->
-
-    <main class="settings-page">
-      <div class="container">
-        <!-- ===== PROFILE SECTION ===== -->
-
-        <section class="profile-card">
-          <div class="profile-img-box">
-            <img
-              src="assest/images/profile.png"
-              id="profilePhoto"
-              alt="Profile"
-            />
+    <div class="page-body">
+      <!-- PROFILE HERO -->
+      <div class="profile-hero">
+        <img
+          src="assets/images/default-user.png"
+          class="profile-avatar"
+          id="profileAvatar"
+          alt="Profile"
+        />
+        <div class="profile-hero-info">
+          <h2 id="heroName">Loading…</h2>
+          <p id="heroEmail">—</p>
+          <div class="account-badge">
+            <span class="material-icons-outlined">verified_user</span>
+            <span id="heroId">ICU—</span>
           </div>
-
-          <h3 id="fullName">Loading...</h3>
-          <p class="account-id">Account ID: <span id="accountId">----</span></p>
-        </section>
-
-        <!-- ===== PERSONAL INFO ===== -->
-
-        <section class="info-card">
-          <h3>Personal Information</h3>
-
-          <div class="info-grid">
-            <div>
-              <label>Full Name</label>
-              <input id="nameField" readonly />
-            </div>
-
-            <div>
-              <label>Date of Birth</label>
-              <input id="dobField" readonly />
-            </div>
-
-            <div>
-              <label>SSN</label>
-              <input id="ssnField" readonly />
-            </div>
-
-            <div>
-              <label>Phone</label>
-              <input id="phoneField" readonly />
-            </div>
-
-            <div>
-              <label>Email</label>
-              <input id="emailField" readonly />
-            </div>
-
-            <div>
-              <label>Address</label>
-              <input id="addressField" readonly />
-            </div>
-          </div>
-        </section>
-
-        <!-- ===== BANK INFO ===== -->
-
-        <section class="info-card">
-          <h3>Bank Information</h3>
-
-          <div class="info-grid">
-            <div>
-              <label>Account Number</label>
-              <input id="accNumberField" readonly />
-            </div>
-
-            <div>
-              <label>Routing Number</label>
-              <input id="routingField" readonly />
-            </div>
-          </div>
-        </section>
-
-        <!-- ===== SECURITY ===== -->
-
-        <section class="security-card">
-          <h3>Security</h3>
-
-          <div class="security-actions">
-            <button id="changePassBtn">Change Password</button>
-
-            <button id="changeEmailBtn">Change Email</button>
-
-            <button id="resetSecBtn">Reset Security Questions</button>
-          </div>
-        </section>
-
-        <!-- ===== PREFERENCES ===== -->
-        <section class="info-card">
-          <h3>General Preferences</h3>
-          <div
-            class="toggle-row"
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-top: 15px;
-            "
-          >
-            <span>Dark Mode</span>
-            <label class="switch">
-              <input type="checkbox" id="darkToggle" />
-              <span class="slider"></span>
-            </label>
-          </div>
-        </section>
+        </div>
       </div>
-    </main>
 
-    <!-- ========== CHANGE PASSWORD MODAL ========== -->
+      <!-- PERSONAL INFORMATION -->
+      <div class="settings-card">
+        <div class="card-title">
+          <span class="material-icons-outlined">person</span>
+          Personal Information
+        </div>
+        <div class="info-grid">
+          <div class="info-field">
+            <label>First Name</label>
+            <input id="fldFirst" readonly />
+          </div>
+          <div class="info-field">
+            <label>Last Name</label>
+            <input id="fldLast" readonly />
+          </div>
+          <div class="info-field">
+            <label>Date of Birth</label>
+            <input id="fldDob" readonly />
+          </div>
+          <div class="info-field">
+            <label>Phone</label>
+            <input id="fldPhone" readonly />
+          </div>
+          <div class="info-field full">
+            <label>Email Address</label>
+            <input id="fldEmail" readonly />
+          </div>
+          <div class="info-field full">
+            <label>Mailing Address</label>
+            <input id="fldAddress" readonly />
+          </div>
+        </div>
+      </div>
 
-    <div class="modal-overlay" id="passwordModal">
+      <!-- BANK INFORMATION -->
+      <div class="settings-card">
+        <div class="card-title">
+          <span class="material-icons-outlined">account_balance</span>
+          Bank Information
+        </div>
+        <div class="info-grid">
+          <div class="info-field">
+            <label>Account Number</label>
+            <input id="fldAccNum" readonly />
+          </div>
+          <div class="info-field">
+            <label>Routing Number</label>
+            <input id="fldRouting" value="021000021" readonly />
+          </div>
+          <div class="info-field">
+            <label>Account Type</label>
+            <input id="fldAccType" readonly />
+          </div>
+          <div class="info-field">
+            <label>Member Since</label>
+            <input id="fldSince" readonly />
+          </div>
+        </div>
+      </div>
+
+      <!-- SECURITY -->
+      <div class="settings-card">
+        <div class="card-title">
+          <span class="material-icons-outlined">security</span>
+          Security
+        </div>
+        <div class="security-actions">
+          <div class="security-row" id="openPinModal">
+            <div class="security-row-left">
+              <div class="sec-icon blue">
+                <span class="material-icons-outlined">pin</span>
+              </div>
+              <div>
+                <strong>Transaction PIN</strong>
+                <span id="pinStatus">Set a 4-digit PIN for all transfers</span>
+              </div>
+            </div>
+            <span class="material-icons-outlined arrow">chevron_right</span>
+          </div>
+          <div class="security-row" id="openPassModal">
+            <div class="security-row-left">
+              <div class="sec-icon purple">
+                <span class="material-icons-outlined">lock</span>
+              </div>
+              <div>
+                <strong>Change Password</strong>
+                <span>Update your login password</span>
+              </div>
+            </div>
+            <span class="material-icons-outlined arrow">chevron_right</span>
+          </div>
+          <div class="security-row" id="openEmailModal">
+            <div class="security-row-left">
+              <div class="sec-icon green">
+                <span class="material-icons-outlined">email</span>
+              </div>
+              <div>
+                <strong>Change Email</strong>
+                <span>Update your registered email</span>
+              </div>
+            </div>
+            <span class="material-icons-outlined arrow">chevron_right</span>
+          </div>
+          <div class="security-row" id="openSecQModal">
+            <div class="security-row-left">
+              <div class="sec-icon red">
+                <span class="material-icons-outlined">help_outline</span>
+              </div>
+              <div>
+                <strong>Security Questions</strong>
+                <span>Reset your account recovery questions</span>
+              </div>
+            </div>
+            <span class="material-icons-outlined arrow">chevron_right</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREFERENCES -->
+      <div class="settings-card">
+        <div class="card-title">
+          <span class="material-icons-outlined">tune</span>
+          Preferences
+        </div>
+        <div class="pref-row">
+          <div class="pref-left">
+            <div class="pref-icon">
+              <span class="material-icons-outlined">dark_mode</span>
+            </div>
+            <div class="pref-label">
+              <strong>Dark Mode</strong>
+              <span>Switch to a darker theme</span>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="darkToggle" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="pref-row">
+          <div class="pref-left">
+            <div class="pref-icon">
+              <span class="material-icons-outlined">notifications</span>
+            </div>
+            <div class="pref-label">
+              <strong>Email Alerts</strong>
+              <span>Receive notifications for transactions</span>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="alertToggle" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- DANGER ZONE -->
+      <div class="danger-card">
+        <div class="danger-title">
+          <span class="material-icons-outlined">warning</span>
+          Danger Zone
+        </div>
+        <p
+          style="
+            font-size: 0.88rem;
+            color: #c62828;
+            margin-bottom: 16px;
+            opacity: 0.8;
+          "
+        >
+          These actions are permanent and cannot be undone.
+        </p>
+        <button class="danger-btn" id="logoutAllBtn">
+          <span class="material-icons-outlined" style="font-size: 1rem"
+            >logout</span
+          >
+          Sign Out of All Devices
+        </button>
+      </div>
+    </div>
+    <!-- /page-body -->
+
+    <!-- ═══ CHANGE PASSWORD MODAL ═══ -->
+    <div class="modal-overlay" id="passModal">
       <div class="modal-box">
         <h3>Change Password</h3>
-
-        <!-- Password Form -->
-        <form id="passwordForm">
-          <div class="form-group">
+        <p>Enter your current password, then choose a new one.</p>
+        <div id="passFormStep">
+          <div class="modal-form-group">
             <label>Current Password</label>
-            <input type="password" id="currentPass" required />
+            <input type="password" id="currentPass" placeholder="••••••••" />
           </div>
-
-          <div class="form-group">
+          <div class="modal-form-group">
             <label>New Password</label>
-            <input type="password" id="newPass" required />
+            <input
+              type="password"
+              id="newPass"
+              placeholder="Min. 6 characters"
+            />
           </div>
-
-          <div class="form-group">
+          <div class="modal-form-group">
             <label>Confirm New Password</label>
-            <input type="password" id="confirmPass" required />
+            <input
+              type="password"
+              id="confirmPass"
+              placeholder="Repeat new password"
+            />
           </div>
-
-          <p class="error-msg" id="passError"></p>
-
-          <button type="submit" class="confirm-btn">Confirm Changes</button>
-        </form>
-
-        <!-- OTP SECTION -->
-
-        <div class="otp-section hidden" id="otpSection">
-          <p>Enter the 6-digit code sent to your email</p>
-
-          <input
-            type="text"
-            id="otpCode"
-            maxlength="6"
-            placeholder="Enter OTP"
-          />
-
-          <button id="verifyOtpBtn" class="confirm-btn">Verify & Update</button>
+          <div class="error-msg" id="passError"></div>
+          <div class="modal-actions">
+            <button class="btn-confirm" id="passSubmit">
+              Send Verification Code
+            </button>
+            <button class="btn-cancel" id="passCancel">Cancel</button>
+          </div>
         </div>
-
-        <button class="close-btn" id="closePassModal">Cancel</button>
+        <div class="otp-step" id="passOtpStep">
+          <p style="font-size: 0.88rem; color: #555; margin-bottom: 18px">
+            A 6-digit code was sent to your registered email.
+          </p>
+          <input
+            class="otp-input-big"
+            type="text"
+            id="passOtpInput"
+            maxlength="6"
+            placeholder="— — — — — —"
+          />
+          <p class="otp-hint">Check your inbox and spam folder</p>
+          <div
+            class="error-msg"
+            id="passOtpError"
+            style="margin-top: 12px"
+          ></div>
+          <div class="modal-actions" style="margin-top: 18px">
+            <button class="btn-confirm" id="passOtpVerify">
+              Verify & Update
+            </button>
+            <button class="btn-cancel" id="passOtpCancel">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- ========== CHANGE SECURITY QUESTIONS MODAL ========== -->
-
-    <div class="modal-overlay" id="securityQModal">
-      <div class="modal-box large">
-        <h3>Change Security Questions</h3>
-
-        <!-- VERIFY -->
-
-        <div id="verifySection">
-          <p>Verify your identity before continuing.</p>
-
-          <button id="sendVerifyOtpBtn" class="confirm-btn">
-            Send Verification Code
-          </button>
+    <!-- ═══ CHANGE EMAIL MODAL ═══ -->
+    <div class="modal-overlay" id="emailModal">
+      <div class="modal-box">
+        <h3>Change Email Address</h3>
+        <p>Your new email will be used for login and notifications.</p>
+        <div id="emailFormStep">
+          <div class="modal-form-group">
+            <label>New Email Address</label>
+            <input type="email" id="newEmail" placeholder="you@example.com" />
+          </div>
+          <div class="modal-form-group">
+            <label>Confirm Password</label>
+            <input
+              type="password"
+              id="emailPassConfirm"
+              placeholder="Enter your password"
+            />
+          </div>
+          <div class="error-msg" id="emailError"></div>
+          <div class="modal-actions">
+            <button class="btn-confirm" id="emailSubmit">
+              Send Verification Code
+            </button>
+            <button class="btn-cancel" id="emailCancel">Cancel</button>
+          </div>
         </div>
-
-        <!-- OTP -->
-
-        <div class="otp-section hidden" id="securityOtpSection">
-          <p>Enter the code sent to your email</p>
-
+        <div class="otp-step" id="emailOtpStep">
+          <p style="font-size: 0.88rem; color: #555; margin-bottom: 18px">
+            Enter the code sent to your new email address.
+          </p>
           <input
+            class="otp-input-big"
             type="text"
-            id="securityOtpInput"
+            id="emailOtpInput"
             maxlength="6"
-            placeholder="Enter OTP"
+            placeholder="— — — — — —"
           />
-
-          <button id="verifySecurityOtpBtn" class="confirm-btn">Verify</button>
+          <p class="otp-hint">Check inbox and spam folder</p>
+          <div
+            class="error-msg"
+            id="emailOtpError"
+            style="margin-top: 12px"
+          ></div>
+          <div class="modal-actions" style="margin-top: 18px">
+            <button class="btn-confirm" id="emailOtpVerify">
+              Verify & Update
+            </button>
+            <button class="btn-cancel" id="emailOtpCancel">Cancel</button>
+          </div>
         </div>
-
-        <!-- FORM -->
-
-        <form id="securityQForm" class="hidden">
-          <div class="qa-group">
-            <input type="text" placeholder="New Question 1" required />
-            <input type="text" placeholder="New Answer" required />
-          </div>
-
-          <div class="qa-group">
-            <input type="text" placeholder="New Question 2" required />
-            <input type="text" placeholder="New Answer" required />
-          </div>
-
-          <div class="qa-group">
-            <input type="text" placeholder="New Question 3" required />
-            <input type="text" placeholder="New Answer" required />
-          </div>
-
-          <button type="submit" class="confirm-btn">Save Changes</button>
-        </form>
-
-        <button class="close-btn" id="closeSecurityQModal">Cancel</button>
       </div>
     </div>
+
+    <!-- ═══ SECURITY QUESTIONS MODAL ═══ -->
+    <div class="modal-overlay" id="secQModal">
+      <div class="modal-box">
+        <h3>Security Questions</h3>
+        <p>Set 3 questions used to verify your identity.</p>
+        <div id="secVerifyStep">
+          <div class="modal-form-group">
+            <label>Confirm Password to Continue</label>
+            <input
+              type="password"
+              id="secPassConfirm"
+              placeholder="Your password"
+            />
+          </div>
+          <div class="error-msg" id="secVerifyError"></div>
+          <div class="modal-actions">
+            <button class="btn-confirm" id="secVerifyBtn">Continue</button>
+            <button class="btn-cancel" id="secVerifyCancel">Cancel</button>
+          </div>
+        </div>
+        <div class="otp-step" id="secFormStep">
+          <div class="modal-form-group">
+            <label>Question 1</label>
+            <input
+              type="text"
+              id="secQ1"
+              placeholder="e.g. What was your first pet's name?"
+            />
+          </div>
+          <div class="modal-form-group">
+            <label>Answer 1</label>
+            <input type="text" id="secA1" placeholder="Your answer" />
+          </div>
+          <div class="modal-form-group">
+            <label>Question 2</label>
+            <input
+              type="text"
+              id="secQ2"
+              placeholder="e.g. What city were you born in?"
+            />
+          </div>
+          <div class="modal-form-group">
+            <label>Answer 2</label>
+            <input type="text" id="secA2" placeholder="Your answer" />
+          </div>
+          <div class="modal-form-group">
+            <label>Question 3</label>
+            <input
+              type="text"
+              id="secQ3"
+              placeholder="e.g. What is your mother's maiden name?"
+            />
+          </div>
+          <div class="modal-form-group">
+            <label>Answer 3</label>
+            <input type="text" id="secA3" placeholder="Your answer" />
+          </div>
+          <div class="modal-actions">
+            <button class="btn-confirm" id="secSaveBtn">Save Questions</button>
+            <button class="btn-cancel" id="secFormCancel">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
     <script src="assest/js/db.js"></script>
-    <script src="assest/js/settings.js"></script>
+    <script src="assest/js/auth.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var USERS_KEY = "icu_users";
+        var SESSION_KEY = "icu_session";
+
+        var session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+        if (!session) {
+          window.location.href = "index.html";
+          return;
+        }
+        var users = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+        var user = users.find(function (u) {
+          return u.id === session.id;
+        });
+        if (!user) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        /* ── POPULATE FIELDS ── */
+        function set(id, val) {
+          var el = document.getElementById(id);
+          if (el) el.value = val || "—";
+        }
+        document.getElementById("heroName").textContent =
+          user.firstName + " " + user.lastName;
+        document.getElementById("heroEmail").textContent = user.email;
+        document.getElementById("heroId").textContent = "ICU" + user.id;
+        if (user.profilePic)
+          document.getElementById("profileAvatar").src = user.profilePic;
+        set("fldFirst", user.firstName);
+        set("fldLast", user.lastName);
+        set("fldDob", user.dob);
+        set("fldPhone", user.phone);
+        set("fldEmail", user.email);
+        set("fldAddress", user.address);
+        set("fldAccNum", user.accountNumber || "Not yet assigned");
+        set(
+          "fldAccType",
+          user.accountType
+            ? user.accountType.charAt(0).toUpperCase() +
+                user.accountType.slice(1)
+            : "Checking",
+        );
+        set(
+          "fldSince",
+          new Date(user.createdAt || Date.now()).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+        );
+
+        /* ── THEME ── */
+        if (window._initThemeToggle) window._initThemeToggle("darkToggle");
+
+        /* ── TOAST ── */
+        function showToast(msg) {
+          var t = document.getElementById("toast");
+          t.textContent = msg;
+          t.classList.add("show");
+          setTimeout(function () {
+            t.classList.remove("show");
+          }, 3000);
+        }
+
+        /* ── MODAL HELPERS ── */
+        function openModal(id) {
+          document.getElementById(id).classList.add("open");
+        }
+        function closeModal(id) {
+          document.getElementById(id).classList.remove("open");
+        }
+        function genOTP() {
+          return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        /* ── SAVE USER ── */
+        function saveUser() {
+          var idx = users.findIndex(function (u) {
+            return u.id === session.id;
+          });
+          if (idx > -1) {
+            users[idx] = user;
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+          }
+          // refresh session
+          var s = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+          if (s) {
+            s.email = user.email;
+            localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+          }
+        }
+
+        /* ────────────────────────────────
+         CHANGE PASSWORD
+      ──────────────────────────────── */
+        var passOTP = "";
+        document
+          .getElementById("openPassModal")
+          .addEventListener("click", function () {
+            openModal("passModal");
+          });
+        document
+          .getElementById("passCancel")
+          .addEventListener("click", function () {
+            closeModal("passModal");
+          });
+        document
+          .getElementById("passOtpCancel")
+          .addEventListener("click", function () {
+            closeModal("passModal");
+          });
+
+        document
+          .getElementById("passSubmit")
+          .addEventListener("click", function () {
+            var cur = document.getElementById("currentPass").value;
+            var newP = document.getElementById("newPass").value;
+            var confP = document.getElementById("confirmPass").value;
+            var err = document.getElementById("passError");
+            if (!cur)
+              return (err.textContent = "Please enter your current password.");
+            if (cur !== user.password)
+              return (err.textContent = "Current password is incorrect.");
+            if (newP.length < 6)
+              return (err.textContent =
+                "New password must be at least 6 characters.");
+            if (newP !== confP)
+              return (err.textContent = "Passwords do not match.");
+            err.textContent = "";
+            passOTP = genOTP();
+            console.log("Password OTP:", passOTP); // in prod: send via email
+            if (window._sendOTP)
+              window._sendOTP(user.email, passOTP, user.firstName);
+            document.getElementById("passFormStep").style.display = "none";
+            document.getElementById("passOtpStep").classList.add("visible");
+          });
+
+        document
+          .getElementById("passOtpVerify")
+          .addEventListener("click", function () {
+            var entered = document.getElementById("passOtpInput").value.trim();
+            var err = document.getElementById("passOtpError");
+            if (entered !== passOTP)
+              return (err.textContent = "Invalid code. Please try again.");
+            user.password = document.getElementById("newPass").value;
+            saveUser();
+            closeModal("passModal");
+            document.getElementById("passFormStep").style.display = "";
+            document.getElementById("passOtpStep").classList.remove("visible");
+            document.getElementById("passOtpInput").value = "";
+            showToast("✓ Password updated successfully");
+          });
+
+        /* ────────────────────────────────
+         CHANGE EMAIL
+      ──────────────────────────────── */
+        var emailOTP = "",
+          pendingEmail = "";
+        document
+          .getElementById("openEmailModal")
+          .addEventListener("click", function () {
+            openModal("emailModal");
+          });
+        document
+          .getElementById("emailCancel")
+          .addEventListener("click", function () {
+            closeModal("emailModal");
+          });
+        document
+          .getElementById("emailOtpCancel")
+          .addEventListener("click", function () {
+            closeModal("emailModal");
+          });
+
+        document
+          .getElementById("emailSubmit")
+          .addEventListener("click", function () {
+            var ne = document
+              .getElementById("newEmail")
+              .value.trim()
+              .toLowerCase();
+            var pwd = document.getElementById("emailPassConfirm").value;
+            var err = document.getElementById("emailError");
+            if (!ne || !ne.includes("@"))
+              return (err.textContent = "Please enter a valid email address.");
+            if (pwd !== user.password)
+              return (err.textContent = "Password is incorrect.");
+            if (ne === user.email)
+              return (err.textContent = "This is already your current email.");
+            var dup = users.find(function (u) {
+              return u.email === ne && u.id !== user.id;
+            });
+            if (dup)
+              return (err.textContent =
+                "That email is already registered to another account.");
+            err.textContent = "";
+            pendingEmail = ne;
+            emailOTP = genOTP();
+            console.log("Email OTP:", emailOTP);
+            if (window._sendOTP) window._sendOTP(ne, emailOTP, user.firstName);
+            document.getElementById("emailFormStep").style.display = "none";
+            document.getElementById("emailOtpStep").classList.add("visible");
+          });
+
+        document
+          .getElementById("emailOtpVerify")
+          .addEventListener("click", function () {
+            var entered = document.getElementById("emailOtpInput").value.trim();
+            var err = document.getElementById("emailOtpError");
+            if (entered !== emailOTP)
+              return (err.textContent = "Invalid code. Please try again.");
+            user.email = pendingEmail;
+            saveUser();
+            closeModal("emailModal");
+            document.getElementById("emailFormStep").style.display = "";
+            document.getElementById("emailOtpStep").classList.remove("visible");
+            document.getElementById("emailOtpInput").value = "";
+            document.getElementById("fldEmail").value = user.email;
+            document.getElementById("heroEmail").textContent = user.email;
+            showToast("✓ Email updated successfully");
+          });
+
+        /* ────────────────────────────────
+         SECURITY QUESTIONS
+      ──────────────────────────────── */
+        document
+          .getElementById("openSecQModal")
+          .addEventListener("click", function () {
+            openModal("secQModal");
+          });
+        document
+          .getElementById("secVerifyCancel")
+          .addEventListener("click", function () {
+            closeModal("secQModal");
+          });
+        document
+          .getElementById("secFormCancel")
+          .addEventListener("click", function () {
+            closeModal("secQModal");
+          });
+
+        document
+          .getElementById("secVerifyBtn")
+          .addEventListener("click", function () {
+            var pwd = document.getElementById("secPassConfirm").value;
+            var err = document.getElementById("secVerifyError");
+            if (pwd !== user.password)
+              return (err.textContent = "Password is incorrect.");
+            err.textContent = "";
+            document.getElementById("secVerifyStep").style.display = "none";
+            document.getElementById("secFormStep").classList.add("visible");
+          });
+
+        document
+          .getElementById("secSaveBtn")
+          .addEventListener("click", function () {
+            var q1 = document.getElementById("secQ1").value.trim();
+            var a1 = document.getElementById("secA1").value.trim();
+            var q2 = document.getElementById("secQ2").value.trim();
+            var a2 = document.getElementById("secA2").value.trim();
+            var q3 = document.getElementById("secQ3").value.trim();
+            var a3 = document.getElementById("secA3").value.trim();
+            if (!q1 || !a1 || !q2 || !a2 || !q3 || !a3)
+              return alert("Please fill in all questions and answers.");
+            user.securityQuestions = [
+              { q: q1, a: a1 },
+              { q: q2, a: a2 },
+              { q: q3, a: a3 },
+            ];
+            saveUser();
+            closeModal("secQModal");
+            document.getElementById("secVerifyStep").style.display = "";
+            document.getElementById("secFormStep").classList.remove("visible");
+            document.getElementById("secPassConfirm").value = "";
+            showToast("✓ Security questions saved");
+          });
+
+        /* ── LOGOUT ALL DEVICES ── */
+        document
+          .getElementById("logoutAllBtn")
+          .addEventListener("click", function () {
+            if (
+              confirm(
+                "Sign out of all devices? You will be redirected to the login page.",
+              )
+            ) {
+              localStorage.removeItem(SESSION_KEY);
+              window.location.href = "index.html";
+            }
+          });
+
+        /* ── ALERT PREFERENCE ── */
+        var alertToggle = document.getElementById("alertToggle");
+        var savedAlert = localStorage.getItem("icu_email_alerts");
+        if (savedAlert === "off") alertToggle.checked = false;
+        alertToggle.addEventListener("change", function () {
+          localStorage.setItem(
+            "icu_email_alerts",
+            alertToggle.checked ? "on" : "off",
+          );
+          showToast(
+            alertToggle.checked
+              ? "✓ Email alerts enabled"
+              : "Email alerts disabled",
+          );
+        });
+      });
+    </script>
+    <script src="assest/js/transaction-pin.js"></script>
   </body>
 </html>

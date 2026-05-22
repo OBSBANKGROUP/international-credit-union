@@ -265,19 +265,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   } // end initDashboard
 
-  /* Call initDashboard after db.js has loaded data, or immediately if no db.js */
-  if (window._icuLoadCache) {
-    window
-      ._icuLoadCache()
-      .then(function () {
-        initDashboard();
-      })
-      .catch(function () {
-        initDashboard();
-      });
-  } else {
-    initDashboard();
+  /* Wait for db.js to finish syncing from Supabase, then run dashboard */
+  function runWhenReady() {
+    if (window._icuLoadCache) {
+      window
+        ._icuLoadCache()
+        .then(function () {
+          // Re-check user exists after fresh load
+          var freshUsers = JSON.parse(
+            localStorage.getItem("icu_users") || "[]",
+          );
+          var freshUser = freshUsers.find(function (u) {
+            return String(u.id) === String(session.id);
+          });
+          if (!freshUser) {
+            window.location.href = "index.html";
+            return;
+          }
+          initDashboard();
+        })
+        .catch(function () {
+          // Supabase failed — use whatever is in localStorage
+          initDashboard();
+        });
+    } else {
+      initDashboard();
+    }
   }
+  runWhenReady();
 });
 
 /* LINK ACCOUNT MODAL */
