@@ -641,27 +641,87 @@ document.addEventListener("DOMContentLoaded", function () {
     var shareBtn = document.getElementById("shareReceiptBtn");
     if (shareBtn)
       shareBtn.addEventListener("click", function () {
-        var txt =
-          "ICU Wire Transfer Receipt\nTo: " +
-          pendingTxn.name +
-          "\nBank: " +
-          pendingTxn.bank +
-          "\nAmount: $" +
-          fmt(pendingTxn.amtRaw) +
-          "\nFee (2%): $" +
-          fmt(pendingTxn.tax) +
-          "\nTotal: $" +
-          fmt(pendingTxn.total) +
-          "\nRef: " +
-          pendingTxn.txnId +
-          "\nDate: " +
-          pendingTxn.date;
-        if (navigator.share)
-          navigator.share({ title: "ICU Receipt", text: txt });
-        else if (navigator.clipboard)
-          navigator.clipboard.writeText(txt).then(function () {
-            alert("Receipt copied.");
-          });
+        var card = document.querySelector(".receipt-card-wrap");
+        if (!card) return;
+        shareBtn.textContent = "Generating...";
+        shareBtn.disabled = true;
+
+        function fallbackText() {
+          var txt =
+            "ICU Wire Transfer Receipt\nTo: " +
+            pendingTxn.name +
+            "\nBank: " +
+            pendingTxn.bank +
+            "\nAmount: $" +
+            fmt(pendingTxn.amtRaw) +
+            "\nFee (2%): $" +
+            fmt(pendingTxn.tax) +
+            "\nTotal: $" +
+            fmt(pendingTxn.total) +
+            "\nRef: " +
+            pendingTxn.txnId +
+            "\nDate: " +
+            pendingTxn.date;
+          if (navigator.share)
+            navigator.share({ title: "ICU Receipt", text: txt });
+          else if (navigator.clipboard)
+            navigator.clipboard.writeText(txt).then(function () {
+              alert("Receipt copied.");
+            });
+        }
+
+        function reset() {
+          shareBtn.innerHTML = "&#128257; Share Receipt";
+          shareBtn.disabled = false;
+        }
+
+        if (typeof html2canvas !== "undefined") {
+          html2canvas(card, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            logging: false,
+          })
+            .then(function (canvas) {
+              canvas.toBlob(function (blob) {
+                var fname =
+                  "ICU-Receipt-" + (pendingTxn.txnId || Date.now()) + ".png";
+                var file = new File([blob], fname, { type: "image/png" });
+                if (
+                  navigator.share &&
+                  navigator.canShare &&
+                  navigator.canShare({ files: [file] })
+                ) {
+                  navigator
+                    .share({
+                      title: "ICU Wire Transfer Receipt",
+                      files: [file],
+                    })
+                    .then(reset)
+                    .catch(function () {
+                      var a = document.createElement("a");
+                      a.href = canvas.toDataURL("image/png");
+                      a.download = fname;
+                      a.click();
+                      reset();
+                    });
+                } else {
+                  var a = document.createElement("a");
+                  a.href = canvas.toDataURL("image/png");
+                  a.download = fname;
+                  a.click();
+                  reset();
+                }
+              }, "image/png");
+            })
+            .catch(function () {
+              fallbackText();
+              reset();
+            });
+        } else {
+          fallbackText();
+          reset();
+        }
       });
   } // end initPage
 });

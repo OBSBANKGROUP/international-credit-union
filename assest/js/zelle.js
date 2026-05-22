@@ -332,27 +332,71 @@ document.addEventListener("DOMContentLoaded", function () {
     var shareBtn = document.getElementById("shareSuccessBtn");
     if (shareBtn) {
       shareBtn.onclick = function () {
-        var txt =
-          "ICU Zelle Receipt\nTo: " +
-          pendingTxn.name +
-          " (" +
-          pendingTxn.rec +
-          ")\nAmount: " +
-          fmt(pendingTxn.amtRaw) +
-          "\nFee (2%): " +
-          fmt(pendingTxn.tax) +
-          "\nTotal: " +
-          fmt(pendingTxn.total) +
-          "\nRef: " +
-          pendingTxn.txnId +
-          "\nDate: " +
-          pendingTxn.date;
-        if (navigator.share)
-          navigator.share({ title: "ICU Receipt", text: txt });
-        else if (navigator.clipboard)
-          navigator.clipboard.writeText(txt).then(function () {
-            alert("Receipt copied.");
-          });
+        var card =
+          document.getElementById("receiptCapture") ||
+          document.getElementById("successScreen");
+        if (!card) return;
+        shareBtn.textContent = "Generating...";
+        shareBtn.disabled = true;
+
+        function reset() {
+          shareBtn.innerHTML = "&#128257; Share Receipt";
+          shareBtn.disabled = false;
+        }
+        function fallbackText() {
+          var _sm = document.getElementById("successMsg");
+          var txt = "ICU Transfer Receipt: " + (_sm ? _sm.textContent : "");
+          if (navigator.share)
+            navigator.share({ title: "ICU Receipt", text: txt });
+          else if (navigator.clipboard)
+            navigator.clipboard.writeText(txt).then(function () {
+              alert("Copied!");
+            });
+        }
+
+        if (typeof html2canvas !== "undefined") {
+          html2canvas(card, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            logging: false,
+          })
+            .then(function (canvas) {
+              canvas.toBlob(function (blob) {
+                var fname = "ICU-Receipt-" + Date.now() + ".png";
+                var file = new File([blob], fname, { type: "image/png" });
+                if (
+                  navigator.share &&
+                  navigator.canShare &&
+                  navigator.canShare({ files: [file] })
+                ) {
+                  navigator
+                    .share({ title: "ICU Receipt", files: [file] })
+                    .then(reset)
+                    .catch(function () {
+                      var a = document.createElement("a");
+                      a.href = canvas.toDataURL();
+                      a.download = fname;
+                      a.click();
+                      reset();
+                    });
+                } else {
+                  var a = document.createElement("a");
+                  a.href = canvas.toDataURL();
+                  a.download = fname;
+                  a.click();
+                  reset();
+                }
+              }, "image/png");
+            })
+            .catch(function () {
+              fallbackText();
+              reset();
+            });
+        } else {
+          fallbackText();
+          reset();
+        }
       };
     }
   });

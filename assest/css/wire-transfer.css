@@ -773,3 +773,25 @@ input[readonly] {
   border-bottom: 1px solid #f0f2f5;
   font-size: 0.88rem;
 }
+
+/* ── Receipt logo ── */
+.receipt-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.receipt-logo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+.receipt-bank-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.3px;
+}

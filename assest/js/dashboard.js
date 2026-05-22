@@ -372,12 +372,35 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
 
-    /* ── Switch Account button → go to manage account ── */
-    var switchBtn = document.getElementById("switchBtnCard");
-    if (switchBtn) {
-      switchBtn.addEventListener("click", function () {
-        window.location.href = "Manage-account.html";
-      });
+    /* ── Switch / Business Mode buttons → go to manage account ── */
+    ["switchBtn", "switchBtnCard"].forEach(function (id) {
+      var btn = document.getElementById(id);
+      if (btn) {
+        btn.addEventListener("click", function () {
+          window.location.href = "Manage-account.html";
+        });
+      }
+    });
+
+    /* ── Dark mode toggle ── */
+    if (window._initThemeToggle) {
+      window._initThemeToggle("darkToggle");
+    } else {
+      /* Fallback if theme.js didn't expose _initThemeToggle */
+      var darkTgl = document.getElementById("darkToggle");
+      if (darkTgl) {
+        var savedTheme = localStorage.getItem("icu_theme") || "light";
+        darkTgl.checked = savedTheme === "dark";
+        darkTgl.addEventListener("change", function () {
+          if (darkTgl.checked) {
+            document.body.classList.add("dark-mode");
+            localStorage.setItem("icu_theme", "dark");
+          } else {
+            document.body.classList.remove("dark-mode");
+            localStorage.setItem("icu_theme", "light");
+          }
+        });
+      }
     }
 
     /* ── Hamburger — uses CSS transform via .open class ── */

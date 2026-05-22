@@ -79,13 +79,48 @@
       </div>
     </div>
     <div class="success-screen" id="successScreen">
-      <div class="big-check">
-        <span class="material-icons-outlined">check</span>
+      <div
+        id="receiptCapture"
+        style="
+          background: white;
+          padding: 24px;
+          border-radius: 16px;
+          text-align: center;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f0f2f5;
+          "
+        >
+          <img
+            src="assest/images/logo.jpeg"
+            alt="ICU Logo"
+            style="
+              width: 36px;
+              height: 36px;
+              border-radius: 8px;
+              object-fit: cover;
+            "
+          />
+          <span style="font-weight: 700; color: #021633; font-size: 0.9rem"
+            >International Credit Union</span
+          >
+        </div>
+        <div class="big-check">
+          <span class="material-icons-outlined">check</span>
+        </div>
+        <h2>Transfer Sent!</h2>
+        <p id="successMsg">
+          Your Cash App transfer has been submitted successfully.
+        </p>
       </div>
-      <h2>Transfer Sent!</h2>
-      <p id="successMsg">
-        Your Cash App transfer has been submitted successfully.
-      </p>
       <button
         class="done-btn"
         onclick="window.location.href = 'dashboard.html'"
@@ -125,10 +160,11 @@
         </div>
       </div>
     </div>
-    <script src="assets/js/transaction-pin.js"></script>
+    <script src="assest/js/transaction-pin.js"></script>
     <script src="assest/js/pin-verify.js"></script>
     <script src="assest/js/face-verify.js"></script>
     <script src="assest/js/db.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="assest/js/auth.js"></script>
     <script src="assest/js/cashapp.js"></script>
   </body>
