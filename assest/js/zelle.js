@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (window.checkSuspended && window.checkSuspended()) return;
   var users = getUsers();
   var user = users.find(function (u) {
-    return u.id === session.id;
+    return String(u.id) === String(session.id);
   });
   if (!user) {
     window.location.href = "index.html";
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var primary = (user.accountType || "checking").toLowerCase();
     var b = 0;
     getLogs().forEach(function (l) {
-      if (l.userId !== session.id || l.amount == null) return;
+      if (String(l.userId) !== String(session.id) || l.amount == null) return;
       var acct = (l.targetAccount || primary).toLowerCase();
       if (acct !== type.toLowerCase()) return;
       if (l.txnType === "credit") b += parseFloat(l.amount);

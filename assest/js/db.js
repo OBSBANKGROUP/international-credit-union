@@ -322,16 +322,31 @@
     if (el) el.remove();
   }
 
+  /* ── Ready promise — other scripts wait on this ── */
+  var _resolveReady;
+  window._icuReady = new Promise(function (resolve) {
+    _resolveReady = resolve;
+  });
+
   /* Auto-load on every page */
   document.addEventListener("DOMContentLoaded", function () {
-    if (
-      !document.getElementById("loginBtn") &&
-      !document.getElementById("adminPanel")
-    ) {
-      // Protected page — show loading while syncing
+    var isLoginPage = !!document.getElementById("loginBtn");
+    var isAdminPage = !!document.getElementById("adminPanel");
+
+    if (!isLoginPage && !isAdminPage) {
       showSyncOverlay();
     }
-    window._icuLoadCache().then(hideSyncOverlay).catch(hideSyncOverlay);
+
+    window
+      ._icuLoadCache()
+      .then(function () {
+        hideSyncOverlay();
+        _resolveReady();
+      })
+      .catch(function () {
+        hideSyncOverlay();
+        _resolveReady(); // resolve anyway so pages don't hang
+      });
   });
 
   console.log("ICU DB: Supabase layer loaded");

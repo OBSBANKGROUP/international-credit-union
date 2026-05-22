@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const users = getUsers();
-  const currentUser = users.find((u) => u.id === session.id);
+  const currentUser = users.find((u) => String(u.id) === String(session.id));
   if (!currentUser) {
     localStorage.removeItem(SESSION_KEY);
     window.location.href = "index.html";
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function getAccBalance(userId, type) {
       let bal = 0;
       logs.forEach((l) => {
-        if (l.userId !== userId || !l.amount) return;
+        if (String(l.userId) !== String(userId) || !l.amount) return;
         // Use explicit targetAccount if set; otherwise fall back to user's primary
         const acct = (l.targetAccount || primary).toLowerCase();
         if (type && acct !== type.toLowerCase()) return;
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function getAccBalFixed(userId, type) {
       let bal = 0;
       logs.forEach((l) => {
-        if (l.userId !== userId || l.amount == null) return;
+        if (String(l.userId) !== String(userId) || l.amount == null) return;
         // If log has an explicit targetAccount, use it
         // If no targetAccount, count it only toward the primary account
         const acct = l.targetAccount ? l.targetAccount.toLowerCase() : primary;
@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (transSection) {
       const allLogs = getLogs();
       const userLogs = allLogs.filter(
-        (l) => l.userId === currentUser.id && l.amount,
+        (l) => String(l.userId) === String(currentUser.id) && l.amount,
       );
       const recentLogs = userLogs
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
@@ -265,34 +265,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   } // end initDashboard
 
-  /* Wait for db.js to finish syncing from Supabase, then run dashboard */
-  function runWhenReady() {
-    if (window._icuLoadCache) {
-      window
-        ._icuLoadCache()
-        .then(function () {
-          // Re-check user exists after fresh load
-          var freshUsers = JSON.parse(
-            localStorage.getItem("icu_users") || "[]",
-          );
-          var freshUser = freshUsers.find(function (u) {
-            return String(u.id) === String(session.id);
-          });
-          if (!freshUser) {
-            window.location.href = "index.html";
-            return;
-          }
-          initDashboard();
-        })
-        .catch(function () {
-          // Supabase failed — use whatever is in localStorage
-          initDashboard();
-        });
-    } else {
+  /* Wait for db.js _icuReady promise, then run dashboard */
+  if (window._icuReady) {
+    window._icuReady.then(function () {
       initDashboard();
-    }
+    });
+  } else if (window._icuLoadCache) {
+    window
+      ._icuLoadCache()
+      .then(function () {
+        initDashboard();
+      })
+      .catch(function () {
+        initDashboard();
+      });
+  } else {
+    initDashboard();
   }
-  runWhenReady();
 });
 
 /* LINK ACCOUNT MODAL */
