@@ -169,9 +169,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* Balance calc */
     function calcBalance(type) {
+      /* Logs are already filtered by user_id in Supabase query */
       var bal = 0;
       logs.forEach(function (l) {
-        if (String(l.userId) !== String(uid) || !l.amount) return;
+        if (!l.amount) return;
         var acct = (l.targetAccount || primary).toLowerCase();
         if (type && acct !== type) return;
         if (l.txnType === "credit") bal += parseFloat(l.amount);
@@ -184,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var savingsBal = calcBalance("savings");
     var totalBal = 0;
     logs.forEach(function (l) {
-      if (String(l.userId) !== String(uid) || !l.amount) return;
+      if (!l.amount) return; /* logs already filtered by user */
       if (l.txnType === "credit") totalBal += parseFloat(l.amount);
       else if (l.txnType === "debit") totalBal -= parseFloat(l.amount);
     });
@@ -219,19 +220,19 @@ document.addEventListener("DOMContentLoaded", function () {
     if (ckEl) ckEl.textContent = formatCurrency(checkingBal);
     if (svEl) svEl.textContent = formatCurrency(savingsBal);
 
-    /* Business balance — sum all non-checking/savings accounts */
+    /* Business balance — logs are already filtered by user from Supabase */
     var businessBal = 0;
-    var accts = currentUser.accounts || {};
-    if (typeof accts !== "object") accts = {};
-    Object.keys(accts).forEach(function (k) {
-      if (k === "checking" || k === "savings") return;
-      if (!accts[k]) return;
-      businessBal += calcBalance(k);
+    logs.forEach(function (l) {
+      if (!l.amount) return;
+      var ta = (l.targetAccount || "").toLowerCase();
+      /* Match "business", "business_0", "business_1", etc */
+      if (ta && (ta === "business" || ta.indexOf("business") === 0)) {
+        if (l.txnType === "credit") businessBal += parseFloat(l.amount);
+        else if (l.txnType === "debit") businessBal -= parseFloat(l.amount);
+      }
     });
-    /* Also check "business" key directly */
-    if (accts["business"]) businessBal += calcBalance("business");
     if (bzEl) bzEl.textContent = formatCurrency(businessBal);
-    /* Always show the business box — never hide it */
+    /* Always show the business box */
     var bizBox = document.getElementById("acctBox_business");
     if (bizBox) bizBox.style.display = "";
 
@@ -252,8 +253,8 @@ document.addEventListener("DOMContentLoaded", function () {
     /* ── Transactions — show last 10 on dashboard ── */
     var userLogs = logs
       .filter(function (l) {
-        return String(l.userId) === String(uid) && l.amount;
-      })
+        return l.amount;
+      }) /* logs pre-filtered by Supabase */
       .sort(function (a, b) {
         return new Date(b.timestamp) - new Date(a.timestamp);
       });
@@ -336,14 +337,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (profileBtn && menuPanel) {
       profileBtn.addEventListener("click", function (e) {
         e.stopPropagation();
-        var isOpen = menuPanel.style.display === "block";
-        menuPanel.style.display = isOpen ? "none" : "block";
-      });
-      document.addEventListener("click", function () {
-        if (menuPanel) menuPanel.style.display = "none";
-      });
-      menuPanel.addEventListener("click", function (e) {
-        e.stopPropagation();
+        menuPanel.classList.toggle("open");
       });
     }
 
@@ -386,14 +380,19 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    /* ── Mobile hamburger — dashboard uses id="menuBtn" ── */
+    /* ── Hamburger — uses CSS transform via .open class ── */
     var menuBtn = document.getElementById("menuBtn");
     var menuPanel2 = document.getElementById("menuPanel");
     if (menuBtn && menuPanel2) {
       menuBtn.addEventListener("click", function (e) {
         e.stopPropagation();
-        var isOpen = menuPanel2.style.display === "block";
-        menuPanel2.style.display = isOpen ? "none" : "block";
+        menuPanel2.classList.toggle("open");
+      });
+      document.addEventListener("click", function () {
+        menuPanel2.classList.remove("open");
+      });
+      menuPanel2.addEventListener("click", function (e) {
+        e.stopPropagation();
       });
     }
   }
