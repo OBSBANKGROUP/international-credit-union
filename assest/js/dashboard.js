@@ -222,18 +222,18 @@ document.addEventListener("DOMContentLoaded", function () {
     /* Business balance — sum all non-checking/savings accounts */
     var businessBal = 0;
     var accts = currentUser.accounts || {};
-    var hasBusiness = false;
+    if (typeof accts !== "object") accts = {};
     Object.keys(accts).forEach(function (k) {
       if (k === "checking" || k === "savings") return;
       if (!accts[k]) return;
-      hasBusiness = true;
       businessBal += calcBalance(k);
     });
-    if (bzEl) {
-      bzEl.textContent = formatCurrency(businessBal);
-      var bizBox = document.getElementById("acctBox_business");
-      if (bizBox) bizBox.style.display = hasBusiness ? "" : "none";
-    }
+    /* Also check "business" key directly */
+    if (accts["business"]) businessBal += calcBalance("business");
+    if (bzEl) bzEl.textContent = formatCurrency(businessBal);
+    /* Always show the business box — never hide it */
+    var bizBox = document.getElementById("acctBox_business");
+    if (bizBox) bizBox.style.display = "";
 
     /* Generic account boxes fallback */
     var boxes = document.querySelectorAll(".account-balance,.acct-bal");
@@ -249,26 +249,32 @@ document.addEventListener("DOMContentLoaded", function () {
           : "••••••••";
       });
 
-    /* ── Transactions ── */
+    /* ── Transactions — show last 10 on dashboard ── */
     var userLogs = logs
       .filter(function (l) {
         return String(l.userId) === String(uid) && l.amount;
       })
       .sort(function (a, b) {
         return new Date(b.timestamp) - new Date(a.timestamp);
-      })
-      .slice(0, 15);
+      });
 
-    var txnList = document.querySelector(
-      ".transaction-list,.history-list,#transactionList,.recent-txns",
-    );
+    var txnList =
+      document.getElementById("dashTxnList") ||
+      document.querySelector(
+        ".transaction-list,.history-list,#transactionList,.recent-txns",
+      );
+
     if (txnList) {
       if (userLogs.length === 0) {
         txnList.innerHTML =
-          '<div style="padding:24px;text-align:center;color:#aaa">No transactions yet.</div>';
+          '<div class="empty-box">' +
+          "<p>No transactions yet.</p>" +
+          "<span>Your activity will appear here.</span>" +
+          "</div>";
       } else {
         txnList.innerHTML = "";
-        userLogs.forEach(function (l) {
+        /* Show last 10 only */
+        userLogs.slice(0, 10).forEach(function (l) {
           var isCredit = l.txnType === "credit";
           var date = "";
           try {
@@ -278,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
               year: "numeric",
             });
           } catch (e) {
-            date = l.timestamp || "";
+            date = "";
           }
           var div = document.createElement("div");
           div.className = "history-card";
@@ -287,16 +293,16 @@ document.addEventListener("DOMContentLoaded", function () {
             '<div class="txn-icon ' +
             (isCredit ? "txn-icon-credit" : "txn-icon-debit") +
             '">' +
-            (isCredit ? "+" : "-") +
+            (isCredit ? "&#8593;" : "&#8595;") +
             "</div>" +
             "<div>" +
-            "<h3>" +
+            '<h3 class="history-title">' +
             (l.action || "Transaction") +
             "</h3>" +
-            '<p class="txn-detail">' +
+            '<p class="history-detail">' +
             (l.details || "") +
             "</p>" +
-            '<span class="txn-date">' +
+            '<span class="history-date">' +
             date +
             "</span>" +
             "</div>" +
@@ -309,6 +315,15 @@ document.addEventListener("DOMContentLoaded", function () {
             "</span>";
           txnList.appendChild(div);
         });
+
+        /* See More link — only show if more than 10 */
+        if (userLogs.length > 10) {
+          var seeMore = document.getElementById("seeMoreTxn");
+          if (seeMore) seeMore.style.display = "";
+        } else {
+          var seeMore = document.getElementById("seeMoreTxn");
+          if (seeMore) seeMore.textContent = "View All";
+        }
       }
     }
 
@@ -371,17 +386,14 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    /* ── Mobile hamburger ── */
-    var hamBtn = document.querySelector(
-      ".hamburger,#hamburgerBtn,#menuToggle,.menu-toggle",
-    );
-    var mobileNav = document.querySelector(
-      ".mobile-nav,#mobileMenu,.side-nav,.nav-drawer",
-    );
-    if (hamBtn && mobileNav) {
-      hamBtn.addEventListener("click", function (e) {
+    /* ── Mobile hamburger — dashboard uses id="menuBtn" ── */
+    var menuBtn = document.getElementById("menuBtn");
+    var menuPanel2 = document.getElementById("menuPanel");
+    if (menuBtn && menuPanel2) {
+      menuBtn.addEventListener("click", function (e) {
         e.stopPropagation();
-        mobileNav.classList.toggle("open");
+        var isOpen = menuPanel2.style.display === "block";
+        menuPanel2.style.display = isOpen ? "none" : "block";
       });
     }
   }
