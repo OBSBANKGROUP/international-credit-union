@@ -1,360 +1,298 @@
-document.addEventListener("DOMContentLoaded", () => {
-  /* ================= DATA HELPERS ================= */
-  const USERS_KEY = "icu_users";
-  const SESSION_KEY = "icu_session";
-  const LOG_KEY = "icu_activity_log";
+document.addEventListener("DOMContentLoaded", function () {
+  var SESSION_KEY = "icu_session";
+  var SUPABASE_URL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+  var SUPABASE_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
 
-  function getSession() {
-    const data = localStorage.getItem(SESSION_KEY);
-    return data ? JSON.parse(data) : null;
+  var HEADERS = {
+    apikey: SUPABASE_KEY,
+    Authorization: "Bearer " + SUPABASE_KEY,
+    "Content-Type": "application/json",
+  };
+
+  function formatCurrency(n) {
+    return (
+      "$" +
+      parseFloat(n || 0).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    );
   }
 
-  function getUsers() {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-  }
-
-  function getLogs() {
-    return JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
-  }
-
-  function formatCurrency(num) {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-    }).format(num);
-  }
-
-  /* ================= LOAD USER DATA ================= */
-  const session = getSession();
+  /* ── Session ── */
+  var session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
   if (!session) {
     window.location.href = "index.html";
     return;
   }
-
-  const users = getUsers();
-  const currentUser = users.find((u) => String(u.id) === String(session.id));
-  if (!currentUser) {
-    localStorage.removeItem(SESSION_KEY);
-    window.location.href = "index.html";
-    return;
-  }
-
-  // Show suspended overlay if account is on hold
   if (window.checkSuspended && window.checkSuspended()) return;
 
-  // Update Profile Name and Picture
-  const usernameEls = document.querySelectorAll(".username");
-  usernameEls.forEach((el) => {
-    el.textContent = currentUser.firstName + " " + currentUser.lastName;
-  });
+  /* ── Show loading spinner ── */
+  var spinner = document.createElement("div");
+  spinner.id = "_dbSpinner";
+  spinner.style.cssText =
+    "position:fixed;inset:0;background:rgba(2,22,51,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;color:white;font-family:Inter,sans-serif;gap:16px";
+  spinner.innerHTML =
+    '<div style="width:44px;height:44px;border:3px solid rgba(255,255,255,.2);border-top-color:#4b38f5;border-radius:50%;animation:spin .8s linear infinite"></div><div style="font-size:.9rem;opacity:.75">Loading your account...</div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+  document.body.appendChild(spinner);
 
-  const profilePicEl = document.getElementById("profileBtn");
-  if (profilePicEl && currentUser.profilePic) {
-    profilePicEl.src = currentUser.profilePic;
+  function hideSpinner() {
+    var el = document.getElementById("_dbSpinner");
+    if (el) el.remove();
   }
 
-  /* ================= CALCULATE BALANCE =================
-     Wrapped in initDashboard() so it can be called AFTER
-     db.js has finished loading data from Supabase into
-     localStorage. Without this, getLogs() returns [] because
-     the async Supabase load hasn't finished yet.
-  ================= */
-  function initDashboard() {
-    // Re-fetch current user from localStorage (now populated by db.js)
-    const freshUsers = getUsers();
-    const me =
-      freshUsers.find((u) => String(u.id) === String(session.id)) ||
-      currentUser;
-
-    const logs = getLogs();
-    const primary = (currentUser.accountType || "checking").toLowerCase();
-
-    function getAccBalance(userId, type) {
-      let bal = 0;
-      logs.forEach((l) => {
-        if (String(l.userId) !== String(userId) || !l.amount) return;
-        // Use explicit targetAccount if set; otherwise fall back to user's primary
-        const acct = (l.targetAccount || primary).toLowerCase();
-        if (type && acct !== type.toLowerCase()) return;
-        if (l.txnType === "credit") bal += parseFloat(l.amount);
-        else if (l.txnType === "debit") bal -= parseFloat(l.amount);
+  /* ── Fetch user directly from Supabase by email ── */
+  function fetchUser() {
+    var email = session.email || "";
+    if (!email) return Promise.reject("no email in session");
+    return fetch(
+      SUPABASE_URL +
+        "/rest/v1/users?email=eq." +
+        encodeURIComponent(email.toLowerCase().trim()) +
+        "&select=*",
+      { headers: HEADERS },
+    )
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (rows) {
+        if (!rows || !rows[0]) throw new Error("User not found in database");
+        return rows[0];
       });
-      return bal;
-    }
+  }
 
-    function getAccBalFixed(userId, type) {
-      let bal = 0;
-      logs.forEach((l) => {
-        if (String(l.userId) !== String(userId) || l.amount == null) return;
-        // If log has an explicit targetAccount, use it
-        // If no targetAccount, count it only toward the primary account
-        const acct = l.targetAccount ? l.targetAccount.toLowerCase() : primary;
-        if (type && acct !== type.toLowerCase()) return;
-        if (l.txnType === "credit") bal += parseFloat(l.amount);
-        else if (l.txnType === "debit") bal -= parseFloat(l.amount);
+  /* ── Fetch logs for this user from Supabase ── */
+  function fetchLogs(userId) {
+    return fetch(
+      SUPABASE_URL +
+        "/rest/v1/logs?user_id=eq." +
+        userId +
+        "&order=timestamp.desc&select=*",
+      { headers: HEADERS },
+    )
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (rows) {
+        return Array.isArray(rows) ? rows : [];
       });
-      return bal;
-    }
+  }
 
-    /* ── Get account name from user.accounts (supports new {enabled,name} format
-     and old {checking:true} format) ── */
-    function getAcctName(key, fallback) {
-      const accts = currentUser.accounts || {};
-      const val = accts[key];
-      if (!val) return fallback;
-      if (typeof val === "object" && val.name) return val.name;
-      return fallback;
-    }
+  /* ── Convert Supabase row to app format ── */
+  function toUser(row) {
+    var u = {
+      id: row.id,
+      email: row.email,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      accountNumber: row.account_number,
+      routingNumber: row.routing_number,
+      accountType: row.account_type || "checking",
+      accounts: row.accounts || {},
+      status: row.status || "active",
+      transactionPin: row.transaction_pin,
+      businessName: row.business_name,
+    };
+    if (row.data && typeof row.data === "object") Object.assign(u, row.data);
+    return u;
+  }
 
-    /* ── Find all business account keys (business_0, business_1, or legacy "business") ── */
-    function getBizKeys() {
-      const accts = currentUser.accounts || {};
-      return Object.keys(accts).filter(
-        (k) => k !== "checking" && k !== "savings" && accts[k],
-      );
-    }
+  function toLog(row) {
+    return {
+      id: row.id,
+      userId: row.user_id,
+      action: row.action,
+      details: row.details,
+      amount: row.amount,
+      txnType: row.txn_type,
+      targetAccount: row.target_account,
+      timestamp: row.timestamp,
+      status: row.status,
+      txnId: row.txn_id,
+    };
+  }
 
-    const checkingBalance = getAccBalFixed(currentUser.id, "checking");
-    const savingsBalance = getAccBalFixed(currentUser.id, "savings");
-    const bizKeys = getBizKeys();
+  /* ── Main: fetch from Supabase then render ── */
+  fetchUser()
+    .then(function (rawUser) {
+      var currentUser = toUser(rawUser);
 
-    // Total = checking + savings + all business accounts
-    let totalBalance = checkingBalance + savingsBalance;
-    bizKeys.forEach((k) => {
-      totalBalance += getAccBalFixed(currentUser.id, k);
-    });
+      /* Update session with real Supabase ID */
+      session.id = currentUser.id;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
 
-    // Update total balance display
-    document.querySelectorAll(".balance").forEach((el) => {
-      el.textContent = formatCurrency(totalBalance);
-    });
-    const mainBalanceH1 = document.querySelector(".balance-card h1");
-    if (mainBalanceH1) mainBalanceH1.textContent = formatCurrency(totalBalance);
+      /* Also cache user in localStorage for other pages */
+      var cached = JSON.parse(localStorage.getItem("icu_users") || "[]");
+      var idx = cached.findIndex(function (u) {
+        return u.email === currentUser.email;
+      });
+      if (idx >= 0) cached[idx] = currentUser;
+      else cached.push(currentUser);
+      localStorage.setItem("icu_users", JSON.stringify(cached));
 
-    /* ── Update account box labels and balances ── */
-    // Checking
-    const ckLabel = document.getElementById("acctLabel_checking");
-    const ckBal = document.getElementById("acctBal_checking");
-    if (ckLabel) ckLabel.textContent = getAcctName("checking", "Checking");
-    if (ckBal) ckBal.textContent = formatCurrency(checkingBalance);
+      return fetchLogs(currentUser.id).then(function (rawLogs) {
+        var logs = rawLogs.map(toLog);
 
-    // Savings
-    const svLabel = document.getElementById("acctLabel_savings");
-    const svBal = document.getElementById("acctBal_savings");
-    if (svLabel) svLabel.textContent = getAcctName("savings", "Savings");
-    if (svBal) svBal.textContent = formatCurrency(savingsBalance);
+        /* Cache logs too */
+        localStorage.setItem("icu_activity_log", JSON.stringify(logs));
 
-    // Business — show first biz account in the 3rd box, with correct name
-    const bizBox = document.getElementById("acctBox_business");
-    const bizLabel = document.getElementById("acctLabel_business");
-    const bizBal = document.getElementById("acctBal_business");
-    if (bizKeys.length > 0) {
-      const firstBizKey = bizKeys[0];
-      const firstBizBal = getAccBalFixed(currentUser.id, firstBizKey);
-      const firstBizName = getAcctName(firstBizKey, "Business");
-      if (bizLabel) bizLabel.textContent = firstBizName;
-      if (bizBal) bizBal.textContent = formatCurrency(firstBizBal);
-      if (bizBox) bizBox.style.display = "";
-    } else {
-      // No business account — hide the box
-      if (bizBox) bizBox.style.display = "none";
-    }
-
-    // Card number
-    const cardNumEl = document.getElementById("acctCardNum");
-    if (cardNumEl)
-      cardNumEl.textContent = currentUser.accountNumber || "— — — —";
-
-    /* ================= NOTIFICATIONS ================= */
-    const notifyBar = document.getElementById("notifyBar");
-    function updateNotifyBar() {
-      const notifications = JSON.parse(
-        localStorage.getItem("icu_notifications") || "[]",
-      );
-      const unread = notifications.filter((n) => n.unread);
-      if (notifyBar && unread.length > 0) {
-        const latest = unread[0];
-        notifyBar.innerHTML = `
-        <div class="notify-pill">
-          <span class="material-icons-outlined">notifications_active</span>
-          <p>${latest.title}: ${latest.message}</p>
-          <button onclick="this.parentElement.parentElement.style.display='none'">✕</button>
-        </div>
-      `;
-        notifyBar.style.display = "block";
-      } else if (notifyBar) {
-        notifyBar.style.display = "none";
+        renderDashboard(currentUser, logs);
+        hideSpinner();
+      });
+    })
+    .catch(function (err) {
+      console.error("Dashboard load error:", err);
+      /* Fallback to localStorage if Supabase fails */
+      var users = JSON.parse(localStorage.getItem("icu_users") || "[]");
+      var user = users.find(function (u) {
+        return (
+          (u.email || "").toLowerCase() ===
+            (session.email || "").toLowerCase() ||
+          String(u.id) === String(session.id)
+        );
+      });
+      if (!user) {
+        hideSpinner();
+        window.location.href = "index.html";
+        return;
       }
+      var logs = JSON.parse(localStorage.getItem("icu_activity_log") || "[]");
+      renderDashboard(user, logs);
+      hideSpinner();
+    });
+
+  /* ── Render dashboard with user + logs ── */
+  function renderDashboard(currentUser, logs) {
+    var primary = (currentUser.accountType || "checking").toLowerCase();
+    var uid = currentUser.id;
+
+    /* Balance calc */
+    function calcBalance(type) {
+      var bal = 0;
+      logs.forEach(function (l) {
+        if (String(l.userId) !== String(uid) || !l.amount) return;
+        var acct = (l.targetAccount || primary).toLowerCase();
+        if (type && acct !== type) return;
+        if (l.txnType === "credit") bal += parseFloat(l.amount);
+        else if (l.txnType === "debit") bal -= parseFloat(l.amount);
+      });
+      return bal;
     }
-    updateNotifyBar();
 
-    /* ================= RECENT TRANSACTIONS ================= */
-    const transSection = document.querySelector(".transactions");
-    if (transSection) {
-      const allLogs = getLogs();
-      const userLogs = allLogs.filter(
-        (l) => String(l.userId) === String(currentUser.id) && l.amount,
-      );
-      const recentLogs = userLogs
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-        .slice(0, 5);
+    var checkingBal = calcBalance("checking");
+    var savingsBal = calcBalance("savings");
+    var totalBal = 0;
+    logs.forEach(function (l) {
+      if (String(l.userId) !== String(uid) || !l.amount) return;
+      if (l.txnType === "credit") totalBal += parseFloat(l.amount);
+      else if (l.txnType === "debit") totalBal -= parseFloat(l.amount);
+    });
 
-      if (recentLogs.length > 0) {
-        transSection.innerHTML = `
-        <div class="section-header">
-          <h3>Recent Activity</h3>
-          <a href="transaction.html">View All</a>
-        </div>
-        <div class="txn-list"></div>
-      `;
+    /* ── User info ── */
+    document
+      .querySelectorAll(".user-name, .welcome-name")
+      .forEach(function (el) {
+        el.textContent = currentUser.firstName || "Member";
+      });
+    document.querySelectorAll(".user-email").forEach(function (el) {
+      el.textContent = currentUser.email || "";
+    });
+    document.querySelectorAll(".user-initials").forEach(function (el) {
+      el.textContent = (
+        (currentUser.firstName || "?")[0] + (currentUser.lastName || "?")[0]
+      ).toUpperCase();
+    });
 
-        const listContainer = transSection.querySelector(".txn-list");
-        recentLogs.forEach((l) => {
-          const isCredit = l.txnType === "credit";
-          const sign = isCredit ? "+" : "-";
-          const amtClass = isCredit ? "txn-credit" : "txn-debit";
-          const icon = isCredit ? "arrow_downward" : "arrow_upward";
-          const iconClass = isCredit ? "txn-icon-credit" : "txn-icon-debit";
+    /* ── Balances ── */
+    var totalEl = document.querySelector(
+      ".total-balance,.balance-amount,#totalBalance,.bal-amount",
+    );
+    if (totalEl) totalEl.textContent = formatCurrency(totalBal);
 
-          const row = document.createElement("div");
-          row.className = "txn-row";
-          row.innerHTML = `
-          <div class="txn-left">
-            <div class="txn-icon ${iconClass}">
-              <span class="material-icons-outlined">${icon}</span>
-            </div>
-            <div class="txn-info">
-              <strong>${l.action}</strong>
-              <span>${new Date(l.timestamp).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</span>
-            </div>
-          </div>
-          <div class="txn-amount ${amtClass}">${sign}${formatCurrency(l.amount)}</div>
-        `;
-          listContainer.appendChild(row);
+    var ckEl = document.getElementById("acctBal_checking");
+    var svEl = document.getElementById("acctBal_savings");
+    if (ckEl) ckEl.textContent = formatCurrency(checkingBal);
+    if (svEl) svEl.textContent = formatCurrency(savingsBal);
+
+    /* Generic account boxes fallback */
+    var boxes = document.querySelectorAll(".account-balance,.acct-bal");
+    if (boxes[0] && !ckEl) boxes[0].textContent = formatCurrency(checkingBal);
+    if (boxes[1] && !svEl) boxes[1].textContent = formatCurrency(savingsBal);
+
+    /* Account number */
+    document
+      .querySelectorAll(".account-number,.acct-number")
+      .forEach(function (el) {
+        el.textContent = currentUser.accountNumber
+          ? "••••" + String(currentUser.accountNumber).slice(-4)
+          : "••••••••";
+      });
+
+    /* ── Transactions ── */
+    var userLogs = logs
+      .filter(function (l) {
+        return String(l.userId) === String(uid) && l.amount;
+      })
+      .sort(function (a, b) {
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      })
+      .slice(0, 15);
+
+    var txnList = document.querySelector(
+      ".transaction-list,.history-list,#transactionList,.recent-txns",
+    );
+    if (txnList) {
+      if (userLogs.length === 0) {
+        txnList.innerHTML =
+          '<div style="padding:24px;text-align:center;color:#aaa">No transactions yet.</div>';
+      } else {
+        txnList.innerHTML = "";
+        userLogs.forEach(function (l) {
+          var isCredit = l.txnType === "credit";
+          var date = "";
+          try {
+            date = new Date(l.timestamp).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            });
+          } catch (e) {
+            date = l.timestamp || "";
+          }
+          var div = document.createElement("div");
+          div.className = "history-card";
+          div.innerHTML =
+            '<div class="history-left">' +
+            '<div class="txn-icon ' +
+            (isCredit ? "txn-icon-credit" : "txn-icon-debit") +
+            '">' +
+            (isCredit ? "+" : "-") +
+            "</div>" +
+            "<div>" +
+            "<h3>" +
+            (l.action || "Transaction") +
+            "</h3>" +
+            '<p class="txn-detail">' +
+            (l.details || "") +
+            "</p>" +
+            '<span class="txn-date">' +
+            date +
+            "</span>" +
+            "</div>" +
+            "</div>" +
+            '<span class="' +
+            (isCredit ? "txn-credit" : "txn-debit") +
+            '">' +
+            (isCredit ? "+" : "-") +
+            formatCurrency(Math.abs(l.amount)) +
+            "</span>";
+          txnList.appendChild(div);
         });
       }
     }
 
-    /* ================= UI LOGIC ================= */
-    const profileBtn = document.getElementById("profileBtn");
-    if (profileBtn) {
-      profileBtn.addEventListener("click", () => {
-        window.location.href = "settings.html";
-      });
-    }
-
-    const switchBtn = document.getElementById("switchBtn");
-    const switchBtnCard = document.getElementById("switchBtnCard");
-    const goToBusiness = () =>
-      (window.location.href = "bussiness-dashboard.html");
-    if (switchBtn) switchBtn.addEventListener("click", goToBusiness);
-    if (switchBtnCard) switchBtnCard.addEventListener("click", goToBusiness);
-
-    const menuBtn = document.getElementById("menuBtn");
-    const menuPanel = document.getElementById("menuPanel");
-    if (menuBtn && menuPanel) {
-      menuBtn.addEventListener("click", () => {
-        menuPanel.classList.toggle("open");
-      });
-    }
-
-    /* DARK MODE */
-    if (window._initThemeToggle) {
-      window._initThemeToggle("darkToggle");
-    }
-  } // end initDashboard
-
-  /* Wait for db.js _icuReady promise, then run dashboard */
-  if (window._icuReady) {
-    window._icuReady.then(function () {
-      initDashboard();
-    });
-  } else if (window._icuLoadCache) {
-    window
-      ._icuLoadCache()
-      .then(function () {
-        initDashboard();
-      })
-      .catch(function () {
-        initDashboard();
-      });
-  } else {
-    initDashboard();
+    /* ── Session timer ── */
+    if (window.startSessionTimer) window.startSessionTimer();
   }
 });
-
-/* LINK ACCOUNT MODAL */
-(function () {
-  const linkBtn = document.getElementById("linkAccountBtn");
-  const modal = document.getElementById("linkAccountModal");
-  if (!modal) return;
-
-  const step1 = document.getElementById("linkStep1");
-  const step2 = document.getElementById("linkStep2");
-  const step3 = document.getElementById("trialDepositStep");
-  const step4 = document.getElementById("linkOtpStep");
-  let generatedOTP = "";
-
-  if (linkBtn) {
-    linkBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      modal.classList.remove("hidden");
-    });
-  }
-
-  document.querySelectorAll(".regionBtn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      step1.classList.add("hidden");
-      step2.classList.remove("hidden");
-    });
-  });
-
-  document.querySelectorAll(".accountTypeBtn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      step2.classList.add("hidden");
-      step3.classList.remove("hidden");
-    });
-  });
-
-  const sendOtpBtn = document.getElementById("sendTrialOtp");
-  if (sendOtpBtn) {
-    sendOtpBtn.addEventListener("click", () => {
-      const acc = document.getElementById("accountNumber").value;
-      const confirm = document.getElementById("confirmAccountNumber").value;
-      if (acc !== confirm) {
-        alert("Account numbers do not match");
-        return;
-      }
-      generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-
-      if (window._sendOTP) {
-        window
-          ._sendOTP(currentUser.email, generatedOTP, currentUser.firstName)
-          .then(() => alert("Verification code sent to your email."))
-          .catch(() => alert("Error sending code."));
-      } else {
-        console.log("Link Account OTP:", generatedOTP);
-        alert("Verification code sent to your email.");
-      }
-
-      step3.classList.add("hidden");
-      step4.classList.remove("hidden");
-    });
-  }
-
-  const verifyOtpBtn = document.getElementById("verifyLinkOtp");
-  if (verifyOtpBtn) {
-    verifyOtpBtn.addEventListener("click", () => {
-      const input = document.getElementById("linkOtpInput").value;
-      if (input === generatedOTP) {
-        alert(
-          "Trial transaction initiated. It will take 2-3 working days to complete.",
-        );
-        modal.classList.add("hidden");
-      } else {
-        alert("Invalid verification code");
-      }
-    });
-  }
-})();

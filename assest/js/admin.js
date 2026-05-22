@@ -278,6 +278,69 @@
     localStorage.setItem(LOG_KEY, JSON.stringify(l));
   }
 
+  /* Save a single new log entry to Supabase */
+  function saveLogToSupabase(log) {
+    var SUPABASE_URL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+    var SUPABASE_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+
+    /* First get the user's Supabase ID by email */
+    var users = getUsers();
+    var user = users.find(function (u) {
+      return u.id === log.userId;
+    });
+    if (!user || !user.email) return;
+
+    fetch(
+      SUPABASE_URL +
+        "/rest/v1/users?email=eq." +
+        encodeURIComponent(user.email.toLowerCase().trim()) +
+        "&select=id",
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: "Bearer " + SUPABASE_KEY,
+        },
+      },
+    )
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (rows) {
+        if (!rows || !rows[0]) return;
+        var supabaseUserId = rows[0].id;
+        var row = {
+          user_id: supabaseUserId,
+          user_name: log.userName || "",
+          action: log.action || "",
+          details: log.details || "",
+          reason: log.reason || "",
+          amount: parseFloat(log.amount) || 0,
+          txn_type: log.txnType || "credit",
+          target_account: log.targetAccount || null,
+          timestamp: log.timestamp || new Date().toISOString(),
+          status: log.status || "completed",
+          txn_id: log.txnId || "",
+        };
+        return fetch(SUPABASE_URL + "/rest/v1/logs", {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: "Bearer " + SUPABASE_KEY,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify(row),
+        });
+      })
+      .then(function () {
+        console.log("Log saved to Supabase:", log.action);
+      })
+      .catch(function (e) {
+        console.warn("Supabase log save failed:", e);
+      });
+  }
+
   function formatNum(n) {
     return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
@@ -2057,7 +2120,7 @@
 
       var action = txnType === "credit" ? "Deposit" : "Withdrawal";
       var logs = getLogs();
-      logs.push({
+      var newLog = {
         id: Date.now(),
         userId: userId,
         userName: user.firstName + " " + user.lastName,
@@ -2073,8 +2136,10 @@
           return new Date().toISOString();
         })(),
         status: "completed",
-      });
+      };
+      logs.push(newLog);
       saveLogs(logs);
+      saveLogToSupabase(newLog); /* Sync to Supabase so any device can see it */
 
       document.getElementById("addTxnModal").classList.remove("show");
       refreshCurrentPage();
