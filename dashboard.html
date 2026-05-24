@@ -90,8 +90,14 @@
           ></label>
         </div>
         <div class="db-toggle-row">
-          <a href="business-dashboard.html"> <span>Business Mode</span></a>
-          <button id="switchBtn" class="db-switch-btn">Switch</button>
+          <span>Business Mode</span>
+          <button
+            id="switchBtn"
+            class="db-switch-btn"
+            onclick="window.location.href = 'business-dashboard.html'"
+          >
+            Switch
+          </button>
         </div>
       </div>
       <a href="index.html" class="db-logout" id="logoutBtn">
@@ -277,9 +283,6 @@
             />
             <div class="db-atm-overlay">
               <div class="db-atm-name user-name">MEMBER NAME</div>
-              <div class="db-atm-visa">
-                DEBIT &nbsp;<span class="db-visa-word">VISA</span>
-              </div>
             </div>
           </div>
           <!-- BUSINESS CARD — uses businessatm.jpeg, shown if business account -->
@@ -296,9 +299,6 @@
             />
             <div class="db-atm-overlay">
               <div class="db-atm-name" id="bizCardName">BUSINESS NAME</div>
-              <div class="db-atm-visa">
-                DEBIT &nbsp;<span class="db-visa-word">VISA</span>
-              </div>
             </div>
           </div>
         </div>
