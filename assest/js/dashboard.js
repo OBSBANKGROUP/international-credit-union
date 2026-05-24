@@ -380,6 +380,37 @@ document.addEventListener("DOMContentLoaded", function () {
     /* ── Session timer ── */
     if (window.startSessionTimer) window.startSessionTimer();
 
+    /* ── Hide/Show balance eye button ── */
+    var eyeBtn = document.getElementById("eyeBtn");
+    var totalEl2 = document.getElementById("totalBalance");
+    var panelBal2 = document.getElementById("panelBalance");
+    var balHidden = false;
+    if (eyeBtn) {
+      eyeBtn.addEventListener("click", function () {
+        balHidden = !balHidden;
+        var mask = "••••••";
+        if (balHidden) {
+          if (totalEl2) {
+            eyeBtn._savedTotal = totalEl2.textContent;
+            totalEl2.textContent = mask;
+          }
+          if (panelBal2) {
+            eyeBtn._savedPanel = panelBal2.textContent;
+            panelBal2.textContent = mask;
+          }
+          eyeBtn.innerHTML =
+            '<span class="material-icons-outlined" style="font-size:1rem">visibility_off</span>';
+        } else {
+          if (totalEl2 && eyeBtn._savedTotal)
+            totalEl2.textContent = eyeBtn._savedTotal;
+          if (panelBal2 && eyeBtn._savedPanel)
+            panelBal2.textContent = eyeBtn._savedPanel;
+          eyeBtn.innerHTML =
+            '<span class="material-icons-outlined" style="font-size:1rem">visibility</span>';
+        }
+      });
+    }
+
     /* ── Profile button → menu panel toggle ── */
     var profileBtn = document.getElementById("profileBtn");
     var menuPanel = document.getElementById("menuPanel");
@@ -426,7 +457,7 @@ document.addEventListener("DOMContentLoaded", function () {
       var btn = document.getElementById(id);
       if (btn) {
         btn.addEventListener("click", function () {
-          window.location.href = "Manage-account.html";
+          window.location.href = "business-dashboard.html";
         });
       }
     });

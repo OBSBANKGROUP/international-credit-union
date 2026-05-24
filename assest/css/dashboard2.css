@@ -4,18 +4,30 @@
 ================================================================ */
 
 :root {
-  --db-bg: #0a0f1e;
-  --db-card: #141929;
-  --db-card2: #1a2035;
+  --db-bg: #f3f5f9;
+  --db-card: #ffffff;
+  --db-card2: #f8fafc;
   --db-accent: #4b38f5;
   --db-accent2: #6a5cff;
   --db-gold: #c9a227;
-  --db-green: #00c896;
-  --db-red: #ff4d6d;
-  --db-text: #ffffff;
-  --db-muted: rgba(255, 255, 255, 0.55);
-  --db-border: rgba(255, 255, 255, 0.08);
+  --db-green: #00a878;
+  --db-red: #e53935;
+  --db-text: #021633;
+  --db-muted: #64748b;
+  --db-border: #e8eaf0;
   --db-radius: 18px;
+}
+
+/* ── DARK MODE variables ── */
+.dark-mode {
+  --db-bg: #0a0f1e !important;
+  --db-card: #141929 !important;
+  --db-card2: #1a2035 !important;
+  --db-text: #ffffff !important;
+  --db-muted: rgba(255, 255, 255, 0.55) !important;
+  --db-border: rgba(255, 255, 255, 0.08) !important;
+  --db-green: #00c896 !important;
+  --db-red: #ff4d6d !important;
 }
 
 * {
@@ -40,9 +52,10 @@ a {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--db-bg);
+  background: var(--db-card);
   border-bottom: 1px solid var(--db-border);
   padding: 0 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 .db-header-inner {
   max-width: 480px;
@@ -68,18 +81,20 @@ a {
   background: var(--db-text);
   border-radius: 2px;
   display: block;
+  transition: background 0.3s;
 }
 .db-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   flex: 1;
 }
 .db-logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   object-fit: cover;
+  display: block;
 }
 .db-brand-name {
   font-size: 0.72rem;
@@ -88,7 +103,7 @@ a {
   line-height: 1.2;
 }
 .db-notif {
-  background: var(--db-card);
+  background: var(--db-bg);
   border: none;
   border-radius: 50%;
   width: 40px;
@@ -589,7 +604,7 @@ a {
   flex-shrink: 0;
 }
 .txn-icon-credit {
-  background: rgba(0, 200, 150, 0.15);
+  background: rgba(0, 168, 120, 0.12);
   color: var(--db-green);
 }
 .txn-icon-debit {
@@ -694,62 +709,11 @@ a {
   font-size: 1.4rem;
 }
 
-/* ── TEXT COLOURS ── */
-/* Default dashboard is dark — all text white */
-.db-section-head h3,
-.db-section-head a,
-.db-acct-name,
-.db-acct-bal,
-.db-acct-tag,
-.db-greeting,
-.db-welcome,
-.db-total,
-.db-bal-label,
-.db-bal-sub,
-.db-action-item span,
-.history-title,
-.history-detail,
-.history-date,
-.txn-credit,
-.txn-debit,
-.db-menu-name,
-.db-menu-bal strong,
-.db-menu-bal span,
-.db-qbtn span {
-  color: #ffffff;
-}
-
-.db-acct-num,
-.db-see-all {
-  color: rgba(255, 255, 255, 0.55);
-}
-
-/* DARK MODE — flip text to dark */
-.dark-mode {
-  background: #060a14 !important;
-}
-.dark-mode .db-section-head h3 {
-  color: #111 !important;
-}
-.dark-mode .db-acct-name {
-  color: #111 !important;
-}
-.dark-mode .db-acct-bal {
-  color: #111 !important;
-}
-.dark-mode .history-title {
-  color: #111 !important;
-}
-.dark-mode .db-action-item span {
-  color: #333 !important;
-}
-.dark-mode .db-acct-row {
-  background: #f5f5f5 !important;
-  border-color: #e0e0e0 !important;
-}
-.dark-mode .history-card {
-  background: #f5f5f5 !important;
-  border-color: #e0e0e0 !important;
+/* ── DARK MODE body override ── */
+.dark-mode body,
+body.dark-mode {
+  background: var(--db-bg) !important;
+  color: var(--db-text) !important;
 }
 
 /* ── SWITCH for toggles ── */
