@@ -251,11 +251,7 @@ document.addEventListener("DOMContentLoaded", function () {
         el.textContent = "•••• " + last4;
       });
 
-    /* Card last 4 */
-    var cardL4 = document.getElementById("cardLastFour");
-    if (cardL4) cardL4.textContent = last4;
-
-    /* User name on card */
+    /* User name on ATM card overlay */
     var cardFullName = (
       (currentUser.firstName || "") +
       " " +
@@ -263,29 +259,35 @@ document.addEventListener("DOMContentLoaded", function () {
     )
       .trim()
       .toUpperCase();
-    document.querySelectorAll(".db-card-name.user-name").forEach(function (el) {
-      el.textContent = cardFullName || "MEMBER NAME";
-    });
+    document
+      .querySelectorAll(".db-atm-name.user-name, .db-card-name.user-name")
+      .forEach(function (el) {
+        el.textContent = cardFullName || "MEMBER NAME";
+      });
 
-    /* Business card */
+    /* Business card — show if user has a business account */
     var bizCardEl = document.getElementById("businessCardEl");
     var bizCardName = document.getElementById("bizCardName");
-    var bizCardL4 = document.getElementById("bizCardLastFour");
     var accts = currentUser.accounts || {};
     var bizKeys = Object.keys(accts).filter(function (k) {
       return k !== "checking" && k !== "savings" && accts[k];
     });
-    if (bizKeys.length > 0) {
+    var hasBizAcct = bizKeys.length > 0 || !!currentUser.businessName;
+    if (hasBizAcct) {
       if (bizCardEl) bizCardEl.style.display = "";
       if (bizCardName) {
-        var bk = accts[bizKeys[0]];
-        bizCardName.textContent = (
-          typeof bk === "object" && bk.name
-            ? bk.name
-            : currentUser.businessName || "BUSINESS"
-        ).toUpperCase();
+        var bName = "";
+        if (bizKeys.length > 0) {
+          var bk = accts[bizKeys[0]];
+          bName =
+            typeof bk === "object" && bk.name
+              ? bk.name
+              : currentUser.businessName || "";
+        } else {
+          bName = currentUser.businessName || "";
+        }
+        bizCardName.textContent = bName.toUpperCase() || "BUSINESS";
       }
-      if (bizCardL4) bizCardL4.textContent = last4;
     }
 
     /* User pic in menu */

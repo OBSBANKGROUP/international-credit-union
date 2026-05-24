@@ -3,187 +3,247 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Business Banking | International Credit Union</title>
+    <link rel="icon" type="image/jpeg" href="assest/images/logo.jpeg" />
+    <title>Business Dashboard | International Credit Union</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="assest/css/business-dashboard.css" />
+    <link rel="stylesheet" href="assest/css/dashboard2.css" />
+    <link rel="stylesheet" href="assest/css/mobile.css" />
     <script src="assest/js/theme.js"></script>
   </head>
   <body>
-    <header class="biz-header">
-      <div class="hc">
-        <div class="biz-header-left">
-          <img src="assest/images/logo.jpeg" alt="Logo" />
-          <h2>Business Banking</h2>
+    <div id="notifyBar"></div>
+
+    <!-- HEADER -->
+    <header class="db-header">
+      <div class="db-header-inner">
+        <a href="dashboard.html" class="db-back-btn">
+          <span class="material-icons-outlined">arrow_back_ios</span>
+        </a>
+        <div class="db-brand">
+          <img src="assest/images/logo.jpeg" alt="ICU" class="db-logo" />
+          <span class="db-brand-name">Business<br />Banking</span>
         </div>
-        <a href="dashboard.html" class="switch-btn">&#8592; Personal</a>
+        <button class="db-notif" id="notifyBtn">
+          <span class="material-icons-outlined">notifications_none</span>
+        </button>
       </div>
     </header>
-    <div class="page-body">
-      <div class="container">
-        <div class="biz-hero">
-          <div class="biz-hero-text">
-            <h4 id="bizName">Business Account</h4>
-            <h1 id="bizBalance">$0.00</h1>
-            <p id="bizMember">Loading...</p>
+
+    <!-- MAIN -->
+    <main class="db-main">
+      <!-- HERO BALANCE -->
+      <section
+        class="db-hero"
+        style="background: linear-gradient(135deg, #0a2342, #1a3a6c)"
+      >
+        <div class="db-hero-top">
+          <div>
+            <p class="db-greeting" id="bizName">Business Account</p>
+            <p class="db-welcome" id="bizMember">Loading...</p>
           </div>
-          <div class="biz-hero-actions">
-            <a href="wire-transfer.html" class="hero-btn white"
-              >Wire Transfer</a
+          <div class="db-biz-badge">
+            <span class="material-icons-outlined">business_center</span>
+          </div>
+        </div>
+        <div class="db-balance-box">
+          <div class="db-bal-label">
+            <span>BUSINESS BALANCE</span>
+            <span class="material-icons-outlined" style="font-size: 1rem"
+              >visibility</span
             >
-            <a href="paybill.html" class="hero-btn outline">Pay Bills</a>
           </div>
+          <h1 class="db-total" id="bizBalance">$0.00</h1>
+          <p class="db-bal-sub">Updated just now</p>
         </div>
-        <div class="section-label">Account Overview</div>
-        <div class="stats-row">
-          <div class="stat-card">
-            <div class="s-icon blue">
-              <span class="material-icons-outlined">account_balance</span>
+        <div class="db-quick">
+          <a href="wire-transfer.html" class="db-qbtn">
+            <div class="db-qicon">
+              <span class="material-icons-outlined">send</span>
             </div>
-            <h5>Business Balance</h5>
-            <div class="s-val" id="bizBalStat">$0.00</div>
-            <div class="s-sub">Current balance</div>
-          </div>
-          <div class="stat-card">
-            <div class="s-icon green">
-              <span class="material-icons-outlined">trending_up</span>
-            </div>
-            <h5>Credits (30 days)</h5>
-            <div class="s-val" id="credits30">$0.00</div>
-            <div class="s-sub">Inbound</div>
-          </div>
-          <div class="stat-card">
-            <div class="s-icon red">
-              <span class="material-icons-outlined">trending_down</span>
-            </div>
-            <h5>Debits (30 days)</h5>
-            <div class="s-val" id="debits30">$0.00</div>
-            <div class="s-sub">Outbound</div>
-          </div>
-          <div class="stat-card">
-            <div class="s-icon orange">
-              <span class="material-icons-outlined">receipt_long</span>
-            </div>
-            <h5>Transactions</h5>
-            <div class="s-val" id="txnCount">0</div>
-            <div class="s-sub">This month</div>
-          </div>
-        </div>
-        <div class="section-label">Quick Actions</div>
-        <div class="actions-grid">
-          <a href="wire-transfer.html" class="action-card">
-            <div class="ac-icon blue">
-              <span class="material-icons-outlined">swap_horiz</span>
-            </div>
-            <h4>Wire Transfer</h4>
-            <p>Send funds</p>
+            <span>Wire</span>
           </a>
-          <a href="transaction.html" class="action-card">
-            <div class="ac-icon green">
-              <span class="material-icons-outlined">history</span>
-            </div>
-            <h4>Transactions</h4>
-            <p>View history</p>
-          </a>
-          <a href="deposit-check.html" class="action-card">
-            <div class="ac-icon orange">
-              <span class="material-icons-outlined">add_a_photo</span>
-            </div>
-            <h4>Deposit Check</h4>
-            <p>Mobile deposit</p>
-          </a>
-          <a href="card.html" class="action-card">
-            <div class="ac-icon purple">
-              <span class="material-icons-outlined">credit_card</span>
-            </div>
-            <h4>Business Cards</h4>
-            <p>Manage cards</p>
-          </a>
-          <a href="paybill.html" class="action-card">
-            <div class="ac-icon blue">
+          <a href="paybill.html" class="db-qbtn">
+            <div class="db-qicon">
               <span class="material-icons-outlined">receipt</span>
             </div>
-            <h4>Pay Bills</h4>
-            <p>Vendor payments</p>
+            <span>Pay Bill</span>
           </a>
-          <a href="Loan.html" class="action-card">
-            <div class="ac-icon green">
-              <span class="material-icons-outlined"
-                >account_balance_wallet</span
-              >
+          <a href="transaction.html" class="db-qbtn">
+            <div class="db-qicon">
+              <span class="material-icons-outlined">receipt_long</span>
             </div>
-            <h4>Business Loans</h4>
-            <p>Apply for credit</p>
+            <span>Activity</span>
           </a>
         </div>
-        <div class="section-label">Business Tools</div>
-        <div class="tools-grid">
-          <div
-            class="tool-card"
-            onclick="alert('Payroll Manager coming soon.')"
-          >
-            <div class="tool-icon orange">
-              <span class="material-icons-outlined">people</span>
+      </section>
+
+      <!-- STATS -->
+      <section class="db-accounts">
+        <div class="db-section-head"><h3>Account Overview</h3></div>
+        <div class="db-acct-list">
+          <div class="db-acct-row">
+            <div class="db-acct-icon blue">
+              <span class="material-icons-outlined">account_balance</span>
             </div>
-            <div class="tool-body">
-              <h4>Payroll Manager</h4>
-              <p>
-                Pay employees directly from your business account with scheduled
-                disbursements.
-              </p>
-              <span class="cs-tag">Coming Soon</span>
+            <div class="db-acct-info">
+              <span class="db-acct-name">Business Balance</span>
+              <span class="db-acct-num">Current balance</span>
             </div>
-          </div>
-          <div
-            class="tool-card"
-            onclick="alert('Invoice Manager coming soon.')"
-          >
-            <div class="tool-icon blue">
-              <span class="material-icons-outlined">description</span>
-            </div>
-            <div class="tool-body">
-              <h4>Invoice Manager</h4>
-              <p>
-                Create, send, and track invoices. Receive payments directly to
-                your ICU account.
-              </p>
-              <span class="cs-tag">Coming Soon</span>
+            <div class="db-acct-right">
+              <span class="db-acct-bal" id="bizBalStat">$0.00</span>
+              <span class="db-acct-tag">Available</span>
             </div>
           </div>
-          <div
-            class="tool-card"
-            onclick="alert('Expense Tracker coming soon.')"
-          >
-            <div class="tool-icon green">
+          <div class="db-acct-row">
+            <div
+              class="db-acct-icon"
+              style="background: rgba(0, 200, 150, 0.2); color: #00c896"
+            >
+              <span class="material-icons-outlined">trending_up</span>
+            </div>
+            <div class="db-acct-info">
+              <span class="db-acct-name">Credits (30 days)</span>
+              <span class="db-acct-num">Inbound</span>
+            </div>
+            <div class="db-acct-right">
+              <span class="db-acct-bal" id="credits30" style="color: #00c896"
+                >$0.00</span
+              >
+              <span class="db-acct-tag">This month</span>
+            </div>
+          </div>
+          <div class="db-acct-row">
+            <div
+              class="db-acct-icon"
+              style="background: rgba(255, 77, 109, 0.2); color: #ff4d6d"
+            >
+              <span class="material-icons-outlined">trending_down</span>
+            </div>
+            <div class="db-acct-info">
+              <span class="db-acct-name">Debits (30 days)</span>
+              <span class="db-acct-num">Outbound</span>
+            </div>
+            <div class="db-acct-right">
+              <span class="db-acct-bal" id="debits30" style="color: #ff4d6d"
+                >$0.00</span
+              >
+              <span class="db-acct-tag">This month</span>
+            </div>
+          </div>
+          <div class="db-acct-row">
+            <div class="db-acct-icon gold">
+              <span class="material-icons-outlined">receipt_long</span>
+            </div>
+            <div class="db-acct-info">
+              <span class="db-acct-name">Transactions</span>
+              <span class="db-acct-num">This month</span>
+            </div>
+            <div class="db-acct-right">
+              <span class="db-acct-bal" id="txnCount">0</span>
+              <span class="db-acct-tag">Total</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BUSINESS CARD -->
+      <section class="db-cards-section">
+        <div class="db-section-head"><h3>Business Card</h3></div>
+        <div class="db-card-scroll">
+          <div class="db-atm-wrap">
+            <img
+              src="assest/images/businessatm.jpeg"
+              class="db-atm-img"
+              alt="Business Card"
+            />
+            <div class="db-atm-overlay">
+              <div class="db-atm-name" id="bizCardName">BUSINESS NAME</div>
+              <div class="db-atm-visa">
+                DEBIT&nbsp;<span class="db-visa-word">VISA</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUICK ACTIONS -->
+      <section class="db-actions">
+        <div class="db-section-head"><h3>Quick Actions</h3></div>
+        <div class="db-actions-grid">
+          <a href="wire-transfer.html" class="db-action-item">
+            <div class="db-action-icon blue">
+              <span class="material-icons-outlined">swap_horiz</span>
+            </div>
+            <span>Wire Transfer</span>
+          </a>
+          <a href="paybill.html" class="db-action-item">
+            <div class="db-action-icon purple">
+              <span class="material-icons-outlined">receipt_long</span>
+            </div>
+            <span>Pay Bills</span>
+          </a>
+          <a href="international_wire.html" class="db-action-item">
+            <div class="db-action-icon gold">
+              <span class="material-icons-outlined">language</span>
+            </div>
+            <span>Intl Wire</span>
+          </a>
+          <a href="transaction.html" class="db-action-item">
+            <div class="db-action-icon green">
               <span class="material-icons-outlined">bar_chart</span>
             </div>
-            <div class="tool-body">
-              <h4>Expense Tracker</h4>
-              <p>
-                Categorize and monitor business spending. Export reports for tax
-                purposes.
-              </p>
-              <span class="cs-tag">Coming Soon</span>
-            </div>
+            <span>Statements</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- TRANSACTIONS -->
+      <section class="db-txns">
+        <div class="db-section-head">
+          <h3>Business Transactions</h3>
+          <a href="transaction.html" class="db-see-all">View all</a>
+        </div>
+        <div id="bizTxns">
+          <div class="db-empty">
+            <span class="material-icons-outlined">receipt_long</span>
+            <p>Loading transactions...</p>
           </div>
         </div>
-        <div class="txn-section">
-          <h3>
-            Recent Business Transactions <a href="transaction.html">View All</a>
-          </h3>
-          <div id="bizTxns">
-            <p class="empty-txn">No business transactions yet.</p>
-          </div>
-        </div>
-      </div>
-    </div>
+      </section>
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="db-bottom-nav">
+      <a href="dashboard.html" class="db-nav-item">
+        <span class="material-icons-outlined">home</span><span>Home</span>
+      </a>
+      <a href="transaction.html" class="db-nav-item">
+        <span class="material-icons-outlined">bar_chart</span
+        ><span>Activity</span>
+      </a>
+      <a href="wire.html" class="db-nav-item db-nav-center">
+        <span class="material-icons-outlined">send</span>
+      </a>
+      <a href="card.html" class="db-nav-item">
+        <span class="material-icons-outlined">credit_card</span
+        ><span>Cards</span>
+      </a>
+      <a href="settings.html" class="db-nav-item">
+        <span class="material-icons-outlined">settings</span
+        ><span>Settings</span>
+      </a>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="assest/js/db.js"></script>
+    <script src="assest/js/emailjs-config.js"></script>
     <script src="assest/js/auth.js"></script>
     <script src="assest/js/business-dashboard.js"></script>
   </body>

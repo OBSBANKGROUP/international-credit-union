@@ -29,7 +29,7 @@
           <span></span><span></span><span></span>
         </button>
         <div class="db-brand">
-          <img src="assets/images/logo.jpeg" alt="ICU" class="db-logo" />
+          <img src="assest/images/logo.jpeg" alt="ICU" class="db-logo" />
           <span class="db-brand-name">International<br />Credit Union</span>
         </div>
         <button class="db-notif" id="notifyBtn">
@@ -156,7 +156,6 @@
       <section class="db-actions" id="moreActions">
         <div class="db-section-head">
           <h3>Quick Actions</h3>
-          <a href="Manage-account.html" class="db-see-all">Edit</a>
         </div>
         <div class="db-actions-grid">
           <a href="wire-transfer.html" class="db-action-item">
@@ -182,6 +181,12 @@
               <span class="material-icons-outlined">currency_exchange</span>
             </div>
             <span>Transfer Money</span>
+          </a>
+          <a href="#" id="linkAccountBtn" class="db-action-item">
+            <div class="db-action-icon green">
+              <span class="material-icons-outlined">link</span>
+            </div>
+            <span>Link Account</span>
           </a>
         </div>
       </section>
@@ -254,76 +259,43 @@
         </div>
       </section>
 
-      <!-- DEBIT CARD -->
+      <!-- DEBIT CARD — real ATM images with name + VISA overlay -->
       <section class="db-cards-section">
         <div class="db-section-head">
           <h3>My Cards</h3>
           <a href="card.html" class="db-see-all">View all</a>
         </div>
         <div class="db-card-scroll">
-          <!-- PERSONAL CARD -->
-          <div class="db-card db-card-personal">
-            <div class="db-card-top">
-              <div class="db-card-logo-row">
-                <img
-                  src="assest/images/logo.jpeg"
-                  class="db-card-bank-logo"
-                  alt="ICU"
-                />
-                <span class="db-card-bank-label"
-                  >International<br />Credit Union</span
-                >
-              </div>
-              <div class="db-card-chip">
-                <span class="material-icons-outlined">credit_card</span>
-              </div>
-            </div>
-            <div class="db-card-number">
-              &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;
-              &bull;&bull;&bull;&bull; <span id="cardLastFour">1001</span>
-            </div>
-            <div class="db-card-bottom">
-              <div>
-                <div class="db-card-label">CARD HOLDER</div>
-                <div class="db-card-name user-name">MEMBER NAME</div>
-              </div>
-              <div class="db-card-visa">
-                DEBIT<br /><span class="db-visa-word">VISA</span>
+          <!-- PERSONAL CARD — uses real personalatm.jpeg with overlay -->
+          <div class="db-atm-wrap" onclick="window.location.href = 'card.html'">
+            <img
+              src="assest/images/personalatm.jpeg"
+              class="db-atm-img"
+              alt="Personal Card"
+            />
+            <div class="db-atm-overlay">
+              <div class="db-atm-name user-name">MEMBER NAME</div>
+              <div class="db-atm-visa">
+                DEBIT &nbsp;<span class="db-visa-word">VISA</span>
               </div>
             </div>
           </div>
-          <!-- BUSINESS CARD (shown if business account) -->
+          <!-- BUSINESS CARD — uses businessatm.jpeg, shown if business account -->
           <div
-            class="db-card db-card-business"
+            class="db-atm-wrap"
             id="businessCardEl"
             style="display: none"
+            onclick="window.location.href = 'card.html'"
           >
-            <div class="db-card-top">
-              <div class="db-card-logo-row">
-                <img
-                  src="assest/images/logo.jpeg"
-                  class="db-card-bank-logo"
-                  alt="ICU"
-                />
-                <span class="db-card-bank-label"
-                  >International<br />Credit Union</span
-                >
-              </div>
-              <div class="db-card-chip">
-                <span class="material-icons-outlined">credit_card</span>
-              </div>
-            </div>
-            <div class="db-card-number">
-              &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;
-              &bull;&bull;&bull;&bull; <span id="bizCardLastFour">7645</span>
-            </div>
-            <div class="db-card-bottom">
-              <div>
-                <div class="db-card-label">BUSINESS</div>
-                <div class="db-card-name" id="bizCardName">BUSINESS NAME</div>
-              </div>
-              <div class="db-card-visa">
-                DEBIT<br /><span class="db-visa-word">MC</span>
+            <img
+              src="assest/images/businessatm.jpeg"
+              class="db-atm-img"
+              alt="Business Card"
+            />
+            <div class="db-atm-overlay">
+              <div class="db-atm-name" id="bizCardName">BUSINESS NAME</div>
+              <div class="db-atm-visa">
+                DEBIT &nbsp;<span class="db-visa-word">VISA</span>
               </div>
             </div>
           </div>

@@ -499,9 +499,7 @@ a {
   font-size: 1.1rem !important;
 }
 
-/* ── DEBIT CARD ── */
-.db-cards-section {
-}
+/* ── ATM CARD with image + overlay ── */
 .db-card-scroll {
   display: flex;
   gap: 16px;
@@ -512,113 +510,58 @@ a {
 .db-card-scroll::-webkit-scrollbar {
   display: none;
 }
-.db-card {
+
+.db-atm-wrap {
+  position: relative;
   min-width: 300px;
-  height: 175px;
-  border-radius: 20px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   flex-shrink: 0;
-  position: relative;
+  border-radius: 16px;
   overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  transition: transform 0.3s;
 }
-.db-card::before {
-  content: "";
-  position: absolute;
-  top: -30px;
-  right: -30px;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  pointer-events: none;
+.db-atm-wrap:hover {
+  transform: translateY(-4px);
 }
-.db-card::after {
-  content: "";
-  position: absolute;
-  bottom: -20px;
-  left: -20px;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  pointer-events: none;
-}
-.db-card-personal {
-  background: linear-gradient(135deg, #1a2a6c, #4b38f5);
-}
-.db-card-business {
-  background: linear-gradient(135deg, #1a1a2e, #c9a227);
-}
-.db-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  position: relative;
-  z-index: 1;
-}
-.db-card-logo-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.db-card-bank-logo {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+.db-atm-img {
+  width: 100%;
+  height: 185px;
   object-fit: cover;
+  object-position: center;
+  display: block;
 }
-.db-card-bank-label {
-  font-size: 0.6rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1.2;
-}
-.db-card-chip .material-icons-outlined {
-  font-size: 1.6rem;
-  color: rgba(255, 255, 255, 0.8);
-}
-.db-card-number {
-  font-size: 0.95rem;
-  letter-spacing: 3px;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  position: relative;
-  z-index: 1;
-}
-.db-card-bottom {
+.db-atm-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 18px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 100%);
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  position: relative;
-  z-index: 1;
 }
-.db-card-label {
-  font-size: 0.58rem;
-  opacity: 0.6;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-bottom: 2px;
-}
-.db-card-name {
-  font-size: 0.85rem;
+.db-atm-name {
+  font-size: 0.82rem;
   font-weight: 700;
+  color: white !important;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
-.db-card-visa {
+.db-atm-visa {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.9);
   text-align: right;
-  font-size: 0.58rem;
-  opacity: 0.8;
   line-height: 1.3;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 .db-visa-word {
   font-size: 1.1rem;
   font-weight: 900;
   font-style: italic;
-  opacity: 1;
+  display: block;
 }
 
 /* ── TRANSACTIONS ── */
@@ -751,12 +694,62 @@ a {
   font-size: 1.4rem;
 }
 
-/* ── DARK MODE ── */
+/* ── TEXT COLOURS ── */
+/* Default dashboard is dark — all text white */
+.db-section-head h3,
+.db-section-head a,
+.db-acct-name,
+.db-acct-bal,
+.db-acct-tag,
+.db-greeting,
+.db-welcome,
+.db-total,
+.db-bal-label,
+.db-bal-sub,
+.db-action-item span,
+.history-title,
+.history-detail,
+.history-date,
+.txn-credit,
+.txn-debit,
+.db-menu-name,
+.db-menu-bal strong,
+.db-menu-bal span,
+.db-qbtn span {
+  color: #ffffff;
+}
+
+.db-acct-num,
+.db-see-all {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* DARK MODE — flip text to dark */
 .dark-mode {
   background: #060a14 !important;
 }
-.dark-mode .db-card {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+.dark-mode .db-section-head h3 {
+  color: #111 !important;
+}
+.dark-mode .db-acct-name {
+  color: #111 !important;
+}
+.dark-mode .db-acct-bal {
+  color: #111 !important;
+}
+.dark-mode .history-title {
+  color: #111 !important;
+}
+.dark-mode .db-action-item span {
+  color: #333 !important;
+}
+.dark-mode .db-acct-row {
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+}
+.dark-mode .history-card {
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
 }
 
 /* ── SWITCH for toggles ── */
@@ -867,4 +860,28 @@ input:checked + .slider:before {
   .db-card {
     min-width: calc(100vw - 56px);
   }
+}
+
+/* ── Business dashboard extras ── */
+.db-back-btn {
+  display: flex;
+  align-items: center;
+  color: var(--db-text);
+  padding: 6px;
+}
+.db-back-btn .material-icons-outlined {
+  font-size: 1.1rem;
+}
+.db-biz-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+.db-biz-badge .material-icons-outlined {
+  font-size: 1.4rem;
 }
