@@ -242,13 +242,60 @@ document.addEventListener("DOMContentLoaded", function () {
     if (boxes[1] && !svEl) boxes[1].textContent = formatCurrency(savingsBal);
 
     /* Account number */
+    var last4 = currentUser.accountNumber
+      ? String(currentUser.accountNumber).slice(-4)
+      : "----";
     document
-      .querySelectorAll(".account-number,.acct-number")
+      .querySelectorAll(".account-number,.acct-number,.user-acct-num")
       .forEach(function (el) {
-        el.textContent = currentUser.accountNumber
-          ? "••••" + String(currentUser.accountNumber).slice(-4)
-          : "••••••••";
+        el.textContent = "•••• " + last4;
       });
+
+    /* Card last 4 */
+    var cardL4 = document.getElementById("cardLastFour");
+    if (cardL4) cardL4.textContent = last4;
+
+    /* User name on card */
+    var cardFullName = (
+      (currentUser.firstName || "") +
+      " " +
+      (currentUser.lastName || "")
+    )
+      .trim()
+      .toUpperCase();
+    document.querySelectorAll(".db-card-name.user-name").forEach(function (el) {
+      el.textContent = cardFullName || "MEMBER NAME";
+    });
+
+    /* Business card */
+    var bizCardEl = document.getElementById("businessCardEl");
+    var bizCardName = document.getElementById("bizCardName");
+    var bizCardL4 = document.getElementById("bizCardLastFour");
+    var accts = currentUser.accounts || {};
+    var bizKeys = Object.keys(accts).filter(function (k) {
+      return k !== "checking" && k !== "savings" && accts[k];
+    });
+    if (bizKeys.length > 0) {
+      if (bizCardEl) bizCardEl.style.display = "";
+      if (bizCardName) {
+        var bk = accts[bizKeys[0]];
+        bizCardName.textContent = (
+          typeof bk === "object" && bk.name
+            ? bk.name
+            : currentUser.businessName || "BUSINESS"
+        ).toUpperCase();
+      }
+      if (bizCardL4) bizCardL4.textContent = last4;
+    }
+
+    /* User pic in menu */
+    var menuAvatar = document.getElementById("menuAvatar");
+    if (menuAvatar && currentUser.profilePic)
+      menuAvatar.src = currentUser.profilePic;
+
+    /* Update user pic on hero too */
+    var heroPic = document.querySelector(".db-user-pic");
+    if (heroPic && currentUser.profilePic) heroPic.src = currentUser.profilePic;
 
     /* ── Transactions — show last 10 on dashboard ── */
     var userLogs = logs
@@ -403,20 +450,34 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    /* ── Hamburger — uses CSS transform via .open class ── */
+    /* ── Hamburger / Slide Menu ── */
     var menuBtn = document.getElementById("menuBtn");
     var menuPanel2 = document.getElementById("menuPanel");
-    if (menuBtn && menuPanel2) {
+    var menuOverlay = document.getElementById("menuOverlay");
+    var menuCloseEl = document.getElementById("menuCloseBtn");
+    function openMenu() {
+      if (menuPanel2) menuPanel2.classList.add("open");
+      if (menuOverlay) menuOverlay.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+    function closeMenu() {
+      if (menuPanel2) menuPanel2.classList.remove("open");
+      if (menuOverlay) menuOverlay.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+    if (menuBtn)
       menuBtn.addEventListener("click", function (e) {
         e.stopPropagation();
-        menuPanel2.classList.toggle("open");
+        openMenu();
       });
-      document.addEventListener("click", function () {
-        menuPanel2.classList.remove("open");
-      });
-      menuPanel2.addEventListener("click", function (e) {
-        e.stopPropagation();
-      });
-    }
+    if (menuCloseEl) menuCloseEl.addEventListener("click", closeMenu);
+    if (menuOverlay) menuOverlay.addEventListener("click", closeMenu);
+    if (document.getElementById("profileBtn"))
+      document
+        .getElementById("profileBtn")
+        .addEventListener("click", function (e) {
+          e.stopPropagation();
+          openMenu();
+        });
   }
 });

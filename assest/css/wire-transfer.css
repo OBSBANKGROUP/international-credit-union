@@ -795,3 +795,16 @@ input[readonly] {
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: 0.3px;
 }
+
+/* ── Receipt capture quality ── */
+.receipt-card-wrap {
+  width: 400px !important;
+  max-width: 400px !important;
+  font-family: "Inter", Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  text-rendering: optimizeLegibility !important;
+}
+.receipt-header {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}

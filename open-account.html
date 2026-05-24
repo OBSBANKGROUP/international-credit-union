@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/jpeg" href="assets/images/logo.jpeg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Open Account | International Credit Union</title>
@@ -12,6 +13,7 @@
     />
 
     <link rel="stylesheet" href="assest/css/open-account.css" />
+    <link rel="stylesheet" href="assest/css/mobile.css" />
   </head>
 
   <body>
@@ -258,64 +260,9 @@
 
           <!-- SUBMIT -->
 
-          <div id="submitSection">
-            <button type="submit" class="submit-btn" id="submitBtn">
-              Submit Application
-            </button>
-          </div>
-
-          <!-- OTP SECTION -->
-          <div
-            id="otpSection"
-            style="
-              display: none;
-              margin-top: 20px;
-              padding: 20px;
-              background: #f9f9f9;
-              border-radius: 8px;
-              text-align: center;
-              border: 1px solid #ddd;
-            "
-          >
-            <h3 style="margin-bottom: 10px">Verify Your Email</h3>
-            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #555">
-              We have sent a 6-digit verification code to your email. Please
-              enter it below to create your account.
-            </p>
-            <div
-              class="form-group"
-              style="max-width: 200px; margin: 0 auto 15px"
-            >
-              <input
-                type="text"
-                id="otpInput"
-                placeholder="Enter OTP"
-                maxlength="6"
-                style="
-                  text-align: center;
-                  font-size: 1.2rem;
-                  letter-spacing: 2px;
-                "
-              />
-            </div>
-            <button
-              type="button"
-              class="submit-btn"
-              id="verifyOtpBtn"
-              style="background-color: #2e7d32"
-            >
-              Verify & Create Account
-            </button>
-            <p
-              id="otpErrorMsg"
-              style="
-                color: #d32f2f;
-                margin-top: 10px;
-                display: none;
-                font-size: 0.85rem;
-              "
-            ></p>
-          </div>
+          <button type="submit" class="submit-btn" id="submitBtn">
+            Submit Application
+          </button>
         </form>
       </div>
     </section>
@@ -346,10 +293,10 @@
           <h4>Quick Links</h4>
 
           <ul>
-            <li><a href="#">Personal Banking</a></li>
-            <li><a href="#">Business Banking</a></li>
-            <li><a href="#">Loans</a></li>
-            <li><a href="#">Investments</a></li>
+            <li><a href="index.html">Personal Banking</a></li>
+            <li><a href="business.html">Business Banking</a></li>
+            <li><a href="Loan.html">Loans</a></li>
+            <li><a href="invest.html">Investments</a></li>
             <li><a href="open-account.html">Open Account</a></li>
           </ul>
         </div>
@@ -359,11 +306,11 @@
           <h4>Our Services</h4>
 
           <ul>
-            <li><a href="#">Checking Accounts</a></li>
-            <li><a href="#">Savings Accounts</a></li>
-            <li><a href="#">Credit Cards</a></li>
-            <li><a href="#">Insurance</a></li>
-            <li><a href="#">Mobile Banking</a></li>
+            <li><a href="open-account.html">Checking Accounts</a></li>
+            <li><a href="open-account.html">Savings Accounts</a></li>
+            <li><a href="creditcard.html">Credit Cards</a></li>
+            <li><a href="insurance.html">Insurance</a></li>
+            <li><a href="index.html">Mobile Banking</a></li>
           </ul>
         </div>
 
@@ -372,11 +319,15 @@
           <h4>Support</h4>
 
           <ul>
-            <li><a href="#">Help Center</a></li>
-            <li><a href="#">Security</a></li>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms & Conditions</a></li>
-            <li><a href="#">Report Fraud</a></li>
+            <li><a href="help-center.html">Help Center</a></li>
+            <li><a href="Security.html">Security</a></li>
+            <li><a href="Security.html#Privacy_Policy">Privacy Policy</a></li>
+            <li>
+              <a href="Security.html#Terms_Conditions"
+                >Terms &amp; Conditions</a
+              >
+            </li>
+            <li><a href="Contact.html">Report Fraud</a></li>
           </ul>
         </div>
 
@@ -393,7 +344,7 @@
 
           <!-- Contact Info -->
           <div class="footer-contact">
-            <p><strong>Email:</strong> info@internationalcunion.com</p>
+            <p><strong>Email:</strong> support@internationalcu.com</p>
             <p><strong>Phone:</strong> +1 (800) 555-2478</p>
           </div>
         </div>
@@ -409,7 +360,6 @@
         </div>
       </div>
     </footer>
-    <script src="assest/js/db.js"></script>
     <script src="assest/js/auth.js"></script>
   </body>
 </html>

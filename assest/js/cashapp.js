@@ -319,10 +319,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (typeof html2canvas !== "undefined") {
           html2canvas(card, {
-            scale: 2,
+            scale: 4,
             useCORS: true,
+            allowTaint: true,
             backgroundColor: "#ffffff",
             logging: false,
+            imageTimeout: 15000,
+            removeContainer: true,
+            width: card.offsetWidth,
+            height: card.offsetHeight,
           })
             .then(function (canvas) {
               canvas.toBlob(function (blob) {
