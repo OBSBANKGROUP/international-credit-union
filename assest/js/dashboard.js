@@ -457,7 +457,7 @@ document.addEventListener("DOMContentLoaded", function () {
       var btn = document.getElementById(id);
       if (btn) {
         btn.addEventListener("click", function () {
-          window.location.href = "business-dashboard.html";
+          window.location.href = "bussiness-dashboard.html";
         });
       }
     });
