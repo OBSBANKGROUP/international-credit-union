@@ -275,23 +275,7 @@
             </div>
             <span class="record-count" id="userCount">0 users</span>
           </div>
-          <div class="table-wrap">
-            <table class="data-table" id="usersTable">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Email</th>
-                  <th>Password</th>
-                  <th>PIN</th>
-                  <th>Phone</th>
-                  <th>Joined</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="usersBody"></tbody>
-            </table>
-          </div>
+          <div id="usersGrid" class="users-card-grid"></div>
           <div class="empty-state" id="usersEmpty">
             <span class="material-icons-outlined">people</span>
             <p>No users yet</p>
@@ -402,22 +386,7 @@
             </div>
             <span class="record-count" id="txnCount">0 entries</span>
           </div>
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Action</th>
-                  <th>Details</th>
-                  <th>Ref ID</th>
-                  <th>Date &amp; Time</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="txnBody"></tbody>
-            </table>
-          </div>
+          <div id="txnTimeline" class="txn-timeline"></div>
           <div class="empty-state" id="txnEmpty">
             <span class="material-icons-outlined">receipt_long</span>
             <p>No transactions yet</p>

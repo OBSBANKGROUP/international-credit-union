@@ -747,43 +747,117 @@
     }
     empty.style.display = "none";
 
-    body.innerHTML = filtered
+    var grid = document.getElementById("usersGrid");
+    if (!grid) {
+      /* fallback to old tbody if grid not found */
+      var body2 = document.getElementById("usersBody");
+      if (body2)
+        body2.innerHTML = filtered
+          .map(function (u) {
+            return (
+              "<tr><td>" +
+              esc(u.firstName + " " + u.lastName) +
+              "</td><td>" +
+              esc(u.email) +
+              "</td><td>" +
+              '<span class="badge ' +
+              (u.status || "active") +
+              '">' +
+              capitalize(u.status || "active") +
+              "</span></td>" +
+              '<td><button class="btn-sm blue" onclick="window._adminViewUser(' +
+              u.id +
+              ')">View</button></td></tr>'
+            );
+          })
+          .join("");
+      return;
+    }
+
+    /* Calculate each user's total balance from logs */
+    var allLogs = getLogs();
+    function getUserBalance(uid) {
+      var bal = 0;
+      allLogs.forEach(function (l) {
+        if (String(l.userId) !== String(uid) || !l.amount) return;
+        if (l.txnType === "credit") bal += parseFloat(l.amount);
+        else if (l.txnType === "debit") bal -= parseFloat(l.amount);
+      });
+      return bal;
+    }
+
+    grid.innerHTML = filtered
       .map(function (u) {
         var st = u.status || "active";
+        var bal = getUserBalance(u.id);
+        var initStr = (
+          (u.firstName || "?")[0] + (u.lastName || "?")[0]
+        ).toUpperCase();
+        var colors = [
+          "#4b38f5",
+          "#00a878",
+          "#c9a227",
+          "#e53935",
+          "#0288d1",
+          "#7b1fa2",
+        ];
+        var color = colors[Math.abs(u.id || 0) % colors.length];
+        var txnCount = allLogs.filter(function (l) {
+          return String(l.userId) === String(u.id) && l.amount;
+        }).length;
         return (
-          "<tr>" +
-          '<td><div class="user-cell"><div class="cl-avatar" style="width:34px;height:34px;font-size:.75rem">' +
-          initials(u) +
+          '<div class="user-card">' +
+          '<div class="user-card-top">' +
+          '<div class="user-card-avatar" style="background:' +
+          color +
+          '">' +
+          initStr +
           "</div>" +
-          "<strong>" +
+          '<div class="user-card-info">' +
+          '<div class="user-card-name">' +
           esc(u.firstName + " " + u.lastName) +
-          "</strong></div></td>" +
-          "<td>" +
+          "</div>" +
+          '<div class="user-card-email">' +
           esc(u.email) +
-          "</td>" +
-          "<td>" +
-          esc(u.password || "—") +
-          "</td>" +
-          "<td>" +
-          esc(u.transactionPin || "—") +
-          "</td>" +
-          "<td>" +
-          esc(u.phone || "—") +
-          "</td>" +
-          "<td>" +
-          formatDate(u.createdAt) +
-          "</td>" +
-          '<td><span class="badge ' +
+          "</div>" +
+          "</div>" +
+          '<span class="badge ' +
           st +
           '">' +
           capitalize(st) +
-          "</span></td>" +
-          '<td><div class="action-btns">' +
+          "</span>" +
+          "</div>" +
+          '<div class="user-card-bal">' +
+          '<div class="user-card-bal-label">Total Balance</div>' +
+          '<div class="user-card-bal-amt' +
+          (bal < 0 ? " neg" : "") +
+          '">' +
+          fmt(Math.abs(bal)) +
+          "</div>" +
+          "</div>" +
+          '<div class="user-card-meta">' +
+          '<div class="user-card-meta-item"><span>Account #</span><strong>' +
+          esc(u.accountNumber || "—") +
+          "</strong></div>" +
+          '<div class="user-card-meta-item"><span>Transactions</span><strong>' +
+          txnCount +
+          "</strong></div>" +
+          '<div class="user-card-meta-item"><span>Joined</span><strong>' +
+          formatDate(u.createdAt) +
+          "</strong></div>" +
+          "</div>" +
+          '<div class="user-card-actions">' +
           '<button class="btn-sm blue" onclick="window._adminViewUser(' +
           u.id +
-          ')">View</button>' +
-          "</div></td>" +
-          "</tr>"
+          ')">&#128065; View</button>' +
+          '<button class="btn-sm green" onclick="window._adminAddTxn(' +
+          u.id +
+          ')">&#43; Transaction</button>' +
+          '<button class="btn-sm red" onclick="window._adminDeleteUser(' +
+          u.id +
+          ')">&#128465;</button>' +
+          "</div>" +
+          "</div>"
         );
       })
       .join("");
@@ -929,46 +1003,100 @@
     }
     empty.style.display = "none";
 
-    body.innerHTML = filtered
-      .slice(0, 100)
-      .map(function (l) {
-        var badge = actionBadge(l.action);
-        return (
-          "<tr>" +
-          '<td><div class="user-cell"><div class="cl-avatar" style="width:32px;height:32px;font-size:.72rem">' +
-          esc((l.userName || "?")[0]) +
-          '</div><span class="customer-name">' +
-          esc(l.userName || "Unknown") +
-          "</span></div></td>" +
-          "<td>" +
-          esc(l.action) +
-          "</td>" +
-          "<td>" +
-          esc(l.details || "—") +
-          "</td>" +
-          "<td>#" +
-          l.id +
-          "</td>" +
-          "<td>" +
-          formatDateTime(l.timestamp) +
-          "</td>" +
-          '<td><span class="badge ' +
-          badge +
+    var timeline = document.getElementById("txnTimeline");
+    if (!timeline) return;
+
+    /* Group by date */
+    var groups = {};
+    filtered.slice(0, 150).forEach(function (l) {
+      var d = "";
+      try {
+        d = new Date(l.timestamp).toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+      } catch (e) {
+        d = "Unknown Date";
+      }
+      if (!groups[d]) groups[d] = [];
+      groups[d].push(l);
+    });
+
+    var html = "";
+    Object.keys(groups).forEach(function (date) {
+      html +=
+        '<div class="txn-date-group"><div class="txn-date-label">' +
+        date +
+        "</div>";
+      groups[date].forEach(function (l) {
+        var isCredit = l.txnType === "credit";
+        var isDebit = l.txnType === "debit";
+        var iconBg = isCredit ? "#e6f9f3" : isDebit ? "#ffeef0" : "#f0f2ff";
+        var iconColor = isCredit ? "#00a878" : isDebit ? "#e53935" : "#4b38f5";
+        var iconChar = isCredit ? "&#8593;" : isDebit ? "&#8595;" : "&#8801;";
+        var amtStr = l.amount
+          ? (isDebit ? "-" : "+") + fmt(Math.abs(l.amount))
+          : "";
+        var amtClass = isCredit
+          ? "txn-tl-credit"
+          : isDebit
+            ? "txn-tl-debit"
+            : "";
+        var time = "";
+        try {
+          time = new Date(l.timestamp).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        } catch (e) {}
+
+        html +=
+          '<div class="txn-tl-item">' +
+          '<div class="txn-tl-icon" style="background:' +
+          iconBg +
+          ";color:" +
+          iconColor +
           '">' +
-          capitalize(l.status || "completed") +
-          "</span></td>" +
-          '<td><div class="action-btns">' +
+          iconChar +
+          "</div>" +
+          '<div class="txn-tl-body">' +
+          '<div class="txn-tl-row">' +
+          '<div class="txn-tl-left">' +
+          '<span class="txn-tl-name">' +
+          esc(l.userName || "Unknown") +
+          "</span>" +
+          '<span class="txn-tl-action">' +
+          esc(l.action || "") +
+          "</span>" +
+          '<span class="txn-tl-detail">' +
+          esc(l.details || "") +
+          "</span>" +
+          "</div>" +
+          '<div class="txn-tl-right">' +
+          (amtStr
+            ? '<span class="txn-tl-amt ' + amtClass + '">' + amtStr + "</span>"
+            : "") +
+          '<span class="txn-tl-time">' +
+          time +
+          "</span>" +
+          '<div class="txn-tl-btns">' +
           '<button class="btn-sm blue" onclick="window._adminEditTxn(' +
           l.id +
           ')">Edit</button>' +
           '<button class="btn-sm red" onclick="window._adminDeleteTxn(' +
           l.id +
-          ')">Delete</button>' +
-          "</div></td>" +
-          "</tr>"
-        );
-      })
-      .join("");
+          ')">Del</button>' +
+          "</div>" +
+          "</div>" +
+          "</div>" +
+          "</div>" +
+          "</div>";
+      });
+      html += "</div>";
+    });
+    timeline.innerHTML = html;
   };
 
   ["txnSearch", "txnTypeFilter"].forEach(function (id) {

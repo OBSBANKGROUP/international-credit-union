@@ -345,24 +345,26 @@ document.addEventListener("DOMContentLoaded", function () {
             '">' +
             (isCredit ? "&#8593;" : "&#8595;") +
             "</div>" +
-            "<div>" +
-            '<h3 class="history-title">' +
+            '<div class="history-text-col">' +
+            '<span class="history-title">' +
             (l.action || "Transaction") +
-            "</h3>" +
-            '<p class="history-detail">' +
+            "</span>" +
+            '<span class="history-detail">' +
             (l.details || "") +
-            "</p>" +
+            "</span>" +
             '<span class="history-date">' +
             date +
             "</span>" +
             "</div>" +
             "</div>" +
+            '<div class="txn-amount-col">' +
             '<span class="' +
             (isCredit ? "txn-credit" : "txn-debit") +
             '">' +
             (isCredit ? "+" : "-") +
             formatCurrency(Math.abs(l.amount)) +
-            "</span>";
+            "</span>" +
+            "</div>";
           txnList.appendChild(div);
         });
 
@@ -379,6 +381,180 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* ── Session timer ── */
     if (window.startSessionTimer) window.startSessionTimer();
+
+    /* ── NOTIFICATION SYSTEM ── */
+    function buildNotifications(logs, uid) {
+      /* Save each transaction as a notification in localStorage */
+      var stored = JSON.parse(
+        localStorage.getItem("icu_notifications") || "[]",
+      );
+      var storedIds = stored.map(function (n) {
+        return n.id;
+      });
+      var newOnes = [];
+
+      logs
+        .filter(function (l) {
+          return l.amount;
+        })
+        .forEach(function (l) {
+          var nid = "txn_" + l.id;
+          if (storedIds.indexOf(nid) === -1) {
+            var isCredit = l.txnType === "credit";
+            newOnes.push({
+              id: nid,
+              type: isCredit ? "credit" : "debit",
+              title: l.action || "Transaction",
+              desc:
+                (isCredit ? "+" : "-") +
+                formatCurrency(Math.abs(l.amount)) +
+                " — " +
+                (l.details || ""),
+              time: l.timestamp,
+              read: false,
+            });
+          }
+        });
+
+      /* Add new ones at the front */
+      stored = newOnes.concat(stored).slice(0, 50);
+      localStorage.setItem("icu_notifications", JSON.stringify(stored));
+      return stored;
+    }
+
+    var allNotifs = buildNotifications(logs, uid);
+    var unreadCount = allNotifs.filter(function (n) {
+      return !n.read;
+    }).length;
+
+    /* Update badge */
+    var notifDot = document.getElementById("notifDot");
+    var notifBadge = document.querySelector(".notif-badge");
+    if (unreadCount > 0) {
+      if (notifDot) notifDot.style.display = "block";
+      if (notifBadge)
+        notifBadge.textContent = unreadCount > 9 ? "9+" : unreadCount;
+    }
+
+    /* Build notification panel */
+    var notifPanel = document.getElementById("notifPanel");
+    if (!notifPanel) {
+      notifPanel = document.createElement("div");
+      notifPanel.id = "notifPanel";
+      notifPanel.className = "notif-panel";
+      notifPanel.innerHTML =
+        '<div class="notif-panel-head">' +
+        "<h4>Notifications</h4>" +
+        '<button class="notif-clear" id="notifClearBtn">Mark all read</button>' +
+        "</div>" +
+        '<div class="notif-list" id="notifList"></div>';
+      document.body.appendChild(notifPanel);
+    }
+
+    function renderNotifList() {
+      var stored = JSON.parse(
+        localStorage.getItem("icu_notifications") || "[]",
+      );
+      var listEl = document.getElementById("notifList");
+      if (!listEl) return;
+      if (stored.length === 0) {
+        listEl.innerHTML =
+          '<div class="notif-empty">No notifications yet</div>';
+        return;
+      }
+      listEl.innerHTML = "";
+      stored.slice(0, 20).forEach(function (n) {
+        var timeStr = "";
+        try {
+          timeStr =
+            new Date(n.time).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            }) +
+            " " +
+            new Date(n.time).toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+        } catch (e) {
+          timeStr = n.time || "";
+        }
+        var iconClass =
+          n.type === "credit"
+            ? "credit"
+            : n.type === "debit"
+              ? "debit"
+              : "info";
+        var iconChar =
+          n.type === "credit"
+            ? "&#8593;"
+            : n.type === "debit"
+              ? "&#8595;"
+              : "&#x2139;";
+        var item = document.createElement("div");
+        item.className = "notif-item" + (n.read ? "" : " unread");
+        item.innerHTML =
+          '<div class="notif-dot-icon ' +
+          iconClass +
+          '">' +
+          iconChar +
+          "</div>" +
+          '<div class="notif-body">' +
+          '<div class="notif-title">' +
+          n.title +
+          "</div>" +
+          '<div class="notif-desc">' +
+          n.desc +
+          "</div>" +
+          '<span class="notif-time">' +
+          timeStr +
+          "</span>" +
+          "</div>";
+        listEl.appendChild(item);
+      });
+    }
+    renderNotifList();
+
+    /* Bell button toggle */
+    var notifBtn = document.getElementById("notifyBtn");
+    if (notifBtn) {
+      notifBtn.onclick = function (e) {
+        e.stopPropagation();
+        notifPanel.classList.toggle("open");
+        /* Mark all as read when opened */
+        if (notifPanel.classList.contains("open")) {
+          var stored = JSON.parse(
+            localStorage.getItem("icu_notifications") || "[]",
+          );
+          stored.forEach(function (n) {
+            n.read = true;
+          });
+          localStorage.setItem("icu_notifications", JSON.stringify(stored));
+          if (notifDot) notifDot.style.display = "none";
+          if (notifBadge) notifBadge.textContent = "";
+          renderNotifList();
+        }
+      };
+      document.addEventListener("click", function (e) {
+        if (
+          notifPanel &&
+          !notifPanel.contains(e.target) &&
+          e.target !== notifBtn
+        ) {
+          notifPanel.classList.remove("open");
+        }
+      });
+    }
+
+    /* Clear button */
+    document.addEventListener("click", function (e) {
+      if (e.target && e.target.id === "notifClearBtn") {
+        localStorage.removeItem("icu_notifications");
+        renderNotifList();
+        if (notifDot) notifDot.style.display = "none";
+      }
+    });
 
     /* ── Hide/Show balance eye button ── */
     var eyeBtn = document.getElementById("eyeBtn");

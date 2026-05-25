@@ -588,7 +588,7 @@ a {
 .history-card {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   background: var(--db-card);
   border-radius: 14px;
   padding: 14px 16px;
@@ -614,12 +614,20 @@ a {
   background: rgba(255, 77, 109, 0.15);
   color: var(--db-red);
 }
+
+/* Left section — takes all available space, text truncates */
 .history-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  flex: 1;
+  min-width: 0; /* critical — allows flex children to shrink below content size */
+  overflow: hidden;
+}
+.history-text-col {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 .history-title {
   font-size: 0.88rem;
@@ -627,6 +635,8 @@ a {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
 }
 .history-detail {
   font-size: 0.72rem;
@@ -635,24 +645,33 @@ a {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
 }
 .history-date {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   color: var(--db-muted);
   margin-top: 3px;
   display: block;
 }
+
+/* Amount — fixed width on the right, never pushed away */
+.txn-amount-col {
+  flex-shrink: 0;
+  text-align: right;
+  min-width: 70px;
+}
 .txn-credit {
   color: var(--db-green);
   font-weight: 700;
-  font-size: 0.9rem;
-  flex-shrink: 0;
+  font-size: 0.88rem;
+  display: block;
 }
 .txn-debit {
   color: var(--db-red);
   font-weight: 700;
-  font-size: 0.9rem;
-  flex-shrink: 0;
+  font-size: 0.88rem;
+  display: block;
 }
 .db-empty {
   text-align: center;
@@ -851,4 +870,134 @@ input:checked + .slider:before {
 }
 .db-biz-badge .material-icons-outlined {
   font-size: 1.4rem;
+}
+
+/* ── NOTIFICATION PANEL ── */
+.notif-panel {
+  position: fixed;
+  top: 62px;
+  right: 12px;
+  width: 320px;
+  max-height: 420px;
+  background: var(--db-card);
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--db-border);
+  z-index: 300;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+}
+.notif-panel.open {
+  display: flex;
+}
+.notif-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--db-border);
+}
+.notif-panel-head h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.notif-clear {
+  font-size: 0.72rem;
+  color: var(--db-accent2);
+  cursor: pointer;
+  font-weight: 600;
+  background: none;
+  border: none;
+  font-family: "Inter", sans-serif;
+}
+.notif-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 8px 0;
+}
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--db-border);
+  transition: background 0.2s;
+}
+.notif-item:last-child {
+  border-bottom: none;
+}
+.notif-item:hover {
+  background: rgba(75, 56, 245, 0.05);
+}
+.notif-item.unread {
+  background: rgba(75, 56, 245, 0.04);
+}
+.notif-dot-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+.notif-dot-icon.credit {
+  background: rgba(0, 168, 120, 0.15);
+  color: var(--db-green);
+}
+.notif-dot-icon.debit {
+  background: rgba(255, 77, 109, 0.12);
+  color: var(--db-red);
+}
+.notif-dot-icon.info {
+  background: rgba(75, 56, 245, 0.12);
+  color: var(--db-accent2);
+}
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+.notif-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.notif-desc {
+  font-size: 0.72rem;
+  color: var(--db-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.notif-time {
+  font-size: 0.65rem;
+  color: var(--db-muted);
+  margin-top: 3px;
+  display: block;
+}
+.notif-empty {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--db-muted);
+  font-size: 0.85rem;
+}
+.notif-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--db-red);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.db-notif {
+  position: relative;
 }
