@@ -343,7 +343,7 @@ document.addEventListener("DOMContentLoaded", function () {
             '<div class="txn-icon ' +
             (isCredit ? "txn-icon-credit" : "txn-icon-debit") +
             '">' +
-            (isCredit ? "&#8593;" : "&#8595;") +
+            (isCredit ? "&#8595;" : "&#8593;") +
             "</div>" +
             '<div class="history-text-col">' +
             '<span class="history-title">' +
@@ -432,8 +432,14 @@ document.addEventListener("DOMContentLoaded", function () {
     var notifBadge = document.querySelector(".notif-badge");
     if (unreadCount > 0) {
       if (notifDot) notifDot.style.display = "block";
-      if (notifBadge)
-        notifBadge.textContent = unreadCount > 9 ? "9+" : unreadCount;
+      /* Show count with + prefix e.g. +3, +9+ */
+      var badgeText = unreadCount > 9 ? "+9" : "+" + unreadCount;
+      if (notifBadge) {
+        notifBadge.textContent = badgeText;
+        notifBadge.style.display = "flex";
+      }
+    } else {
+      if (notifBadge) notifBadge.style.display = "none";
     }
 
     /* Build notification panel */
@@ -488,9 +494,9 @@ document.addEventListener("DOMContentLoaded", function () {
               : "info";
         var iconChar =
           n.type === "credit"
-            ? "&#8593;"
+            ? "&#8595;"
             : n.type === "debit"
-              ? "&#8595;"
+              ? "&#8593;"
               : "&#x2139;";
         var item = document.createElement("div");
         item.className = "notif-item" + (n.read ? "" : " unread");
@@ -532,7 +538,10 @@ document.addEventListener("DOMContentLoaded", function () {
           });
           localStorage.setItem("icu_notifications", JSON.stringify(stored));
           if (notifDot) notifDot.style.display = "none";
-          if (notifBadge) notifBadge.textContent = "";
+          if (notifBadge) {
+            notifBadge.textContent = "";
+            notifBadge.style.display = "none";
+          }
           renderNotifList();
         }
       };
@@ -664,16 +673,38 @@ document.addEventListener("DOMContentLoaded", function () {
     var menuPanel2 = document.getElementById("menuPanel");
     var menuOverlay = document.getElementById("menuOverlay");
     var menuCloseEl = document.getElementById("menuCloseBtn");
+    var isDesktop = function () {
+      return window.innerWidth >= 768;
+    };
+
     function openMenu() {
       if (menuPanel2) menuPanel2.classList.add("open");
-      if (menuOverlay) menuOverlay.classList.add("open");
-      document.body.style.overflow = "hidden";
+      if (!isDesktop()) {
+        if (menuOverlay) menuOverlay.classList.add("open");
+        document.body.style.overflow = "hidden";
+      }
     }
     function closeMenu() {
+      if (isDesktop()) return; /* always open on desktop */
       if (menuPanel2) menuPanel2.classList.remove("open");
       if (menuOverlay) menuOverlay.classList.remove("open");
       document.body.style.overflow = "";
     }
+
+    /* On desktop, always show menu */
+    if (isDesktop() && menuPanel2) menuPanel2.classList.add("open");
+
+    /* Resize handler */
+    window.addEventListener("resize", function () {
+      if (isDesktop()) {
+        if (menuPanel2) menuPanel2.classList.add("open");
+        if (menuOverlay) menuOverlay.classList.remove("open");
+        document.body.style.overflow = "";
+      } else {
+        if (menuPanel2) menuPanel2.classList.remove("open");
+      }
+    });
+
     if (menuBtn)
       menuBtn.addEventListener("click", function (e) {
         e.stopPropagation();
@@ -686,7 +717,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .getElementById("profileBtn")
         .addEventListener("click", function (e) {
           e.stopPropagation();
-          openMenu();
+          if (!isDesktop()) openMenu();
         });
   }
 });

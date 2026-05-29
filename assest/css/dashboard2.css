@@ -58,7 +58,7 @@ a {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 .db-header-inner {
-  max-width: 480px;
+  max-width: 1200px;
   margin: 0 auto;
   height: 60px;
   display: flex;
@@ -265,12 +265,12 @@ a {
 
 /* ── MAIN ── */
 .db-main {
-  max-width: 480px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px 20px;
+  padding: 0 28px 32px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 28px;
 }
 
 /* ── HERO BALANCE ── */
@@ -609,11 +609,11 @@ a {
 .txn-icon-credit {
   background: rgba(0, 168, 120, 0.12);
   color: var(--db-green);
-}
+} /* green down — money IN  */
 .txn-icon-debit {
-  background: rgba(255, 77, 109, 0.15);
+  background: rgba(229, 57, 53, 0.12);
   color: var(--db-red);
-}
+} /* red up   — money OUT */
 
 /* Left section — takes all available space, text truncates */
 .history-left {
@@ -831,7 +831,140 @@ input:checked + .slider:before {
 }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 480px) {
+/* ── DESKTOP LAYOUT (768px+) ── */
+@media (min-width: 768px) {
+  body {
+    padding-bottom: 0;
+  }
+
+  /* Header expands fully */
+  .db-header-inner {
+    padding: 0 8px;
+  }
+
+  /* Hide mobile bottom nav on desktop */
+  .db-bottom-nav {
+    display: none;
+  }
+
+  /* Show hamburger menu as sidebar on desktop */
+  .db-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100%;
+    transform: translateX(0) !important;
+    border-right: 1px solid var(--db-border);
+    box-shadow: none;
+  }
+  .db-overlay {
+    display: none !important;
+  }
+
+  /* Push main content right of sidebar */
+  .db-header {
+    margin-left: 240px;
+  }
+  .db-main {
+    margin-left: 240px;
+    max-width: calc(1200px - 240px);
+  }
+
+  /* Hide hamburger button — menu always visible */
+  .db-ham {
+    display: none;
+  }
+
+  /* Hero card full width with better padding */
+  .db-hero {
+    padding: 32px 28px 24px;
+    margin-top: 20px;
+  }
+  .db-total {
+    font-size: 2.8rem;
+  }
+
+  /* Two column layout — accounts left, cards right */
+  .db-desktop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  /* Accounts + Quick Actions in left column, Cards + Transactions in right */
+  .db-accounts,
+  .db-actions {
+    width: 100%;
+  }
+
+  /* Cards scroll wider */
+  .db-atm-wrap {
+    min-width: 340px;
+  }
+
+  /* Transactions table-like view */
+  .history-card {
+    padding: 16px 20px;
+  }
+
+  /* Quick actions 5 columns on desktop */
+  .db-actions-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* ── LARGE DESKTOP (1024px+) ── */
+@media (min-width: 1024px) {
+  .db-main {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    grid-template-rows: auto;
+    column-gap: 28px;
+  }
+
+  /* Left column: hero + actions + accounts + transactions */
+  .db-hero {
+    grid-column: 1;
+  }
+  .db-actions {
+    grid-column: 1;
+  }
+  .db-accounts {
+    grid-column: 1;
+  }
+  .db-txns {
+    grid-column: 1;
+  }
+
+  /* Right column: cards */
+  .db-cards-section {
+    grid-column: 2;
+    grid-row: 1 / 5;
+  }
+
+  /* Cards stack vertically on right panel */
+  .db-card-scroll {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+  .db-atm-wrap {
+    min-width: unset;
+    width: 100%;
+  }
+  .db-atm-img {
+    height: 200px;
+  }
+}
+
+/* ── MOBILE (below 768px) ── */
+@media (max-width: 767px) {
+  .db-menu {
+    transform: translateX(-100%);
+  }
+  .db-menu.open {
+    transform: translateX(0);
+  }
   .db-total {
     font-size: 2rem;
   }
@@ -843,7 +976,7 @@ input:checked + .slider:before {
     width: 44px;
     height: 44px;
   }
-  .db-card {
+  .db-atm-wrap {
     min-width: calc(100vw - 56px);
   }
 }
@@ -985,18 +1118,21 @@ input:checked + .slider:before {
 }
 .notif-badge {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: -4px;
+  right: -4px;
   background: var(--db-red);
   color: white;
   font-size: 0.6rem;
-  font-weight: 700;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: flex;
+  font-weight: 800;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  border-radius: 10px;
+  display: none; /* hidden until there are unread notifs */
   align-items: center;
   justify-content: center;
+  border: 2px solid var(--db-card);
+  letter-spacing: 0.3px;
 }
 .db-notif {
   position: relative;
