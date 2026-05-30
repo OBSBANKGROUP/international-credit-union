@@ -279,38 +279,54 @@
   }
 
   /* Save a single new log entry to Supabase */
+  /* Always fetches the real Supabase user_id fresh by email to avoid ID mismatch */
   function saveLogToSupabase(log) {
     var SUPABASE_URL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
     var SUPABASE_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+    var HEADERS = {
+      apikey: SUPABASE_KEY,
+      Authorization: "Bearer " + SUPABASE_KEY,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    };
 
-    /* First get the user's Supabase ID by email */
+    /* Step 1: find the local user to get their email */
     var users = getUsers();
     var user = users.find(function (u) {
-      return u.id === log.userId;
+      return String(u.id) === String(log.userId);
     });
-    if (!user || !user.email) return;
+    if (!user || !user.email) {
+      console.warn("saveLogToSupabase: user not found for id", log.userId);
+      return;
+    }
 
+    /* Step 2: look up the REAL Supabase numeric id by email (always fresh) */
     fetch(
       SUPABASE_URL +
         "/rest/v1/users?email=eq." +
         encodeURIComponent(user.email.toLowerCase().trim()) +
         "&select=id",
       {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: "Bearer " + SUPABASE_KEY,
-        },
+        headers: HEADERS,
       },
     )
       .then(function (r) {
         return r.json();
       })
       .then(function (rows) {
-        if (!rows || !rows[0]) return;
-        var supabaseUserId = rows[0].id;
+        if (!rows || !rows[0]) {
+          console.warn(
+            "saveLogToSupabase: user not found in Supabase for email",
+            user.email,
+          );
+          return;
+        }
+        var realSupabaseId =
+          rows[0].id; /* This is guaranteed to be the correct Supabase ID */
+
         var row = {
-          user_id: supabaseUserId,
+          user_id: realSupabaseId /* ← always the real Supabase ID */,
           user_name: log.userName || "",
           action: log.action || "",
           details: log.details || "",
@@ -320,21 +336,30 @@
           target_account: log.targetAccount || null,
           timestamp: log.timestamp || new Date().toISOString(),
           status: log.status || "completed",
-          txn_id: log.txnId || "",
+          txn_id: log.txnId || String(Date.now()),
         };
+
+        console.log(
+          "Saving log to Supabase:",
+          row.action,
+          "for user_id:",
+          realSupabaseId,
+          "(email:",
+          user.email + ")",
+        );
+
         return fetch(SUPABASE_URL + "/rest/v1/logs", {
           method: "POST",
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: "Bearer " + SUPABASE_KEY,
-            "Content-Type": "application/json",
-            Prefer: "return=minimal",
-          },
+          headers: HEADERS,
           body: JSON.stringify(row),
         });
       })
-      .then(function () {
-        console.log("Log saved to Supabase:", log.action);
+      .then(function (res) {
+        if (res && !res.ok)
+          res.text().then(function (t) {
+            console.warn("Supabase log error:", t);
+          });
+        else console.log("Log saved to Supabase:", log.action);
       })
       .catch(function (e) {
         console.warn("Supabase log save failed:", e);
@@ -2278,33 +2303,34 @@
   window._adminViewHistory = function (userId) {
     var users = getUsers();
     var user = users.find(function (u) {
-      return u.id === userId;
+      return String(u.id) === String(userId);
     });
     if (!user) return;
 
     _historyCurrentUserId = userId;
     document.getElementById("historyTitle").textContent =
-      "Transaction History — " + user.firstName + " " + user.lastName;
+      user.firstName + " " + user.lastName + " — History";
 
     var txns = getUserTxns(userId);
-    var body = document.getElementById("historyBody");
+    var timeline = document.getElementById("historyTimeline");
     var empty = document.getElementById("historyEmpty");
     var summary = document.getElementById("historySummary");
 
+    /* Summary stats */
     var totalCredits = 0,
       totalDebits = 0;
     txns.forEach(function (t) {
-      if (t.txnType === "credit") totalCredits += t.amount;
-      else totalDebits += t.amount;
+      if (t.txnType === "credit") totalCredits += parseFloat(t.amount) || 0;
+      else totalDebits += parseFloat(t.amount) || 0;
     });
     var balance = totalCredits - totalDebits;
 
     summary.innerHTML =
       '<div class="history-stats">' +
-      '<div class="hs-item hs-credit"><span>Total Credits</span><strong>$' +
+      '<div class="hs-item hs-credit"><span>Credits</span><strong>+$' +
       formatNum(totalCredits.toFixed(2)) +
       "</strong></div>" +
-      '<div class="hs-item hs-debit"><span>Total Debits</span><strong>$' +
+      '<div class="hs-item hs-debit"><span>Debits</span><strong>-$' +
       formatNum(totalDebits.toFixed(2)) +
       "</strong></div>" +
       '<div class="hs-item hs-balance"><span>Balance</span><strong>$' +
@@ -2313,63 +2339,132 @@
       "</div>";
 
     if (txns.length === 0) {
-      body.innerHTML = "";
+      timeline.innerHTML = "";
       empty.style.display = "block";
-    } else {
-      empty.style.display = "none";
-      var runBal = 0;
-      body.innerHTML = txns
-        .map(function (t) {
-          if (t.txnType === "credit") runBal += t.amount;
-          else runBal -= t.amount;
-          var cls = t.txnType === "credit" ? "txn-credit" : "txn-debit";
-          var sign = t.txnType === "credit" ? "+" : "-";
-          return (
-            "<tr>" +
-            "<td>" +
-            formatDateTime(t.timestamp) +
-            "</td>" +
-            '<td><span class="badge ' +
-            (t.txnType === "credit" ? "approved" : "cancelled") +
-            '">' +
-            capitalize(t.txnType) +
-            "</span></td>" +
-            "<td>" +
-            esc(t.details || "—") +
-            (t.reason
-              ? '<br><small style="color:#8b949e">Reason: ' +
-                esc(t.reason) +
-                "</small>"
-              : "") +
-            "</td>" +
-            '<td class="' +
-            cls +
-            '">' +
-            sign +
-            "$" +
-            formatNum(t.amount.toFixed(2)) +
-            "</td>" +
-            "<td>$" +
-            formatNum(runBal.toFixed(2)) +
-            "</td>" +
-            "<td style='white-space:nowrap'>" +
-            '<button class="btn-sm blue" style="margin-right:4px" onclick="_adminEditTxn(' +
-            JSON.stringify(t.id) +
-            "," +
-            userId +
-            ')">Edit</button>' +
-            '<button class="btn-sm" style="background:#ffebee;color:#c62828" onclick="_adminDeleteTxn(' +
-            JSON.stringify(t.id) +
-            "," +
-            userId +
-            ')">Delete</button>' +
-            "</td>" +
-            "</tr>"
-          );
-        })
-        .join("");
+      document.getElementById("historyModal").classList.add("show");
+      return;
     }
+    empty.style.display = "none";
 
+    /* Group by date */
+    var groups = {};
+    var sorted = txns.slice().sort(function (a, b) {
+      return new Date(b.timestamp) - new Date(a.timestamp);
+    });
+    sorted.forEach(function (t) {
+      var d = "";
+      try {
+        d = new Date(t.timestamp).toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+      } catch (e) {
+        d = "Unknown Date";
+      }
+      if (!groups[d]) groups[d] = [];
+      groups[d].push(t);
+    });
+
+    /* Running balance (forward order) */
+    var runBal = 0;
+    var balMap = {};
+    txns
+      .slice()
+      .sort(function (a, b) {
+        return new Date(a.timestamp) - new Date(b.timestamp);
+      })
+      .forEach(function (t) {
+        if (t.txnType === "credit") runBal += parseFloat(t.amount) || 0;
+        else runBal -= parseFloat(t.amount) || 0;
+        balMap[t.id] = runBal;
+      });
+
+    var html = "";
+    Object.keys(groups).forEach(function (date) {
+      html += '<div class="hist-tl-group">';
+      html += '<div class="hist-tl-date">' + date + "</div>";
+      groups[date].forEach(function (t) {
+        var isCredit = t.txnType === "credit";
+        var iconBg = isCredit ? "#e6f9f3" : "#ffeef0";
+        var iconColor = isCredit ? "#00a878" : "#e53935";
+        var arrow = isCredit
+          ? "&#8595;"
+          : "&#8593;"; /* green down = in, red up = out */
+        var sign = isCredit ? "+" : "-";
+        var amtClass = isCredit ? "hist-credit" : "hist-debit";
+        var bal =
+          balMap[t.id] !== undefined
+            ? "$" + formatNum(balMap[t.id].toFixed(2))
+            : "";
+        var time = "";
+        try {
+          time = new Date(t.timestamp).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        } catch (e) {}
+        var acct = t.targetAccount
+          ? ' <span class="hist-acct-tag">' +
+            capitalize(t.targetAccount) +
+            "</span>"
+          : "";
+
+        html +=
+          '<div class="hist-tl-item">' +
+          '<div class="hist-tl-icon" style="background:' +
+          iconBg +
+          ";color:" +
+          iconColor +
+          '">' +
+          arrow +
+          "</div>" +
+          '<div class="hist-tl-body">' +
+          '<div class="hist-tl-top">' +
+          '<div class="hist-tl-left">' +
+          '<span class="hist-tl-action">' +
+          esc(t.action || "Transaction") +
+          acct +
+          "</span>" +
+          '<span class="hist-tl-detail">' +
+          esc(t.details || "") +
+          "</span>" +
+          "</div>" +
+          '<div class="hist-tl-right">' +
+          '<span class="hist-tl-amt ' +
+          amtClass +
+          '">' +
+          sign +
+          "$" +
+          formatNum((parseFloat(t.amount) || 0).toFixed(2)) +
+          "</span>" +
+          '<span class="hist-tl-bal">Bal: ' +
+          bal +
+          "</span>" +
+          '<span class="hist-tl-time">' +
+          time +
+          "</span>" +
+          "</div>" +
+          "</div>" +
+          '<div class="hist-tl-actions">' +
+          '<button class="btn-sm blue" onclick="_adminEditTxn(' +
+          JSON.stringify(t.id) +
+          "," +
+          userId +
+          ')">Edit</button>' +
+          '<button class="btn-sm red" onclick="_adminDeleteTxn(' +
+          JSON.stringify(t.id) +
+          "," +
+          userId +
+          ')">Delete</button>' +
+          "</div>" +
+          "</div>" +
+          "</div>";
+      });
+      html += "</div>";
+    });
+    timeline.innerHTML = html;
     document.getElementById("historyModal").classList.add("show");
   };
 
