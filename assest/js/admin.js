@@ -844,14 +844,19 @@
         var txnCount = allLogs.filter(function (l) {
           return String(l.userId) === String(u.id) && l.amount;
         }).length;
+        var cardAvatarHtml = u.profilePic
+          ? '<img src="' +
+            u.profilePic +
+            '" style="width:46px;height:46px;border-radius:14px;object-fit:cover;flex-shrink:0" alt="photo"/>'
+          : '<div class="user-card-avatar" style="background:' +
+            color +
+            '">' +
+            initStr +
+            "</div>";
         return (
           '<div class="user-card">' +
           '<div class="user-card-top">' +
-          '<div class="user-card-avatar" style="background:' +
-          color +
-          '">' +
-          initStr +
-          "</div>" +
+          cardAvatarHtml +
           '<div class="user-card-info">' +
           '<div class="user-card-name">' +
           esc(u.firstName + " " + u.lastName) +
@@ -1029,6 +1034,17 @@
           (u.firstName || "?")[0] + (u.lastName || "?")[0]
         ).toUpperCase();
         var color = colors[Math.abs(parseInt(u.id) || 0) % colors.length];
+        var acctAvatarHtml = u.profilePic
+          ? '<img src="' +
+            u.profilePic +
+            '" class="acct-user-avatar-img" alt="' +
+            esc(u.firstName) +
+            '" style="width:44px;height:44px;border-radius:12px;object-fit:cover;flex-shrink:0"/>'
+          : '<div class="acct-user-avatar" style="background:' +
+            color +
+            '">' +
+            initStr +
+            "</div>";
         var totalBal = 0;
         acctKeys.forEach(function (k) {
           totalBal += getAcctBalance(u.id, k);
@@ -1080,11 +1096,7 @@
           u.id +
           '">' +
           '<div class="acct-user-header">' +
-          '<div class="acct-user-avatar" style="background:' +
-          color +
-          '">' +
-          initStr +
-          "</div>" +
+          acctAvatarHtml +
           '<div class="acct-user-info">' +
           '<div class="acct-user-name">' +
           esc(u.firstName + " " + u.lastName) +
@@ -1606,6 +1618,27 @@
     document.getElementById("editCard1Balance").value = u.card1Balance || 0;
     document.getElementById("editCard2Balance").value = u.card2Balance || 0;
 
+    /* Show current profile pic or initials */
+    var previewEl = document.getElementById("editProfilePreview");
+    var initialsEl = document.getElementById("editProfileInitials");
+    if (u.profilePic) {
+      if (previewEl) {
+        previewEl.src = u.profilePic;
+        previewEl.style.display = "block";
+      }
+      if (initialsEl) initialsEl.style.display = "none";
+    } else {
+      if (previewEl) previewEl.style.display = "none";
+      if (initialsEl) {
+        initialsEl.style.display = "flex";
+        initialsEl.textContent = (
+          (u.firstName || "?")[0] + (u.lastName || "?")[0]
+        ).toUpperCase();
+      }
+    }
+    var picInput = document.getElementById("editProfilePic");
+    if (picInput) picInput.value = "";
+
     document.getElementById("editModal").classList.add("show");
   };
 
@@ -1688,6 +1721,23 @@
 
       var newPass = document.getElementById("editPassword").value;
       if (newPass) users[idx].password = newPass;
+
+      /* Save profile pic if a new one was uploaded */
+      var editPicFile = document.getElementById("editProfilePic");
+      if (editPicFile && editPicFile.files && editPicFile.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+          users[idx].profilePic = ev.target.result;
+          saveUsers(users);
+          if (window._dbUpdateUser)
+            window
+              ._dbUpdateUser(users[idx].id, users[idx])
+              .catch(function () {});
+          refreshCurrentPage();
+        };
+        reader.readAsDataURL(editPicFile.files[0]);
+        return; /* async — will refresh after read */
+      }
 
       saveUsers(users);
       /* Sync updated user to Supabase */
