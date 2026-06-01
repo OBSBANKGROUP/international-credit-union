@@ -908,10 +908,10 @@
           ')">&#128065; View</button>' +
           '<button class="btn-sm green"  onclick="window._adminCreditAcct(' +
           u.id +
-          ',&quot;checking&quot;,&quot;Checking&quot;)">&#8595; Credit</button>' +
+          ",'checking','Checking')\">&#8595; Credit</button>" +
           '<button class="btn-sm red"    onclick="window._adminDebitAcct(' +
           u.id +
-          ',&quot;checking&quot;,&quot;Checking&quot;)">&#8593; Debit</button>' +
+          ",'checking','Checking')\">&#8593; Debit</button>" +
           '<button class="btn-sm" style="background:#6b7280;color:white" onclick="window._adminDeleteUser(' +
           u.id +
           ')">&#128465;</button>' +
@@ -1093,19 +1093,19 @@
               "</span>" +
               '<div class="acct-sub-btns">' +
               '<button class="btn-sm green" onclick="window._adminCreditAcct(' +
-              JSON.stringify(u.id) +
-              "," +
-              JSON.stringify(k) +
-              "," +
-              JSON.stringify(label) +
-              ')">&#8595; Credit</button>' +
+              u.id +
+              ",'" +
+              k +
+              "','" +
+              label +
+              "')\">&#8595; Credit</button>" +
               '<button class="btn-sm red"   onclick="window._adminDebitAcct(' +
-              JSON.stringify(u.id) +
-              "," +
-              JSON.stringify(k) +
-              "," +
-              JSON.stringify(label) +
-              ')">&#8593; Debit</button>' +
+              u.id +
+              ",'" +
+              k +
+              "','" +
+              label +
+              "')\">&#8593; Debit</button>" +
               '<button class="btn-sm blue"  onclick="window._adminViewHistory(' +
               JSON.stringify(u.id) +
               ')">History</button>' +
