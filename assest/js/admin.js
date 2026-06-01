@@ -962,15 +962,29 @@
     }
     empty.style.display = "none";
 
-    /* Get all account keys for a user */
+    /* Get all account keys for a user — always include checking + savings + all business */
     function getAccountKeys(u) {
       var accts = {};
+
+      /* Start with checking and savings — every user has these */
+      accts["checking"] = true;
+      accts["savings"] = true;
+
+      /* Add any explicit business accounts */
       if (u.accounts && typeof u.accounts === "object") {
-        Object.assign(accts, u.accounts);
+        Object.keys(u.accounts).forEach(function (k) {
+          if (u.accounts[k]) accts[k] = u.accounts[k];
+        });
       }
-      // Always include primary
-      var primary = (u.accountType || "checking").toLowerCase();
-      if (!accts[primary]) accts[primary] = true;
+
+      /* If user has a businessName but no business key yet, add one */
+      var bizKeys = Object.keys(accts).filter(function (k) {
+        return k !== "checking" && k !== "savings";
+      });
+      if (u.businessName && bizKeys.length === 0) {
+        accts["business"] = { name: u.businessName };
+      }
+
       return accts;
     }
 
@@ -2020,6 +2034,16 @@
       document.getElementById("addUserModal").classList.add("show");
     });
   }
+
+  /* Wire Manage page Add User button to same modal */
+  var addUserBtnManage = document.getElementById("addUserBtnManage");
+  if (addUserBtnManage) {
+    addUserBtnManage.addEventListener("click", function () {
+      var origBtn = document.getElementById("addUserBtn");
+      if (origBtn) origBtn.click();
+    });
+  }
+
   ["closeAddUser", "cancelAddUser"].forEach(function (id) {
     var el = document.getElementById(id);
     if (el)
