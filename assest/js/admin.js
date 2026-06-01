@@ -432,8 +432,22 @@
   function initials(u) {
     return ((u.firstName || "")[0] || "") + ((u.lastName || "")[0] || "");
   }
+  /* Generate a realistic 10-digit account number
+     Format: 2-digit branch prefix + 8-digit unique number
+     e.g. 4800012847, 4800019253  */
   function genAcctNum(id) {
-    return "ICU-" + ("00000000" + id).slice(-8);
+    var seed = parseInt(id) || 1001;
+    var branch = "48"; /* ICU branch code */
+    var unique = String((seed * 9973 + 31337) % 100000000).padStart(8, "0");
+    return branch + unique;
+  }
+
+  /* Generate a real-format ABA routing number
+     Format: 9 digits — first 4 = Federal Reserve routing symbol,
+     next 4 = institution identifier, last 1 = check digit
+     We use a fixed real-looking prefix for ICU */
+  function genRoutingNum() {
+    return "091000022"; /* Fixed ICU routing number — looks like a real ABA */
   }
 
   /* ---------- Initialization ---------- */
@@ -900,98 +914,227 @@
   /* ----------------------------------------------------------
      ACCOUNTS
      ---------------------------------------------------------- */
+  /* ----------------------------------------------------------
+     ACCOUNTS — shows each user with their sub-accounts
+     each user appears ONCE with all their accounts below
+     ---------------------------------------------------------- */
   pageRenderers.accounts = function () {
     var users = getUsers();
-
-    // Count account types (simulated from user data or stored)
-    var checking = 0,
-      savings = 0,
-      business = 0;
-    users.forEach(function (u) {
-      var type = (u.accountType || "checking").toLowerCase();
-      if (type === "checking") checking++;
-      else if (type === "savings") savings++;
-      else if (type === "business") business++;
-      else checking++;
+    var logs = getLogs();
+    var q = (document.getElementById("acctSearch") || {}).value || "";
+    var filtered = users.filter(function (u) {
+      var name = (u.firstName + " " + u.lastName + " " + u.email).toLowerCase();
+      return !q || name.includes(q.toLowerCase());
     });
 
+    // Stats
+    var ckCount = 0,
+      svCount = 0,
+      bzCount = 0;
+    users.forEach(function (u) {
+      var accts = getAccountKeys(u);
+      if (accts.checking) ckCount++;
+      if (accts.savings) svCount++;
+      if (
+        Object.keys(accts).filter(function (k) {
+          return k !== "checking" && k !== "savings";
+        }).length
+      )
+        bzCount++;
+    });
     setText("acctTotal", users.length);
-    setText("acctChecking", checking);
-    setText("acctSavings", savings);
-    setText("acctBusiness", business);
+    setText("acctChecking", ckCount);
+    setText("acctSavings", svCount);
+    setText("acctBusiness", bzCount);
     setText(
       "acctCount",
-      users.length + " account" + (users.length !== 1 ? "s" : ""),
+      filtered.length + " user" + (filtered.length !== 1 ? "s" : ""),
     );
 
-    var body = document.getElementById("accountsBody");
+    var container = document.getElementById("accountsUserList");
     var empty = document.getElementById("accountsEmpty");
+    if (!container) return;
 
-    if (users.length === 0) {
-      body.innerHTML = "";
+    if (filtered.length === 0) {
+      container.innerHTML = "";
       empty.style.display = "block";
       return;
     }
     empty.style.display = "none";
 
-    body.innerHTML = users
+    /* Get all account keys for a user */
+    function getAccountKeys(u) {
+      var accts = {};
+      if (u.accounts && typeof u.accounts === "object") {
+        Object.assign(accts, u.accounts);
+      }
+      // Always include primary
+      var primary = (u.accountType || "checking").toLowerCase();
+      if (!accts[primary]) accts[primary] = true;
+      return accts;
+    }
+
+    /* Balance per account type for this user — isolated by userId */
+    function getAcctBalance(uid, acctType) {
+      var bal = 0;
+      logs.forEach(function (l) {
+        if (String(l.userId) !== String(uid) || !l.amount) return;
+        var primary = "checking";
+        var u2 = users.find(function (u) {
+          return String(u.id) === String(uid);
+        });
+        if (u2) primary = (u2.accountType || "checking").toLowerCase();
+        var ta = (l.targetAccount || primary).toLowerCase();
+        if (ta !== acctType.toLowerCase()) return;
+        if (l.txnType === "credit") bal += parseFloat(l.amount) || 0;
+        else if (l.txnType === "debit") bal -= parseFloat(l.amount) || 0;
+      });
+      return bal;
+    }
+
+    var colors = [
+      "#4b38f5",
+      "#00a878",
+      "#c9a227",
+      "#e53935",
+      "#0288d1",
+      "#7b1fa2",
+    ];
+    var acctIcons = {
+      checking: "account_balance",
+      savings: "savings",
+      business: "business_center",
+    };
+
+    container.innerHTML = filtered
       .map(function (u) {
-        var accts =
-          u.accounts ||
-          (u.accountType ? { [u.accountType]: true } : { checking: true });
-        return Object.keys(accts)
-          .map(function (type) {
-            var label = capitalize(type);
-            var balance =
-              "$" + formatNum(getUserBalance(u.id, type).toFixed(2));
-            var st = u.status || "active";
+        var st = u.status || "active";
+        var accts = getAccountKeys(u);
+        var acctKeys = Object.keys(accts);
+        var initStr = (
+          (u.firstName || "?")[0] + (u.lastName || "?")[0]
+        ).toUpperCase();
+        var color = colors[Math.abs(parseInt(u.id) || 0) % colors.length];
+        var totalBal = 0;
+        acctKeys.forEach(function (k) {
+          totalBal += getAcctBalance(u.id, k);
+        });
+        var txnCount = logs.filter(function (l) {
+          return String(l.userId) === String(u.id) && l.amount;
+        }).length;
+
+        // Sub-account rows
+        var subRows = acctKeys
+          .map(function (k) {
+            var bal = getAcctBalance(u.id, k);
+            var label =
+              typeof accts[k] === "object" && accts[k].name
+                ? accts[k].name
+                : capitalize(k);
+            var icon = acctIcons[k] || "account_balance_wallet";
+            var balColor = bal < 0 ? "color:#e53935" : "color:#00a878";
             return (
-              "<tr>" +
-              '<td><div class="user-cell"><div class="cl-avatar" style="width:34px;height:34px;font-size:.75rem">' +
-              initials(u) +
-              "</div>" +
-              "<strong>" +
-              esc(u.firstName + " " + u.lastName) +
-              "</strong></div></td>" +
-              "<td>" +
-              esc(genAcctNum(u.id)) +
-              "</td>" +
-              "<td>" +
+              '<div class="acct-sub-row">' +
+              '<span class="material-icons-outlined acct-sub-icon">' +
+              icon +
+              "</span>" +
+              '<span class="acct-sub-label">' +
               esc(label) +
-              "</td>" +
-              "<td>" +
-              balance +
-              "</td>" +
-              "<td>" +
-              formatDate(u.createdAt) +
-              "</td>" +
-              '<td><span class="badge ' +
-              st +
-              '">' +
-              capitalize(st) +
-              "</span></td>" +
-              '<td><div class="action-btns">' +
-              '<button class="btn-sm green" onclick="window._adminAddTxn(' +
-              u.id +
-              ')">Add Txn</button>' +
-              '<button class="btn-sm blue" onclick="window._adminViewHistory(' +
-              u.id +
+              "</span>" +
+              '<span class="acct-sub-bal" style="' +
+              balColor +
+              '">$' +
+              formatNum(bal.toFixed(2)) +
+              "</span>" +
+              '<div class="acct-sub-btns">' +
+              '<button class="btn-sm green" onclick="window._adminAddTxnAcct(' +
+              JSON.stringify(u.id) +
+              "," +
+              JSON.stringify(k) +
+              ')">+ Txn</button>' +
+              '<button class="btn-sm blue"  onclick="window._adminViewHistory(' +
+              JSON.stringify(u.id) +
               ')">History</button>' +
-              '<button class="btn-sm red" onclick="window._adminDeleteUser(' +
-              u.id +
-              ')">Delete</button>' +
-              "</div></td>" +
-              "</tr>"
+              "</div>" +
+              "</div>"
             );
           })
           .join("");
+
+        return (
+          '<div class="acct-user-block" id="acctBlock_' +
+          u.id +
+          '">' +
+          '<div class="acct-user-header">' +
+          '<div class="acct-user-avatar" style="background:' +
+          color +
+          '">' +
+          initStr +
+          "</div>" +
+          '<div class="acct-user-info">' +
+          '<div class="acct-user-name">' +
+          esc(u.firstName + " " + u.lastName) +
+          "</div>" +
+          '<div class="acct-user-email">' +
+          esc(u.email) +
+          "</div>" +
+          "</div>" +
+          '<div class="acct-user-stats">' +
+          '<span class="badge ' +
+          st +
+          '">' +
+          capitalize(st) +
+          "</span>" +
+          '<span class="acct-user-txncount">' +
+          txnCount +
+          " txns</span>" +
+          "</div>" +
+          '<div class="acct-user-total">' +
+          '<span class="acct-total-label">Total</span>' +
+          '<span class="acct-total-val">$' +
+          formatNum(totalBal.toFixed(2)) +
+          "</span>" +
+          "</div>" +
+          '<div class="acct-user-actions">' +
+          '<button class="btn-sm blue"   onclick="window._adminEditUser(' +
+          u.id +
+          ')">Edit</button>' +
+          '<button class="btn-sm purple" onclick="window._adminViewHistory(' +
+          u.id +
+          ')">History</button>' +
+          '<button class="btn-sm red"    onclick="window._adminDeleteUserFull(' +
+          JSON.stringify(u.id) +
+          ')">Delete</button>' +
+          "</div>" +
+          "</div>" +
+          '<div class="acct-sub-list">' +
+          subRows +
+          "</div>" +
+          "</div>"
+        );
       })
       .join("");
+
+    // Search live filter
+    var searchEl = document.getElementById("acctSearch");
+    if (searchEl && !searchEl._wired) {
+      searchEl._wired = true;
+      searchEl.addEventListener("input", function () {
+        pageRenderers.accounts();
+      });
+    }
+
+    // Wire addUserBtn2
+    var addBtn2 = document.getElementById("addUserBtn2");
+    if (addBtn2 && !addBtn2._wired) {
+      addBtn2._wired = true;
+      addBtn2.addEventListener("click", function () {
+        document.getElementById("addUserBtn") &&
+          document.getElementById("addUserBtn").click();
+      });
+    }
   };
 
-  /* ----------------------------------------------------------
-     TRANSACTIONS (activity log)
-     ---------------------------------------------------------- */
   pageRenderers.transactions = function () {
     var logs = getLogs();
     var search = (
@@ -1613,19 +1756,79 @@
 
   /* Delete user */
   window._adminDeleteUser = function (id) {
-    if (!confirm("Permanently delete this user? This cannot be undone."))
+    window._adminDeleteUserFull(id);
+  };
+
+  /* Permanently delete user + ALL their transaction history from Supabase */
+  window._adminDeleteUserFull = function (id) {
+    if (
+      !confirm(
+        "Permanently delete this user and ALL their transaction history? This cannot be undone.",
+      )
+    )
       return;
+
+    var SUPABASE_URL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+    var SUPABASE_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+    var H = { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY };
+
     var users = getUsers();
     var u = users.find(function (x) {
-      return x.id === id;
+      return String(x.id) === String(id);
     });
-    var name = u ? u.firstName + " " + u.lastName : "Unknown";
-    users = users.filter(function (x) {
-      return x.id !== id;
-    });
-    saveUsers(users);
-    addLog(id, name, "Account Deleted", "Admin permanently deleted account");
-    refreshCurrentPage();
+
+    function doLocalDelete() {
+      saveUsers(
+        users.filter(function (x) {
+          return String(x.id) !== String(id);
+        }),
+      );
+      var logs = getLogs().filter(function (l) {
+        return String(l.userId) !== String(id);
+      });
+      saveLogs(logs);
+      refreshCurrentPage();
+    }
+
+    if (!u || !u.email) {
+      doLocalDelete();
+      return;
+    }
+
+    /* Delete from Supabase — logs cascade-delete automatically via ON DELETE CASCADE */
+    fetch(
+      SUPABASE_URL +
+        "/rest/v1/users?email=eq." +
+        encodeURIComponent(u.email.toLowerCase().trim()),
+      {
+        method: "DELETE",
+        headers: H,
+      },
+    )
+      .then(function (r) {
+        console.log("User deleted from Supabase:", u.email, r.status);
+        doLocalDelete();
+      })
+      .catch(function (e) {
+        console.warn("Supabase delete failed, deleting locally:", e);
+        doLocalDelete();
+      });
+  };
+
+  /* Add transaction to a specific account — opens modal pre-filled */
+  window._adminAddTxnAcct = function (userId, accountType) {
+    window._adminAddTxn(userId);
+    setTimeout(function () {
+      var sel = document.getElementById("txnAccountType");
+      if (!sel) return;
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === accountType) {
+          sel.selectedIndex = i;
+          break;
+        }
+      }
+    }, 150);
   };
 
   /* Add log helper */
@@ -1955,6 +2158,7 @@
               phone: phone,
               dob: dob,
               accountNumber: genAcctNum(nextId),
+              routingNumber: genRoutingNum(),
               ssn: ssn,
               address: address,
               password: (password || "").trim(), // trim whitespace on save
@@ -2550,7 +2754,8 @@
     newUser.email = newEmail.trim().toLowerCase();
     newUser.password = newPass;
     newUser.createdAt = new Date().toISOString();
-    newUser.accountNumber = "ICU" + ("00000000" + newId).slice(-8);
+    newUser.accountNumber = genAcctNum(newId);
+    newUser.routingNumber = genRoutingNum();
     users.push(newUser);
     saveUsers(users);
 

@@ -31,8 +31,8 @@
         <a href="#" class="nav-link active" data-page="dashboard">
           <span class="material-icons-outlined">dashboard</span> Dashboard
         </a>
-        <a href="#" class="nav-link" data-page="users">
-          <span class="material-icons-outlined">people</span> Users
+        <a href="#" class="nav-link" data-page="manage">
+          <span class="material-icons-outlined">manage_accounts</span> Manage Users
         </a>
         <a href="#" class="nav-link" data-page="accounts">
           <span class="material-icons-outlined">account_balance</span> Accounts
@@ -287,70 +287,28 @@
            PAGE: ACCOUNTS
            ============================================================ -->
       <section class="content page-section" id="page-accounts">
-        <div
-          class="page-top"
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-          "
-        >
+        <div class="page-top" style="display:flex;justify-content:space-between;align-items:flex-start">
           <div>
             <h1 class="page-title">Accounts</h1>
-            <p class="page-desc">Member bank accounts overview</p>
+            <p class="page-desc">All users and their sub-accounts with individual balances</p>
           </div>
-          <button class="btn-dark" id="addTxnBtn">
-            <span
-              class="material-icons-outlined"
-              style="
-                vertical-align: middle;
-                margin-right: 4px;
-                font-size: 1.1rem;
-              "
-              >add_card</span
-            >
-            Add Transaction
+          <button class="btn-dark" id="addUserBtn2">
+            <span class="material-icons-outlined" style="vertical-align:middle;margin-right:4px;font-size:1.1rem">person_add</span>
+            Add User
           </button>
         </div>
         <div class="stat-cards small">
-          <div class="stat-card green-bg">
-            <p class="stat-label">Total Accounts</p>
-            <h2 class="stat-value" id="acctTotal">0</h2>
-          </div>
-          <div class="stat-card blue-bg">
-            <p class="stat-label">Checking</p>
-            <h2 class="stat-value" id="acctChecking">0</h2>
-          </div>
-          <div class="stat-card purple-bg">
-            <p class="stat-label">Savings</p>
-            <h2 class="stat-value" id="acctSavings">0</h2>
-          </div>
-          <div class="stat-card orange-bg">
-            <p class="stat-label">Business</p>
-            <h2 class="stat-value" id="acctBusiness">0</h2>
-          </div>
+          <div class="stat-card green-bg"><p class="stat-label">Total Users</p><h2 class="stat-value" id="acctTotal">0</h2></div>
+          <div class="stat-card blue-bg"><p class="stat-label">Checking</p><h2 class="stat-value" id="acctChecking">0</h2></div>
+          <div class="stat-card purple-bg"><p class="stat-label">Savings</p><h2 class="stat-value" id="acctSavings">0</h2></div>
+          <div class="stat-card orange-bg"><p class="stat-label">Business</p><h2 class="stat-value" id="acctBusiness">0</h2></div>
         </div>
         <div class="card">
           <div class="card-header">
-            <h3>All Accounts</h3>
-            <span class="record-count" id="acctCount">0 accounts</span>
+            <input type="text" class="table-search" placeholder="Search users..." id="acctSearch"/>
+            <span class="record-count" id="acctCount">0 users</span>
           </div>
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Account Holder</th>
-                  <th>Account #</th>
-                  <th>Type</th>
-                  <th>Balance</th>
-                  <th>Opened</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="accountsBody"></tbody>
-            </table>
-          </div>
+          <div id="accountsUserList"></div>
           <div class="empty-state" id="accountsEmpty">
             <span class="material-icons-outlined">account_balance</span>
             <p>No accounts yet</p>
@@ -775,9 +733,15 @@
            PAGE: MANAGE USERS
            ============================================================ -->
       <section class="content page-section" id="page-manage">
-        <div class="page-top">
-          <h1 class="page-title">Manage Users</h1>
-          <p class="page-desc">Edit, suspend, or remove user accounts</p>
+        <div class="page-top" style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <h1 class="page-title">Manage Users</h1>
+            <p class="page-desc">Edit, suspend, or remove user accounts</p>
+          </div>
+          <button class="btn-dark" id="addUserBtn">
+            <span class="material-icons-outlined" style="vertical-align:middle;margin-right:4px;font-size:1.1rem">person_add</span>
+            Add New User
+          </button>
         </div>
         <div class="card">
           <div class="card-header">
