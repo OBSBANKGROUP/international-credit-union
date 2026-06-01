@@ -366,6 +366,18 @@
       });
   }
 
+  function showToast(msg, type) {
+    var t = document.createElement("div");
+    t.style.cssText =
+      "position:fixed;bottom:24px;right:24px;z-index:9999;padding:14px 20px;border-radius:12px;font-size:.88rem;font-weight:600;color:white;box-shadow:0 6px 20px rgba(0,0,0,.2);max-width:320px";
+    t.style.background = type === "success" ? "#00a878" : "#e53935";
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () {
+      t.remove();
+    }, 3500);
+  }
+
   function formatNum(n) {
     return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
@@ -3194,15 +3206,3 @@
   if (badge)
     badge.textContent = pendingCount < 10 ? "0" + pendingCount : pendingCount;
 })();
-
-function showToast(msg, type) {
-  var t = document.createElement("div");
-  t.style.cssText =
-    "position:fixed;bottom:24px;right:24px;z-index:9999;padding:14px 20px;border-radius:12px;font-size:.88rem;font-weight:600;color:white;box-shadow:0 6px 20px rgba(0,0,0,.2);max-width:320px;animation:fadeInUp .3s ease";
-  t.style.background = type === "success" ? "#00a878" : "#e53935";
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(function () {
-    t.remove();
-  }, 3500);
-}
