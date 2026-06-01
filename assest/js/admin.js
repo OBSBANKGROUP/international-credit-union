@@ -891,13 +891,16 @@
           "</strong></div>" +
           "</div>" +
           '<div class="user-card-actions">' +
-          '<button class="btn-sm blue" onclick="window._adminViewUser(' +
+          '<button class="btn-sm blue"   onclick="window._adminViewUser(' +
           u.id +
           ')">&#128065; View</button>' +
-          '<button class="btn-sm green" onclick="window._adminAddTxn(' +
+          '<button class="btn-sm green"  onclick="window._adminCreditAcct(' +
           u.id +
-          ')">&#43; Transaction</button>' +
-          '<button class="btn-sm red" onclick="window._adminDeleteUser(' +
+          ',&quot;checking&quot;,&quot;Checking&quot;)">&#8595; Credit</button>' +
+          '<button class="btn-sm red"    onclick="window._adminDebitAcct(' +
+          u.id +
+          ',&quot;checking&quot;,&quot;Checking&quot;)">&#8593; Debit</button>' +
+          '<button class="btn-sm" style="background:#6b7280;color:white" onclick="window._adminDeleteUser(' +
           u.id +
           ')">&#128465;</button>' +
           "</div>" +
@@ -1077,11 +1080,20 @@
               formatNum(bal.toFixed(2)) +
               "</span>" +
               '<div class="acct-sub-btns">' +
-              '<button class="btn-sm green" onclick="window._adminAddTxnAcct(' +
+              '<button class="btn-sm green" onclick="window._adminCreditAcct(' +
               JSON.stringify(u.id) +
               "," +
               JSON.stringify(k) +
-              ')">+ Txn</button>' +
+              "," +
+              JSON.stringify(label) +
+              ')">&#8595; Credit</button>' +
+              '<button class="btn-sm red"   onclick="window._adminDebitAcct(' +
+              JSON.stringify(u.id) +
+              "," +
+              JSON.stringify(k) +
+              "," +
+              JSON.stringify(label) +
+              ')">&#8593; Debit</button>' +
               '<button class="btn-sm blue"  onclick="window._adminViewHistory(' +
               JSON.stringify(u.id) +
               ')">History</button>' +
@@ -1643,6 +1655,148 @@
   };
 
   /* Close modal */
+  /* ── CREDIT MODAL ── */
+  ["closeCreditModal", "cancelCreditModal"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el)
+      el.addEventListener("click", function () {
+        document.getElementById("creditModal").classList.remove("show");
+      });
+  });
+
+  var creditForm = document.getElementById("creditForm");
+  if (creditForm) {
+    creditForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var userId = document.getElementById("creditUserId").value;
+      var accountType = document.getElementById("creditAccountType").value;
+      var amount = parseFloat(document.getElementById("creditAmount").value);
+      var description = document
+        .getElementById("creditDescription")
+        .value.trim();
+      var dtVal = document.getElementById("creditDateTime").value;
+
+      if (!amount || amount <= 0) {
+        document.getElementById("creditError").textContent =
+          "Please enter a valid amount.";
+        document.getElementById("creditError").style.display = "block";
+        return;
+      }
+
+      var users = getUsers();
+      var u = users.find(function (x) {
+        return String(x.id) === String(userId);
+      });
+      if (!u) return;
+
+      var newLog = {
+        id: Date.now(),
+        userId: u.id,
+        userName: u.firstName + " " + u.lastName,
+        action: "Credit — " + capitalize(accountType),
+        details:
+          description || "Credit to " + capitalize(accountType) + " account",
+        amount: amount,
+        txnType: "credit",
+        targetAccount: accountType,
+        timestamp: dtVal
+          ? new Date(dtVal).toISOString()
+          : new Date().toISOString(),
+        status: "completed",
+        txnId: "TXN" + Date.now(),
+      };
+
+      var logs = getLogs();
+      logs.push(newLog);
+      saveLogs(logs);
+      saveLogToSupabase(newLog);
+
+      document.getElementById("creditModal").classList.remove("show");
+      showToast(
+        "Credit of $" +
+          formatNum(amount.toFixed(2)) +
+          " added to " +
+          u.firstName +
+          "'s " +
+          capitalize(accountType) +
+          " account",
+        "success",
+      );
+      refreshCurrentPage();
+    });
+  }
+
+  /* ── DEBIT MODAL ── */
+  ["closeDebitModal", "cancelDebitModal"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el)
+      el.addEventListener("click", function () {
+        document.getElementById("debitModal").classList.remove("show");
+      });
+  });
+
+  var debitForm = document.getElementById("debitForm");
+  if (debitForm) {
+    debitForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var userId = document.getElementById("debitUserId").value;
+      var accountType = document.getElementById("debitAccountType").value;
+      var amount = parseFloat(document.getElementById("debitAmount").value);
+      var description = document
+        .getElementById("debitDescription")
+        .value.trim();
+      var dtVal = document.getElementById("debitDateTime").value;
+
+      if (!amount || amount <= 0) {
+        document.getElementById("debitError").textContent =
+          "Please enter a valid amount.";
+        document.getElementById("debitError").style.display = "block";
+        return;
+      }
+
+      var users = getUsers();
+      var u = users.find(function (x) {
+        return String(x.id) === String(userId);
+      });
+      if (!u) return;
+
+      var newLog = {
+        id: Date.now(),
+        userId: u.id,
+        userName: u.firstName + " " + u.lastName,
+        action: "Debit — " + capitalize(accountType),
+        details:
+          description || "Debit from " + capitalize(accountType) + " account",
+        amount: amount,
+        txnType: "debit",
+        targetAccount: accountType,
+        timestamp: dtVal
+          ? new Date(dtVal).toISOString()
+          : new Date().toISOString(),
+        status: "completed",
+        txnId: "TXN" + Date.now(),
+      };
+
+      var logs = getLogs();
+      logs.push(newLog);
+      saveLogs(logs);
+      saveLogToSupabase(newLog);
+
+      document.getElementById("debitModal").classList.remove("show");
+      showToast(
+        "Debit of $" +
+          formatNum(amount.toFixed(2)) +
+          " applied to " +
+          u.firstName +
+          "'s " +
+          capitalize(accountType) +
+          " account",
+        "success",
+      );
+      refreshCurrentPage();
+    });
+  }
+
   ["closeModal", "cancelEdit"].forEach(function (id) {
     var el = document.getElementById(id);
     if (el)
@@ -1880,19 +2034,59 @@
       });
   };
 
-  /* Add transaction to a specific account — opens modal pre-filled */
+  /* Open Credit modal for a specific account */
+  window._adminCreditAcct = function (userId, accountType, accountLabel) {
+    var users = getUsers();
+    var u = users.find(function (x) {
+      return String(x.id) === String(userId);
+    });
+    if (!u) return;
+    document.getElementById("creditUserId").value = userId;
+    document.getElementById("creditAccountType").value = accountType;
+    document.getElementById("creditAmount").value = "";
+    document.getElementById("creditDescription").value = "";
+    document.getElementById("creditDateTime").value = "";
+    document.getElementById("creditError").style.display = "none";
+    var sub = document.getElementById("creditModalSubtitle");
+    if (sub)
+      sub.textContent =
+        u.firstName +
+        " " +
+        u.lastName +
+        " — " +
+        (accountLabel || accountType) +
+        " Account";
+    document.getElementById("creditModal").classList.add("show");
+  };
+
+  /* Open Debit modal for a specific account */
+  window._adminDebitAcct = function (userId, accountType, accountLabel) {
+    var users = getUsers();
+    var u = users.find(function (x) {
+      return String(x.id) === String(userId);
+    });
+    if (!u) return;
+    document.getElementById("debitUserId").value = userId;
+    document.getElementById("debitAccountType").value = accountType;
+    document.getElementById("debitAmount").value = "";
+    document.getElementById("debitDescription").value = "";
+    document.getElementById("debitDateTime").value = "";
+    document.getElementById("debitError").style.display = "none";
+    var sub = document.getElementById("debitModalSubtitle");
+    if (sub)
+      sub.textContent =
+        u.firstName +
+        " " +
+        u.lastName +
+        " — " +
+        (accountLabel || accountType) +
+        " Account";
+    document.getElementById("debitModal").classList.add("show");
+  };
+
+  /* Also keep _adminAddTxnAcct as alias for backward compat */
   window._adminAddTxnAcct = function (userId, accountType) {
-    window._adminAddTxn(userId);
-    setTimeout(function () {
-      var sel = document.getElementById("txnAccountType");
-      if (!sel) return;
-      for (var i = 0; i < sel.options.length; i++) {
-        if (sel.options[i].value === accountType) {
-          sel.selectedIndex = i;
-          break;
-        }
-      }
-    }, 150);
+    window._adminCreditAcct(userId, accountType, accountType);
   };
 
   /* Add log helper */
@@ -3000,3 +3194,15 @@
   if (badge)
     badge.textContent = pendingCount < 10 ? "0" + pendingCount : pendingCount;
 })();
+
+function showToast(msg, type) {
+  var t = document.createElement("div");
+  t.style.cssText =
+    "position:fixed;bottom:24px;right:24px;z-index:9999;padding:14px 20px;border-radius:12px;font-size:.88rem;font-weight:600;color:white;box-shadow:0 6px 20px rgba(0,0,0,.2);max-width:320px;animation:fadeInUp .3s ease";
+  t.style.background = type === "success" ? "#00a878" : "#e53935";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function () {
+    t.remove();
+  }, 3500);
+}

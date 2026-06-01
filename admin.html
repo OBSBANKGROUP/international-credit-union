@@ -1081,75 +1081,87 @@
     </div>
 
     <!-- ===== ADD TRANSACTION MODAL ===== -->
-    <div class="modal-overlay" id="addTxnModal">
+    <!-- CREDIT MODAL -->
+    <div class="modal-overlay" id="creditModal">
       <div class="modal">
-        <div class="modal-header">
-          <h3>Add Transaction</h3>
-          <button class="icon-btn" id="closeAddTxn">
-            <span class="material-icons-outlined">close</span>
-          </button>
+        <div class="modal-header" style="background:#e6f9f3;border-bottom:2px solid #00a878">
+          <div>
+            <h3 style="color:#00a878">&#8595; Credit Account</h3>
+            <p id="creditModalSubtitle" style="font-size:.78rem;color:#555;margin-top:2px"></p>
+          </div>
+          <button class="icon-btn" id="closeCreditModal"><span class="material-icons-outlined">close</span></button>
         </div>
-        <form id="addTxnForm">
+        <form id="creditForm">
+          <input type="hidden" id="creditUserId"/>
+          <input type="hidden" id="creditAccountType"/>
           <div class="form-grid">
             <div class="form-group">
-              <label>Select User</label
-              ><select id="txnUserId" class="filter-select" required></select>
+              <label>Amount ($)</label>
+              <input type="number" id="creditAmount" min="0.01" step="0.01" placeholder="0.00" required/>
             </div>
             <div class="form-group">
-              <label>Type</label
-              ><select id="txnType" class="filter-select" required>
-                <option value="credit">Credit (Deposit)</option>
-                <option value="debit">Debit (Withdrawal)</option>
-              </select>
+              <label>Description</label>
+              <input type="text" id="creditDescription" placeholder="e.g. Salary deposit, Payment from Client"/>
             </div>
             <div class="form-group">
-              <label>Target Account</label>
-              <select id="txnAccountType" class="filter-select" required>
-                <option value="checking">Checking</option>
-                <option value="savings">Savings</option>
-                <option value="business">Business</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Amount ($)</label
-              ><input
-                type="number"
-                id="txnAmount"
-                min="0.01"
-                step="0.01"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label>Description</label
-              ><input
-                type="text"
-                id="txnDescription"
-                placeholder="e.g. Salary deposit"
-              />
-            </div>
-            <div class="form-group">
-              <label>Date & Time (Optional)</label>
-              <input type="datetime-local" id="addTxnDateTime" />
+              <label>Date &amp; Time (optional)</label>
+              <input type="datetime-local" id="creditDateTime"/>
             </div>
           </div>
-          <p
-            id="addTxnError"
-            style="
-              color: #e53935;
-              font-size: 0.85rem;
-              margin-top: 12px;
-              display: none;
-            "
-          ></p>
+          <p id="creditError" style="color:#e53935;font-size:.85rem;margin-top:12px;display:none"></p>
           <div class="modal-actions">
-            <button type="button" class="btn-outline" id="cancelAddTxn">
-              Cancel
-            </button>
-            <button type="submit" class="btn-dark">Add Transaction</button>
+            <button type="button" class="btn-outline" id="cancelCreditModal">Cancel</button>
+            <button type="submit" class="btn-dark" style="background:#00a878">&#8595; Credit Account</button>
           </div>
         </form>
       </div>
+    </div>
+
+    <!-- DEBIT MODAL -->
+    <div class="modal-overlay" id="debitModal">
+      <div class="modal">
+        <div class="modal-header" style="background:#ffeef0;border-bottom:2px solid #e53935">
+          <div>
+            <h3 style="color:#e53935">&#8593; Debit Account</h3>
+            <p id="debitModalSubtitle" style="font-size:.78rem;color:#555;margin-top:2px"></p>
+          </div>
+          <button class="icon-btn" id="closeDebitModal"><span class="material-icons-outlined">close</span></button>
+        </div>
+        <form id="debitForm">
+          <input type="hidden" id="debitUserId"/>
+          <input type="hidden" id="debitAccountType"/>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Amount ($)</label>
+              <input type="number" id="debitAmount" min="0.01" step="0.01" placeholder="0.00" required/>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" id="debitDescription" placeholder="e.g. Wire transfer, Fee"/>
+            </div>
+            <div class="form-group">
+              <label>Date &amp; Time (optional)</label>
+              <input type="datetime-local" id="debitDateTime"/>
+            </div>
+          </div>
+          <p id="debitError" style="color:#e53935;font-size:.85rem;margin-top:12px;display:none"></p>
+          <div class="modal-actions">
+            <button type="button" class="btn-outline" id="cancelDebitModal">Cancel</button>
+            <button type="submit" class="btn-dark" style="background:#e53935">&#8593; Debit Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Keep old addTxnModal hidden for backward compat -->
+    <div id="addTxnModal" style="display:none">
+      <input type="hidden" id="txnUserId"/>
+      <input type="hidden" id="txnType" value="credit"/>
+      <input type="hidden" id="txnAccountType" value="checking"/>
+      <input type="hidden" id="txnAmount"/>
+      <input type="hidden" id="txnDescription"/>
+      <input type="hidden" id="addTxnDateTime"/>
+      <input type="hidden" id="addTxnError"/>
     </div>
 
     <!-- ===== EDIT TRANSACTION MODAL ===== -->
