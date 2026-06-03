@@ -483,15 +483,11 @@
       : "checking";
 
     logs.forEach(function (l) {
-      if (l.userId === userId && l.amount) {
-        // Use explicit targetAccount if set; else fall back to user primary
-        var acct = l.targetAccount
-          ? l.targetAccount.toLowerCase()
-          : userPrimary;
-        if (accountType && acct !== accountType.toLowerCase()) return;
-        if (l.txnType === "credit") balance += parseFloat(l.amount);
-        else if (l.txnType === "debit") balance -= parseFloat(l.amount);
-      }
+      if (String(l.userId) !== String(userId) || !l.amount) return;
+      var acct = l.targetAccount ? l.targetAccount.toLowerCase() : userPrimary;
+      if (accountType && acct !== accountType.toLowerCase()) return;
+      if (l.txnType === "credit") balance += parseFloat(l.amount);
+      else if (l.txnType === "debit") balance -= parseFloat(l.amount);
     });
     return balance;
   }
@@ -506,7 +502,7 @@
       ? (thisUser.accountType || "checking").toLowerCase()
       : "checking";
     return logs.filter(function (l) {
-      if (l.userId !== userId || !l.amount) return false;
+      if (String(l.userId) !== String(userId) || !l.amount) return false;
       var acct = l.targetAccount ? l.targetAccount.toLowerCase() : userPrimary;
       if (accountType && acct !== accountType.toLowerCase()) return false;
       return true;
@@ -2795,7 +2791,70 @@
     document.getElementById("historyTitle").textContent =
       user.firstName + " " + user.lastName + " — History";
 
-    var txns = getUserTxns(userId);
+    /* Always fetch fresh from Supabase by email to get the real user_id */
+    var SURL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+    var SKEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+    var H = { apikey: SKEY, Authorization: "Bearer " + SKEY };
+
+    /* First get real Supabase ID by email */
+    fetch(
+      SURL +
+        "/rest/v1/users?email=eq." +
+        encodeURIComponent(user.email.toLowerCase().trim()) +
+        "&select=id",
+      { headers: H },
+    )
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (rows) {
+        var realId = rows && rows[0] ? rows[0].id : userId;
+        /* Fetch logs for this specific user only */
+        return fetch(
+          SURL +
+            "/rest/v1/logs?user_id=eq." +
+            realId +
+            "&order=timestamp.desc&select=*",
+          { headers: H },
+        );
+      })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (rows) {
+        if (!Array.isArray(rows)) rows = [];
+        /* Convert Supabase rows to local format */
+        var txns = rows.map(function (row) {
+          return {
+            id: row.id,
+            userId: row.user_id,
+            action: row.action,
+            details: row.details,
+            amount: row.amount,
+            txnType: row.txn_type,
+            targetAccount: row.target_account,
+            timestamp: row.timestamp,
+            status: row.status,
+            txnId: row.txn_id,
+            reason: row.reason,
+          };
+        });
+        /* Also sync to localStorage */
+        var allLogs = getLogs().filter(function (l) {
+          return String(l.userId) !== String(userId);
+        });
+        saveLogs(allLogs.concat(txns));
+        renderHistoryTimeline(userId, user, txns);
+      })
+      .catch(function () {
+        /* Fallback to localStorage if Supabase unavailable */
+        var txns = getUserTxns(userId);
+        renderHistoryTimeline(userId, user, txns);
+      });
+  };
+
+  function renderHistoryTimeline(userId, user, txns) {
     var timeline = document.getElementById("historyTimeline");
     var empty = document.getElementById("historyEmpty");
     var summary = document.getElementById("historySummary");
@@ -2950,20 +3009,38 @@
     });
     timeline.innerHTML = html;
     document.getElementById("historyModal").classList.add("show");
-  };
+  }
 
   /* ── Delete transaction ── */
   window._adminDeleteTxn = function (txnId, userId) {
     if (!confirm("Delete this transaction? This cannot be undone.")) return;
-    var logs = getLogs();
-    var idx = logs.findIndex(function (l) {
-      return l.id === txnId;
+
+    var SURL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+    var SKEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+    var H = { apikey: SKEY, Authorization: "Bearer " + SKEY };
+
+    /* Delete from Supabase first */
+    fetch(SURL + "/rest/v1/logs?id=eq." + txnId, {
+      method: "DELETE",
+      headers: H,
+    })
+      .then(function () {
+        console.log("Log deleted from Supabase:", txnId);
+      })
+      .catch(function (e) {
+        console.warn("Supabase delete failed:", e);
+      });
+
+    /* Also remove from localStorage */
+    var logs = getLogs().filter(function (l) {
+      return String(l.id) !== String(txnId);
     });
-    if (idx !== -1) {
-      logs.splice(idx, 1);
-      saveLogs(logs);
-      window._adminViewHistory(userId);
-    }
+    saveLogs(logs);
+
+    /* Refresh history */
+    if (userId) window._adminViewHistory(userId);
+    else refreshCurrentPage();
   };
 
   /* ── Edit transaction ── */
