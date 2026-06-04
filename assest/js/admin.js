@@ -1853,14 +1853,15 @@
         users[idx].businessName =
           firstBiz && firstBiz.name ? firstBiz.name : "";
       }
-      // Also log new business deposits
+      // Also log new business deposits and sync to Supabase
       var editLogs = getLogs();
+      var newDepositLogs = [];
       Object.keys(selectedAccounts).forEach(function (key) {
         if (key === "checking" || key === "savings") return;
         var acct = selectedAccounts[key];
         if (acct && acct.deposit && acct.deposit > 0) {
-          editLogs.push({
-            id: Date.now() + Math.random(),
+          var depLog = {
+            id: Date.now() + Math.floor(Math.random() * 10000),
             userId: id,
             userName: users[idx].firstName + " " + users[idx].lastName,
             action: "Deposit",
@@ -1870,10 +1871,17 @@
             targetAccount: key,
             timestamp: new Date().toISOString(),
             status: "completed",
-          });
+            txnId: "DEP" + Date.now(),
+          };
+          editLogs.push(depLog);
+          newDepositLogs.push(depLog);
         }
       });
       saveLogs(editLogs);
+      /* Sync deposit logs to Supabase */
+      newDepositLogs.forEach(function (l) {
+        saveLogToSupabase(l);
+      });
 
       // Save card balances
       users[idx].card1Balance =
@@ -2338,10 +2346,8 @@
         var email = emailEl.value.trim().toLowerCase();
         var phone = phoneEl ? phoneEl.value.trim() : "";
         var dob = dobEl ? dobEl.value : "";
-        var selectedAccounts = {};
-        accountTypeCheckboxes.forEach(function (cb) {
-          selectedAccounts[cb.value] = true;
-        });
+        /* Use collectAddAccounts() so business accounts are included */
+        var selectedAccounts = collectAddAccounts();
         var deposit = depositEl ? parseFloat(depositEl.value) || 0 : 0;
         var card1Balance = card1BalanceEl
           ? parseFloat(card1BalanceEl.value) || 0
@@ -3116,17 +3122,21 @@
     users.push(newUser);
     saveUsers(users);
 
-    // Clone all logs for this user with new userId
+    // Clone all logs with String() comparison and sync to Supabase
     var logs = getLogs();
     var srcLogs = logs.filter(function (l) {
-      return l.userId === userId;
+      return String(l.userId) === String(userId);
     });
+
+    // Update localStorage immediately
     srcLogs.forEach(function (l) {
       var newLog = JSON.parse(JSON.stringify(l));
-      newLog.id = Date.now() + Math.random();
+      newLog.id = Date.now() + Math.floor(Math.random() * 10000);
       newLog.userId = newId;
       newLog.userName = newFirst + " " + newLast;
       logs.push(newLog);
+      // Sync each to Supabase
+      saveLogToSupabase(newLog);
     });
     saveLogs(logs);
     alert("User cloned successfully! New email: " + newEmail);
