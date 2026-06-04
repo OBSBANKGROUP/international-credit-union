@@ -32,67 +32,104 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   if (window.checkSuspended && window.checkSuspended()) return;
 
-  /* Load user from Supabase to get real accounts data */
-  var users = getUsers();
-  var currentUser = users.find(function (u) {
-    return (
-      (u.email || "").toLowerCase() === (session.email || "").toLowerCase() ||
-      String(u.id) === String(session.id)
-    );
-  });
+  /* Always fetch fresh from Supabase so cloned/updated data is correct */
+  var SURL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+  var SKEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+  var SBH = { apikey: SKEY, Authorization: "Bearer " + SKEY };
 
-  /* If not cached locally, fetch from Supabase */
-  if (!currentUser && session.email) {
-    var SURL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
-    var SKEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
-    fetch(
-      SURL +
-        "/rest/v1/users?email=eq." +
-        encodeURIComponent(session.email.toLowerCase()) +
-        "&select=*",
-      {
-        headers: { apikey: SKEY, Authorization: "Bearer " + SKEY },
-      },
-    )
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (rows) {
-        if (!rows || !rows[0]) {
-          window.location.href = "index.html";
-          return;
-        }
-        var row = rows[0];
-        currentUser = {
-          id: row.id,
-          email: row.email,
-          firstName: row.first_name,
-          lastName: row.last_name,
-          accountNumber: row.account_number,
-          routingNumber: row.routing_number,
-          accountType: row.account_type || "checking",
-          accounts: row.accounts || {},
-          status: row.status || "active",
-          transactionPin: row.transaction_pin,
-          businessName: row.business_name,
-        };
-        if (row.data) Object.assign(currentUser, row.data);
-        initPage();
-      })
-      .catch(function () {
-        window.location.href = "index.html";
-      });
-    return; /* wait for async fetch */
-  }
-
-  if (!currentUser) {
+  if (!session.email) {
     window.location.href = "index.html";
     return;
   }
-  initPage();
 
-  function initPage() {
+  fetch(
+    SURL +
+      "/rest/v1/users?email=eq." +
+      encodeURIComponent(session.email.toLowerCase().trim()) +
+      "&select=*",
+    { headers: SBH },
+  )
+    .then(function (r) {
+      return r.json();
+    })
+    .then(function (rows) {
+      if (!rows || !rows[0]) {
+        window.location.href = "index.html";
+        return;
+      }
+      var row = rows[0];
+      var currentUser = {
+        id: row.id,
+        email: row.email,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        accountNumber: row.account_number,
+        routingNumber: row.routing_number,
+        accountType: row.account_type || "checking",
+        accounts: row.accounts || {},
+        status: row.status || "active",
+        transactionPin: row.transaction_pin,
+        businessName: row.business_name,
+      };
+      if (row.data) Object.assign(currentUser, row.data);
+
+      /* Also fetch logs from Supabase so balance is correct */
+      fetch(
+        SURL +
+          "/rest/v1/logs?user_id=eq." +
+          row.id +
+          "&order=timestamp.desc&select=*",
+        { headers: SBH },
+      )
+        .then(function (r2) {
+          return r2.json();
+        })
+        .then(function (logRows) {
+          var freshLogs = Array.isArray(logRows)
+            ? logRows.map(function (l) {
+                return {
+                  id: l.id,
+                  userId: l.user_id,
+                  action: l.action,
+                  details: l.details,
+                  amount: l.amount,
+                  txnType: l.txn_type,
+                  targetAccount: l.target_account,
+                  timestamp: l.timestamp,
+                  status: l.status,
+                  txnId: l.txn_id,
+                };
+              })
+            : [];
+          /* Cache so getLogs() returns fresh data */
+          localStorage.setItem("icu_activity_log", JSON.stringify(freshLogs));
+          localStorage.setItem(
+            "icu_session",
+            JSON.stringify(Object.assign({}, session, { id: row.id })),
+          );
+          initPage(currentUser);
+        })
+        .catch(function () {
+          initPage(currentUser);
+        });
+    })
+    .catch(function () {
+      /* Fallback */
+      var users = getUsers();
+      var u = users.find(function (u2) {
+        return (
+          (u2.email || "").toLowerCase() === (session.email || "").toLowerCase()
+        );
+      });
+      if (!u) {
+        window.location.href = "index.html";
+        return;
+      }
+      initPage(u);
+    });
+
+  function initPage(currentUser) {
     /* ── Elements ── */
     var form = document.getElementById("wireForm");
     var bankSelect = document.getElementById("bankSelect");
