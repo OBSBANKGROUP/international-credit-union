@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function calcBal(accountType) {
     var b = 0;
     allLogs.forEach(function (l) {
-      if (l.userId !== session.id || l.amount == null) return;
+      if (String(l.userId) !== String(session.id) || l.amount == null) return;
       var acct = (l.targetAccount || primary).toLowerCase();
       if (acct !== accountType.toLowerCase()) return;
       if (l.txnType === "credit") b += parseFloat(l.amount);
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function calcCredits(accountType) {
     var b = 0;
     allLogs.forEach(function (l) {
-      if (l.userId !== session.id || l.amount == null) return;
+      if (String(l.userId) !== String(session.id) || l.amount == null) return;
       var acct = (l.targetAccount || primary).toLowerCase();
       if (acct !== accountType.toLowerCase()) return;
       if (l.txnType === "credit") b += parseFloat(l.amount);
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function calcDebits(accountType) {
     var b = 0;
     allLogs.forEach(function (l) {
-      if (l.userId !== session.id || l.amount == null) return;
+      if (String(l.userId) !== String(session.id) || l.amount == null) return;
       var acct = (l.targetAccount || primary).toLowerCase();
       if (acct !== accountType.toLowerCase()) return;
       if (l.txnType === "debit") b += parseFloat(l.amount);
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Method 2: scan logs for any targetAccount not already found
   allLogs.forEach(function (l) {
     if (
-      l.userId === session.id &&
+      String(l.userId) === String(session.id) &&
       l.targetAccount &&
       !activeAccounts[l.targetAccount]
     ) {
@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "receipt_long",
         "Transactions",
         allLogs.filter(function (l) {
-          return l.userId === session.id;
+          return String(l.userId) === String(session.id);
         }).length + " Total",
       );
   }
@@ -234,7 +234,10 @@ document.addEventListener("DOMContentLoaded", function () {
     var cr = calcCredits(type);
     var db = calcDebits(type);
     var txns = allLogs.filter(function (l) {
-      return l.userId === session.id && (l.targetAccount || primary) === type;
+      return (
+        String(l.userId) === String(session.id) &&
+        (l.targetAccount || primary) === type
+      );
     }).length;
 
     var card = document.createElement("div");
@@ -297,7 +300,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var txnFilter = "all";
   var userLogs = allLogs
     .filter(function (l) {
-      return l.userId === session.id && l.amount != null;
+      return String(l.userId) === String(session.id) && l.amount != null;
     })
     .sort(function (a, b) {
       return new Date(b.timestamp) - new Date(a.timestamp);

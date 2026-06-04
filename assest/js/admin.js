@@ -3211,40 +3211,180 @@
     var srcId = _pendingCloneSourceId;
     _pendingCloneSourceId = null;
 
-    // Remove clone banner
     var banner = document.getElementById("cloneBanner");
     if (banner) banner.remove();
 
     var logs = getLogs();
+
+    /* Fix 1: use String() comparison so number/string IDs both match */
     var srcLogs = logs.filter(function (l) {
-      return l.userId === srcId;
+      return String(l.userId) === String(srcId);
     });
 
     if (srcLogs.length === 0) {
-      alert("No transactions found to clone.");
+      /* Also try fetching from Supabase in case localStorage is stale */
+      var SURL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+      var SKEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+      var H = { apikey: SKEY, Authorization: "Bearer " + SKEY };
+
+      /* Find src user email then fetch their Supabase ID and logs */
+      var users = getUsers();
+      var srcUser = users.find(function (u) {
+        return String(u.id) === String(srcId);
+      });
+      if (!srcUser) {
+        alert("Source user not found.");
+        return;
+      }
+
+      fetch(
+        SURL +
+          "/rest/v1/users?email=eq." +
+          encodeURIComponent(srcUser.email.toLowerCase()) +
+          "&select=id",
+        { headers: H },
+      )
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (rows) {
+          if (!rows || !rows[0]) {
+            alert("Source user not in Supabase.");
+            return;
+          }
+          var realSrcId = rows[0].id;
+          return fetch(
+            SURL + "/rest/v1/logs?user_id=eq." + realSrcId + "&select=*",
+            { headers: H },
+          );
+        })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (rows) {
+          if (!rows || rows.length === 0) {
+            alert("No transactions found to clone.");
+            return;
+          }
+          var supaLogs = rows.map(function (row) {
+            return {
+              id: row.id,
+              userId: row.user_id,
+              action: row.action,
+              details: row.details,
+              amount: row.amount,
+              txnType: row.txn_type,
+              targetAccount: row.target_account,
+              timestamp: row.timestamp,
+              status: row.status,
+              txnId: row.txn_id,
+            };
+          });
+          _doClone(supaLogs, newUserId);
+        })
+        .catch(function (e) {
+          console.warn("Clone Supabase fetch failed:", e);
+          alert("Could not fetch source transactions.");
+        });
       return;
     }
 
-    // Clone every log with new userId + new timestamps offset preserved
-    srcLogs.forEach(function (l) {
-      var newLog = JSON.parse(JSON.stringify(l));
-      newLog.id = Date.now() + Math.random();
-      newLog.userId = newUserId;
-      var users = getUsers();
-      var newUser = users.find(function (u) {
-        return u.id === newUserId;
-      });
-      newLog.userName = newUser
-        ? newUser.firstName + " " + newUser.lastName
-        : newLog.userName;
-      logs.push(newLog);
+    _doClone(srcLogs, newUserId);
+  }
+
+  function _doClone(srcLogs, newUserId) {
+    var users = getUsers();
+    var newUser = users.find(function (u) {
+      return String(u.id) === String(newUserId);
     });
-    saveLogs(logs);
-    alert(
-      "Transaction history successfully cloned to the new account! (" +
-        srcLogs.length +
-        " transactions copied)",
-    );
+    var newName = newUser ? newUser.firstName + " " + newUser.lastName : "";
+
+    var SURL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+    var SKEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+    var H = {
+      apikey: SKEY,
+      Authorization: "Bearer " + SKEY,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    };
+
+    /* Find new user's real Supabase ID by email */
+    if (!newUser || !newUser.email) {
+      alert("New user not found.");
+      return;
+    }
+
+    fetch(
+      SURL +
+        "/rest/v1/users?email=eq." +
+        encodeURIComponent(newUser.email.toLowerCase()) +
+        "&select=id",
+      { headers: H },
+    )
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (rows) {
+        if (!rows || !rows[0]) {
+          alert(
+            "New user not found in Supabase — make sure the user was created successfully.",
+          );
+          return;
+        }
+        var realNewId = rows[0].id;
+
+        /* Build cloned rows for Supabase */
+        var clonedRows = srcLogs.map(function (l) {
+          return {
+            user_id: realNewId /* real Supabase ID */,
+            user_name: newName,
+            action: l.action || "",
+            details: l.details || "",
+            reason: l.reason || "",
+            amount: parseFloat(l.amount) || 0,
+            txn_type: l.txnType || l.txn_type || "credit",
+            target_account: l.targetAccount || l.target_account || null,
+            timestamp: l.timestamp || new Date().toISOString(),
+            status: l.status || "completed",
+            txn_id: "CLN" + Date.now() + Math.floor(Math.random() * 1000),
+          };
+        });
+
+        /* Insert all cloned logs into Supabase */
+        return fetch(SURL + "/rest/v1/logs", {
+          method: "POST",
+          headers: H,
+          body: JSON.stringify(clonedRows),
+        });
+      })
+      .then(function (r) {
+        if (r && !r.ok)
+          return r.text().then(function (t) {
+            console.warn("Clone insert error:", t);
+          });
+        /* Also save to localStorage */
+        var localLogs = getLogs();
+        srcLogs.forEach(function (l) {
+          var newLog = JSON.parse(JSON.stringify(l));
+          newLog.id = Date.now() + Math.floor(Math.random() * 10000);
+          newLog.userId = newUserId;
+          newLog.userName = newName;
+          localLogs.push(newLog);
+        });
+        saveLogs(localLogs);
+        alert(
+          "Transaction history cloned successfully! (" +
+            srcLogs.length +
+            " transactions copied to new account)",
+        );
+        refreshCurrentPage();
+      })
+      .catch(function (e) {
+        console.warn("Clone failed:", e);
+        alert("Clone failed. Check console for details.");
+      });
   }
 
   /* Expose so the add-user submit handler can call it */
