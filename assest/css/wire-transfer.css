@@ -649,6 +649,11 @@ input[readonly] {
   margin: 0 auto 14px;
   font-size: 1.8rem;
 }
+.receipt-check-green {
+  background: #00c896;
+  color: white;
+  box-shadow: 0 6px 20px rgba(0, 200, 150, 0.4);
+}
 .receipt-title {
   font-size: 1.2rem;
   font-weight: 800;
@@ -777,23 +782,21 @@ input[readonly] {
 /* ── Receipt logo ── */
 .receipt-logo-row {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .receipt-logo-img {
-  width: 40px;
-  height: 40px;
+  height: 52px;
+  width: auto;
+  max-width: 140px;
   border-radius: 8px;
-  object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  object-fit: contain;
+  border: none;
+  display: block;
+  margin: 0 auto 10px;
 }
 .receipt-bank-name {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: 0.3px;
+  display: none;
 }
 
 /* ── Receipt capture quality ── */
@@ -807,4 +810,62 @@ input[readonly] {
 .receipt-header {
   -webkit-print-color-adjust: exact !important;
   print-color-adjust: exact !important;
+}
+
+/* ── Bank search ── */
+.bank-search-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bank-search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f7f8fc;
+  border: 1.5px solid #e0e4ee;
+  border-radius: 12px;
+  padding: 10px 14px;
+  transition: border-color 0.2s;
+}
+.bank-search-input-row:focus-within {
+  border-color: #4b38f5;
+  background: #fff;
+}
+.bank-search-icon {
+  font-size: 1.1rem !important;
+  color: #aaa;
+  flex-shrink: 0;
+}
+.bank-search-input-row input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.92rem;
+  font-family: "Inter", sans-serif;
+  color: #021633;
+}
+.bank-clear-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #aaa;
+  font-size: 0.85rem;
+  padding: 0;
+  flex-shrink: 0;
+}
+.bank-search-wrap select {
+  max-height: 200px;
+}
+
+/* ── Fix transaction amount overflow ── */
+.detail-row {
+  overflow: hidden;
+}
+.detail-row span:last-child,
+.detail-row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 55%;
 }

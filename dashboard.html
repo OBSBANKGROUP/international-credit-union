@@ -138,7 +138,7 @@
             >
           </div>
           <h1 class="db-total" id="totalBalance">$0.00</h1>
-          <!-- <p class="db-bal-sub">Updated just now</p> -->
+          <p class="db-bal-sub">Updated just now</p>
         </div>
 
         <!-- QUICK ACTION BUTTONS -->
@@ -210,7 +210,11 @@
           <a href="Manage-account.html" class="db-see-all">View all</a>
         </div>
         <div class="db-acct-list">
-          <a href="Manage-account.html" class="db-acct-row">
+          <!-- CHECKING -->
+          <div
+            class="db-acct-row db-acct-expandable"
+            onclick="toggleAcctDetail('checking')"
+          >
             <div class="db-acct-icon blue">
               <span class="material-icons-outlined">account_balance</span>
             </div>
@@ -224,11 +228,40 @@
               <span class="db-acct-bal" id="acctBal_checking">$0.00</span>
               <span class="db-acct-tag">Available</span>
             </div>
-            <span class="material-icons-outlined db-chevron"
-              >chevron_right</span
+            <span
+              class="material-icons-outlined db-chevron db-expand-arrow"
+              id="arrow_checking"
+              >expand_more</span
             >
-          </a>
-          <a href="Manage-account.html" class="db-acct-row">
+          </div>
+          <div class="db-acct-detail" id="detail_checking">
+            <div class="db-acct-detail-row">
+              <span>Account Number</span
+              ><span class="user-acct-num"
+                >&bull;&bull;&bull;&bull;&bull;&bull; ----</span
+              >
+            </div>
+            <div class="db-acct-detail-row">
+              <span>Routing Number</span
+              ><span class="user-routing-num">091000022</span>
+            </div>
+            <div class="db-acct-detail-row">
+              <span>Account Type</span><span>Personal Checking</span>
+            </div>
+            <div class="db-acct-detail-row">
+              <span>Status</span
+              ><span style="color: #00a878; font-weight: 700">Active</span>
+            </div>
+            <a href="Manage-account.html" class="db-acct-detail-link"
+              >View Full Details &rarr;</a
+            >
+          </div>
+
+          <!-- SAVINGS -->
+          <div
+            class="db-acct-row db-acct-expandable"
+            onclick="toggleAcctDetail('savings')"
+          >
             <div class="db-acct-icon purple">
               <span class="material-icons-outlined">savings</span>
             </div>
@@ -242,14 +275,40 @@
               <span class="db-acct-bal" id="acctBal_savings">$0.00</span>
               <span class="db-acct-tag">Available</span>
             </div>
-            <span class="material-icons-outlined db-chevron"
-              >chevron_right</span
+            <span
+              class="material-icons-outlined db-chevron db-expand-arrow"
+              id="arrow_savings"
+              >expand_more</span
             >
-          </a>
-          <a
-            href="Manage-account.html"
-            class="db-acct-row"
+          </div>
+          <div class="db-acct-detail" id="detail_savings">
+            <div class="db-acct-detail-row">
+              <span>Account Number</span
+              ><span class="user-acct-num"
+                >&bull;&bull;&bull;&bull;&bull;&bull; ----</span
+              >
+            </div>
+            <div class="db-acct-detail-row">
+              <span>Routing Number</span
+              ><span class="user-routing-num">091000022</span>
+            </div>
+            <div class="db-acct-detail-row">
+              <span>Account Type</span><span>Personal Savings</span>
+            </div>
+            <div class="db-acct-detail-row">
+              <span>Status</span
+              ><span style="color: #00a878; font-weight: 700">Active</span>
+            </div>
+            <a href="Manage-account.html" class="db-acct-detail-link"
+              >View Full Details &rarr;</a
+            >
+          </div>
+
+          <!-- BUSINESS -->
+          <div
+            class="db-acct-row db-acct-expandable"
             id="acctBox_business"
+            onclick="toggleAcctDetail('business')"
           >
             <div class="db-acct-icon gold">
               <span class="material-icons-outlined">business_center</span>
@@ -264,10 +323,34 @@
               <span class="db-acct-bal" id="acctBal_business">$0.00</span>
               <span class="db-acct-tag">Balance</span>
             </div>
-            <span class="material-icons-outlined db-chevron"
-              >chevron_right</span
+            <span
+              class="material-icons-outlined db-chevron db-expand-arrow"
+              id="arrow_business"
+              >expand_more</span
             >
-          </a>
+          </div>
+          <div class="db-acct-detail" id="detail_business">
+            <div class="db-acct-detail-row">
+              <span>Account Number</span
+              ><span class="user-acct-num"
+                >&bull;&bull;&bull;&bull;&bull;&bull; ----</span
+              >
+            </div>
+            <div class="db-acct-detail-row">
+              <span>Routing Number</span
+              ><span class="user-routing-num">091000022</span>
+            </div>
+            <div class="db-acct-detail-row">
+              <span>Account Type</span><span>Business Account</span>
+            </div>
+            <div class="db-acct-detail-row">
+              <span>Status</span
+              ><span style="color: #00a878; font-weight: 700">Active</span>
+            </div>
+            <a href="Manage-account.html" class="db-acct-detail-link"
+              >View Full Details &rarr;</a
+            >
+          </div>
         </div>
       </section>
 
@@ -397,5 +480,14 @@
     <script src="assest/js/auth.js"></script>
     <script src="assest/js/security.js"></script>
     <script src="assest/js/dashboard.js"></script>
+    <script>
+      function toggleAcctDetail(type) {
+        var detail = document.getElementById("detail_" + type);
+        var arrow = document.getElementById("arrow_" + type);
+        if (!detail) return;
+        var open = detail.classList.toggle("open");
+        if (arrow) arrow.textContent = open ? "expand_less" : "expand_more";
+      }
+    </script>
   </body>
 </html>

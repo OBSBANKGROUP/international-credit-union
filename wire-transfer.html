@@ -35,32 +35,53 @@
           <!-- RECIPIENT BANK -->
           <div class="form-group">
             <label>Recipient Bank</label>
-            <select id="bankSelect" required>
-              <option value="">Select Bank</option>
-              <option>JPMorgan Chase Bank</option>
-              <option>Bank of America</option>
-              <option>Wells Fargo Bank</option>
-              <option>Citibank</option>
-              <option>U.S. Bank</option>
-              <option>PNC Bank</option>
-              <option>Truist Bank</option>
-              <option>Capital One</option>
-              <option>TD Bank</option>
-              <option>Regions Bank</option>
-              <option>Fifth Third Bank</option>
-              <option>KeyBank</option>
-              <option>Huntington Bank</option>
-              <option>Ally Bank</option>
-              <option>Discover Bank</option>
-              <option>Charles Schwab Bank</option>
-              <option>Citizens Bank</option>
-              <option>HSBC USA</option>
-              <option>Navy Federal Credit Union</option>
-              <option>PenFed Credit Union</option>
-              <option>Alliant Credit Union</option>
-              <option>International Credit Union</option>
-              <option value="other">Other (Type Manually)</option>
-            </select>
+            <div class="bank-search-wrap">
+              <div class="bank-search-input-row">
+                <span class="material-icons-outlined bank-search-icon"
+                  >search</span
+                >
+                <input
+                  type="text"
+                  id="bankSearchInput"
+                  placeholder="Search bank name..."
+                  autocomplete="off"
+                />
+                <button
+                  type="button"
+                  id="bankSearchClear"
+                  class="bank-clear-btn"
+                  style="display: none"
+                >
+                  &#10005;
+                </button>
+              </div>
+              <select id="bankSelect" required size="1">
+                <option value="">Select Bank</option>
+                <option>JPMorgan Chase Bank</option>
+                <option>Bank of America</option>
+                <option>Wells Fargo Bank</option>
+                <option>Citibank</option>
+                <option>U.S. Bank</option>
+                <option>PNC Bank</option>
+                <option>Truist Bank</option>
+                <option>Capital One</option>
+                <option>TD Bank</option>
+                <option>Regions Bank</option>
+                <option>Fifth Third Bank</option>
+                <option>KeyBank</option>
+                <option>Huntington Bank</option>
+                <option>Ally Bank</option>
+                <option>Discover Bank</option>
+                <option>Charles Schwab Bank</option>
+                <option>Citizens Bank</option>
+                <option>HSBC USA</option>
+                <option>Navy Federal Credit Union</option>
+                <option>PenFed Credit Union</option>
+                <option>Alliant Credit Union</option>
+                <option>International Credit Union</option>
+                <option value="other">Other (Type Manually)</option>
+              </select>
+            </div>
           </div>
 
           <!-- MANUAL BANK -->
@@ -186,11 +207,8 @@
                   alt="ICU Logo"
                   class="receipt-logo-img"
                 />
-                <span class="receipt-bank-name"
-                  >International Credit Union</span
-                >
               </div>
-              <div class="receipt-check">&#10004;</div>
+              <div class="receipt-check receipt-check-green">&#10004;</div>
               <div class="receipt-title">Transfer Successful</div>
               <div class="receipt-subtitle">Wire Transfer Receipt</div>
               <div class="receipt-amount-box">
@@ -272,5 +290,48 @@
     <script src="assest/js/face-verify.js"></script>
     <script src="assest/js/auth.js"></script>
     <script src="assest/js/wire-transfer.js"></script>
+    <script>
+      // Bank search filter
+      var bankSearchInput = document.getElementById("bankSearchInput");
+      var bankClearBtn = document.getElementById("bankSearchClear");
+      var bankSelect = document.getElementById("bankSelect");
+
+      if (bankSearchInput && bankSelect) {
+        var allBankOptions = Array.from(bankSelect.options).map(function (o) {
+          return { value: o.value, text: o.text };
+        });
+
+        bankSearchInput.addEventListener("input", function () {
+          var q = this.value.toLowerCase().trim();
+          bankClearBtn.style.display = q ? "block" : "none";
+
+          // Rebuild options based on search
+          var prev = bankSelect.value;
+          bankSelect.innerHTML = "";
+          allBankOptions.forEach(function (opt) {
+            if (!q || opt.text.toLowerCase().includes(q) || opt.value === "") {
+              var o = document.createElement("option");
+              o.value = opt.value;
+              o.textContent = opt.text;
+              if (o.value === prev) o.selected = true;
+              bankSelect.appendChild(o);
+            }
+          });
+        });
+
+        bankClearBtn.addEventListener("click", function () {
+          bankSearchInput.value = "";
+          bankClearBtn.style.display = "none";
+          bankSelect.innerHTML = "";
+          allBankOptions.forEach(function (opt) {
+            var o = document.createElement("option");
+            o.value = opt.value;
+            o.textContent = opt.text;
+            bankSelect.appendChild(o);
+          });
+          bankSearchInput.focus();
+        });
+      }
+    </script>
   </body>
 </html>

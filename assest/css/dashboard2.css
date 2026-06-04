@@ -1137,3 +1137,56 @@ input:checked + .slider:before {
 .db-notif {
   position: relative;
 }
+
+/* ── Expandable account detail ── */
+.db-acct-expandable {
+  cursor: pointer;
+}
+.db-acct-expandable:hover {
+  border-color: rgba(75, 56, 245, 0.3);
+}
+.db-expand-arrow {
+  transition: transform 0.2s;
+}
+
+.db-acct-detail {
+  display: none;
+  background: var(--db-card2);
+  border: 1px solid var(--db-border);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  padding: 0 16px;
+  margin-top: -6px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.db-acct-detail.open {
+  display: block;
+  padding: 14px 16px;
+}
+.db-acct-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--db-border);
+  font-size: 0.82rem;
+}
+.db-acct-detail-row:last-of-type {
+  border-bottom: none;
+}
+.db-acct-detail-row span:first-child {
+  color: var(--db-muted);
+}
+.db-acct-detail-row span:last-child {
+  font-weight: 600;
+}
+.db-acct-detail-link {
+  display: block;
+  text-align: center;
+  padding: 10px 0 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--db-accent2);
+}
