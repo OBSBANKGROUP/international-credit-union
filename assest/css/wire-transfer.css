@@ -812,51 +812,24 @@ input[readonly] {
   print-color-adjust: exact !important;
 }
 
-/* ── Bank search ── */
-.bank-search-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.bank-search-input-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #f7f8fc;
+/* ── Bank search input (datalist) ── */
+#bankSelect {
+  width: 100%;
+  padding: 12px 14px;
   border: 1.5px solid #e0e4ee;
   border-radius: 12px;
-  padding: 10px 14px;
-  transition: border-color 0.2s;
-}
-.bank-search-input-row:focus-within {
-  border-color: #4b38f5;
-  background: #fff;
-}
-.bank-search-icon {
-  font-size: 1.1rem !important;
-  color: #aaa;
-  flex-shrink: 0;
-}
-.bank-search-input-row input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  outline: none;
   font-size: 0.92rem;
   font-family: "Inter", sans-serif;
   color: #021633;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
 }
-.bank-clear-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
+#bankSelect:focus {
+  border-color: #4b38f5;
+}
+#bankSelect::placeholder {
   color: #aaa;
-  font-size: 0.85rem;
-  padding: 0;
-  flex-shrink: 0;
-}
-.bank-search-wrap select {
-  max-height: 200px;
 }
 
 /* ── Fix transaction amount overflow ── */

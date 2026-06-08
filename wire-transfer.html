@@ -35,53 +35,38 @@
           <!-- RECIPIENT BANK -->
           <div class="form-group">
             <label>Recipient Bank</label>
-            <div class="bank-search-wrap">
-              <div class="bank-search-input-row">
-                <span class="material-icons-outlined bank-search-icon"
-                  >search</span
-                >
-                <input
-                  type="text"
-                  id="bankSearchInput"
-                  placeholder="Search bank name..."
-                  autocomplete="off"
-                />
-                <button
-                  type="button"
-                  id="bankSearchClear"
-                  class="bank-clear-btn"
-                  style="display: none"
-                >
-                  &#10005;
-                </button>
-              </div>
-              <select id="bankSelect" required size="1">
-                <option value="">Select Bank</option>
-                <option>JPMorgan Chase Bank</option>
-                <option>Bank of America</option>
-                <option>Wells Fargo Bank</option>
-                <option>Citibank</option>
-                <option>U.S. Bank</option>
-                <option>PNC Bank</option>
-                <option>Truist Bank</option>
-                <option>Capital One</option>
-                <option>TD Bank</option>
-                <option>Regions Bank</option>
-                <option>Fifth Third Bank</option>
-                <option>KeyBank</option>
-                <option>Huntington Bank</option>
-                <option>Ally Bank</option>
-                <option>Discover Bank</option>
-                <option>Charles Schwab Bank</option>
-                <option>Citizens Bank</option>
-                <option>HSBC USA</option>
-                <option>Navy Federal Credit Union</option>
-                <option>PenFed Credit Union</option>
-                <option>Alliant Credit Union</option>
-                <option>International Credit Union</option>
-                <option value="other">Other (Type Manually)</option>
-              </select>
-            </div>
+            <input
+              type="text"
+              id="bankSelect"
+              list="bankList"
+              placeholder="Type or select a bank..."
+              autocomplete="off"
+              required
+            />
+            <datalist id="bankList">
+              <option value="JPMorgan Chase Bank"></option>
+              <option value="Bank of America"></option>
+              <option value="Wells Fargo Bank"></option>
+              <option value="Citibank"></option>
+              <option value="U.S. Bank"></option>
+              <option value="PNC Bank"></option>
+              <option value="Truist Bank"></option>
+              <option value="Capital One"></option>
+              <option value="TD Bank"></option>
+              <option value="Regions Bank"></option>
+              <option value="Fifth Third Bank"></option>
+              <option value="KeyBank"></option>
+              <option value="Huntington Bank"></option>
+              <option value="Ally Bank"></option>
+              <option value="Discover Bank"></option>
+              <option value="Charles Schwab Bank"></option>
+              <option value="Citizens Bank"></option>
+              <option value="HSBC USA"></option>
+              <option value="Navy Federal Credit Union"></option>
+              <option value="PenFed Credit Union"></option>
+              <option value="Alliant Credit Union"></option>
+              <option value="International Credit Union"></option>
+            </datalist>
           </div>
 
           <!-- MANUAL BANK -->
@@ -286,52 +271,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="assest/js/db.js"></script>
     <script src="assest/js/emailjs-config.js"></script>
-    <script src="assest/js/pin-verify.js"></script>
-    <script src="assest/js/face-verify.js"></script>
-    <script src="assest/js/auth.js"></script>
-    <script src="assest/js/wire-transfer.js"></script>
-    <script>
-      // Bank search filter
-      var bankSearchInput = document.getElementById("bankSearchInput");
-      var bankClearBtn = document.getElementById("bankSearchClear");
-      var bankSelect = document.getElementById("bankSelect");
-
-      if (bankSearchInput && bankSelect) {
-        var allBankOptions = Array.from(bankSelect.options).map(function (o) {
-          return { value: o.value, text: o.text };
-        });
-
-        bankSearchInput.addEventListener("input", function () {
-          var q = this.value.toLowerCase().trim();
-          bankClearBtn.style.display = q ? "block" : "none";
-
-          // Rebuild options based on search
-          var prev = bankSelect.value;
-          bankSelect.innerHTML = "";
-          allBankOptions.forEach(function (opt) {
-            if (!q || opt.text.toLowerCase().includes(q) || opt.value === "") {
-              var o = document.createElement("option");
-              o.value = opt.value;
-              o.textContent = opt.text;
-              if (o.value === prev) o.selected = true;
-              bankSelect.appendChild(o);
-            }
-          });
-        });
-
-        bankClearBtn.addEventListener("click", function () {
-          bankSearchInput.value = "";
-          bankClearBtn.style.display = "none";
-          bankSelect.innerHTML = "";
-          allBankOptions.forEach(function (opt) {
-            var o = document.createElement("option");
-            o.value = opt.value;
-            o.textContent = opt.text;
-            bankSelect.appendChild(o);
-          });
-          bankSearchInput.focus();
-        });
-      }
-    </script>
+    <script src="assets/js/pin-verify.js"></script>
+    <script src="assets/js/face-verify.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/wire-transfer.js"></script>
   </body>
 </html>

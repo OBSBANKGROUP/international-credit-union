@@ -470,13 +470,24 @@
   });
 
   /* ---------- Balance Calculator ---------- */
+  /* Shared account matching — identical across dashboard, manage, admin */
+  function acctMatches(logAcct, wantType, primary) {
+    var acct = (logAcct || primary || "checking").toLowerCase();
+    var at = (wantType || "").toLowerCase();
+    if (!at) return true; /* no filter = all accounts */
+    if (acct === at) return true;
+    if (at === "business" && acct.indexOf("business") === 0) return true;
+    if (at.indexOf("business") === 0 && acct.indexOf("business") === 0)
+      return true;
+    return false;
+  }
+
   function getUserBalance(userId, accountType) {
     var logs = getLogs();
     var balance = 0;
-    // Get user's primary account type for fallback
     var allUsers = getUsers();
     var thisUser = allUsers.find(function (u) {
-      return u.id === userId;
+      return String(u.id) === String(userId);
     });
     var userPrimary = thisUser
       ? (thisUser.accountType || "checking").toLowerCase()
@@ -484,8 +495,7 @@
 
     logs.forEach(function (l) {
       if (String(l.userId) !== String(userId) || !l.amount) return;
-      var acct = l.targetAccount ? l.targetAccount.toLowerCase() : userPrimary;
-      if (accountType && acct !== accountType.toLowerCase()) return;
+      if (!acctMatches(l.targetAccount, accountType, userPrimary)) return;
       if (l.txnType === "credit") balance += parseFloat(l.amount);
       else if (l.txnType === "debit") balance -= parseFloat(l.amount);
     });
@@ -496,15 +506,14 @@
     var logs = getLogs();
     var allUsers = getUsers();
     var thisUser = allUsers.find(function (u) {
-      return u.id === userId;
+      return String(u.id) === String(userId);
     });
     var userPrimary = thisUser
       ? (thisUser.accountType || "checking").toLowerCase()
       : "checking";
     return logs.filter(function (l) {
       if (String(l.userId) !== String(userId) || !l.amount) return false;
-      var acct = l.targetAccount ? l.targetAccount.toLowerCase() : userPrimary;
-      if (accountType && acct !== accountType.toLowerCase()) return false;
+      if (!acctMatches(l.targetAccount, accountType, userPrimary)) return false;
       return true;
     });
   }
@@ -1007,15 +1016,26 @@
     /* Balance per account type for this user — isolated by userId */
     function getAcctBalance(uid, acctType) {
       var bal = 0;
+      var at = acctType.toLowerCase();
+      var u2 = users.find(function (u) {
+        return String(u.id) === String(uid);
+      });
+      var primary = u2
+        ? (u2.accountType || "checking").toLowerCase()
+        : "checking";
       logs.forEach(function (l) {
         if (String(l.userId) !== String(uid) || !l.amount) return;
-        var primary = "checking";
-        var u2 = users.find(function (u) {
-          return String(u.id) === String(uid);
-        });
-        if (u2) primary = (u2.accountType || "checking").toLowerCase();
         var ta = (l.targetAccount || primary).toLowerCase();
-        if (ta !== acctType.toLowerCase()) return;
+        var matches = ta === at;
+        if (!matches && at === "business" && ta.indexOf("business") === 0)
+          matches = true;
+        if (
+          !matches &&
+          at.indexOf("business") === 0 &&
+          ta.indexOf("business") === 0
+        )
+          matches = true;
+        if (!matches) return;
         if (l.txnType === "credit") bal += parseFloat(l.amount) || 0;
         else if (l.txnType === "debit") bal -= parseFloat(l.amount) || 0;
       });
@@ -1056,9 +1076,12 @@
             '">' +
             initStr +
             "</div>";
+        /* TOTAL = simple sum of ALL user logs (matches dashboard) */
         var totalBal = 0;
-        acctKeys.forEach(function (k) {
-          totalBal += getAcctBalance(u.id, k);
+        logs.forEach(function (l) {
+          if (String(l.userId) !== String(u.id) || !l.amount) return;
+          if (l.txnType === "credit") totalBal += parseFloat(l.amount) || 0;
+          else if (l.txnType === "debit") totalBal -= parseFloat(l.amount) || 0;
         });
         var txnCount = logs.filter(function (l) {
           return String(l.userId) === String(u.id) && l.amount;
@@ -2274,8 +2297,18 @@
   var addUserBtn = document.getElementById("addUserBtn");
   if (addUserBtn) {
     addUserBtn.addEventListener("click", function () {
+      /* CRITICAL: clear any pending clone so a normal new user is TOTALLY empty */
+      _pendingCloneSourceId = null;
+      var oldBanner = document.getElementById("cloneBanner");
+      if (oldBanner) oldBanner.remove();
+
       document.getElementById("addUserForm").reset();
       document.getElementById("addUserError").style.display = "none";
+
+      /* Clear business account list so new user starts fresh */
+      var bizList = document.getElementById("addBusinessList");
+      if (bizList) bizList.innerHTML = "";
+      addBizCount = 0;
 
       // Auto-generate account number for the new user
       var users = getUsers();

@@ -136,12 +136,22 @@ document.addEventListener("DOMContentLoaded", function () {
   ─────────────────────────────────────────────────────────── */
     var primary = (user.accountType || "checking").toLowerCase();
 
+    function acctMatches(logAcct, wantType) {
+      var acct = (logAcct || primary || "checking").toLowerCase();
+      var at = (wantType || "").toLowerCase();
+      if (!at) return true;
+      if (acct === at) return true;
+      if (at === "business" && acct.indexOf("business") === 0) return true;
+      if (at.indexOf("business") === 0 && acct.indexOf("business") === 0)
+        return true;
+      return false;
+    }
+
     function calcBal(accountType) {
       var b = 0;
       allLogs.forEach(function (l) {
-        if (String(l.userId) !== String(session.id) || l.amount == null) return;
-        var acct = (l.targetAccount || primary).toLowerCase();
-        if (acct !== accountType.toLowerCase()) return;
+        if (String(l.userId) !== String(user.id) || l.amount == null) return;
+        if (!acctMatches(l.targetAccount, accountType)) return;
         if (l.txnType === "credit") b += parseFloat(l.amount);
         else if (l.txnType === "debit") b -= parseFloat(l.amount);
       });
@@ -228,10 +238,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* ── Balances ── */
     var balances = {};
-    var totalBal = 0;
     accountTypes.forEach(function (t) {
       balances[t] = calcBal(t);
-      totalBal += balances[t];
+    });
+    /* TOTAL = simple sum of ALL user logs (guaranteed to match dashboard + admin) */
+    var totalBal = 0;
+    allLogs.forEach(function (l) {
+      if (String(l.userId) !== String(user.id) || l.amount == null) return;
+      if (l.txnType === "credit") totalBal += parseFloat(l.amount);
+      else if (l.txnType === "debit") totalBal -= parseFloat(l.amount);
     });
 
     /* ── Hero ── */

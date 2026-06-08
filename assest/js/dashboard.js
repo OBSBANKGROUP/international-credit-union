@@ -167,14 +167,23 @@ document.addEventListener("DOMContentLoaded", function () {
     var primary = (currentUser.accountType || "checking").toLowerCase();
     var uid = currentUser.id;
 
-    /* Balance calc */
+    /* Shared matching — identical to admin + manage-account */
+    function acctMatches(logAcct, wantType) {
+      var acct = (logAcct || primary || "checking").toLowerCase();
+      var at = (wantType || "").toLowerCase();
+      if (!at) return true;
+      if (acct === at) return true;
+      if (at === "business" && acct.indexOf("business") === 0) return true;
+      if (at.indexOf("business") === 0 && acct.indexOf("business") === 0)
+        return true;
+      return false;
+    }
+
     function calcBalance(type) {
-      /* Logs are already filtered by user_id in Supabase query */
       var bal = 0;
       logs.forEach(function (l) {
         if (!l.amount) return;
-        var acct = (l.targetAccount || primary).toLowerCase();
-        if (type && acct !== type) return;
+        if (!acctMatches(l.targetAccount, type)) return;
         if (l.txnType === "credit") bal += parseFloat(l.amount);
         else if (l.txnType === "debit") bal -= parseFloat(l.amount);
       });
@@ -183,9 +192,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var checkingBal = calcBalance("checking");
     var savingsBal = calcBalance("savings");
+    /* TOTAL = sum of ALL logs (guaranteed to match manage + admin) */
     var totalBal = 0;
     logs.forEach(function (l) {
-      if (!l.amount) return; /* logs already filtered by user */
+      if (!l.amount) return;
       if (l.txnType === "credit") totalBal += parseFloat(l.amount);
       else if (l.txnType === "debit") totalBal -= parseFloat(l.amount);
     });
@@ -220,17 +230,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (ckEl) ckEl.textContent = formatCurrency(checkingBal);
     if (svEl) svEl.textContent = formatCurrency(savingsBal);
 
-    /* Business balance — logs are already filtered by user from Supabase */
-    var businessBal = 0;
-    logs.forEach(function (l) {
-      if (!l.amount) return;
-      var ta = (l.targetAccount || "").toLowerCase();
-      /* Match "business", "business_0", "business_1", etc */
-      if (ta && (ta === "business" || ta.indexOf("business") === 0)) {
-        if (l.txnType === "credit") businessBal += parseFloat(l.amount);
-        else if (l.txnType === "debit") businessBal -= parseFloat(l.amount);
-      }
-    });
+    /* Business balance — uses same calcBalance matching */
+    var businessBal = calcBalance("business");
     if (bzEl) bzEl.textContent = formatCurrency(businessBal);
     /* Always show the business box */
     var bizBox = document.getElementById("acctBox_business");
