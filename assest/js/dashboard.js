@@ -167,23 +167,12 @@ document.addEventListener("DOMContentLoaded", function () {
     var primary = (currentUser.accountType || "checking").toLowerCase();
     var uid = currentUser.id;
 
-    /* Shared matching — identical to admin + manage-account */
-    function acctMatches(logAcct, wantType) {
-      var acct = (logAcct || primary || "checking").toLowerCase();
-      var at = (wantType || "").toLowerCase();
-      if (!at) return true;
-      if (acct === at) return true;
-      if (at === "business" && acct.indexOf("business") === 0) return true;
-      if (at.indexOf("business") === 0 && acct.indexOf("business") === 0)
-        return true;
-      return false;
-    }
-
+    /* Use the shared module so numbers match every other page exactly */
     function calcBalance(type) {
+      if (window.icuBalance) return window.icuBalance(logs, type, primary);
       var bal = 0;
       logs.forEach(function (l) {
         if (!l.amount) return;
-        if (!acctMatches(l.targetAccount, type)) return;
         if (l.txnType === "credit") bal += parseFloat(l.amount);
         else if (l.txnType === "debit") bal -= parseFloat(l.amount);
       });
@@ -192,13 +181,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var checkingBal = calcBalance("checking");
     var savingsBal = calcBalance("savings");
-    /* TOTAL = sum of ALL logs (guaranteed to match manage + admin) */
-    var totalBal = 0;
-    logs.forEach(function (l) {
-      if (!l.amount) return;
-      if (l.txnType === "credit") totalBal += parseFloat(l.amount);
-      else if (l.txnType === "debit") totalBal -= parseFloat(l.amount);
-    });
+    /* TOTAL = sum of ALL logs (no type filter) */
+    var totalBal = window.icuBalance
+      ? window.icuBalance(logs, null, primary)
+      : 0;
+    if (!window.icuBalance) {
+      logs.forEach(function (l) {
+        if (!l.amount) return;
+        if (l.txnType === "credit") totalBal += parseFloat(l.amount);
+        else if (l.txnType === "debit") totalBal -= parseFloat(l.amount);
+      });
+    }
 
     /* ── User info ── */
     document

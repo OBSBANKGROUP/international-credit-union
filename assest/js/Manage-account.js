@@ -136,22 +136,15 @@ document.addEventListener("DOMContentLoaded", function () {
   ─────────────────────────────────────────────────────────── */
     var primary = (user.accountType || "checking").toLowerCase();
 
-    function acctMatches(logAcct, wantType) {
-      var acct = (logAcct || primary || "checking").toLowerCase();
-      var at = (wantType || "").toLowerCase();
-      if (!at) return true;
-      if (acct === at) return true;
-      if (at === "business" && acct.indexOf("business") === 0) return true;
-      if (at.indexOf("business") === 0 && acct.indexOf("business") === 0)
-        return true;
-      return false;
-    }
-
     function calcBal(accountType) {
+      var mine = allLogs.filter(function (l) {
+        return String(l.userId) === String(user.id);
+      });
+      if (window.icuBalance)
+        return window.icuBalance(mine, accountType, primary);
       var b = 0;
-      allLogs.forEach(function (l) {
-        if (String(l.userId) !== String(user.id) || l.amount == null) return;
-        if (!acctMatches(l.targetAccount, accountType)) return;
+      mine.forEach(function (l) {
+        if (l.amount == null) return;
         if (l.txnType === "credit") b += parseFloat(l.amount);
         else if (l.txnType === "debit") b -= parseFloat(l.amount);
       });
@@ -241,13 +234,21 @@ document.addEventListener("DOMContentLoaded", function () {
     accountTypes.forEach(function (t) {
       balances[t] = calcBal(t);
     });
-    /* TOTAL = simple sum of ALL user logs (guaranteed to match dashboard + admin) */
-    var totalBal = 0;
-    allLogs.forEach(function (l) {
-      if (String(l.userId) !== String(user.id) || l.amount == null) return;
-      if (l.txnType === "credit") totalBal += parseFloat(l.amount);
-      else if (l.txnType === "debit") totalBal -= parseFloat(l.amount);
+    /* TOTAL via shared module — guaranteed to match every page */
+    var myLogs = allLogs.filter(function (l) {
+      return String(l.userId) === String(user.id);
     });
+    var totalBal = window.icuBalance
+      ? window.icuBalance(myLogs, null, primary)
+      : (function () {
+          var t = 0;
+          myLogs.forEach(function (l) {
+            if (l.amount == null) return;
+            if (l.txnType === "credit") t += parseFloat(l.amount);
+            else if (l.txnType === "debit") t -= parseFloat(l.amount);
+          });
+          return t;
+        })();
 
     /* ── Hero ── */
     el("totalBalance").textContent = fmt(totalBal);

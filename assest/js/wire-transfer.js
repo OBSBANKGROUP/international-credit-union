@@ -147,63 +147,34 @@ document.addEventListener("DOMContentLoaded", function () {
     var receiptModal = document.getElementById("receiptModal");
 
     /* ── ACCOUNT DROPDOWN — first <select> in form ── */
-    var fromAccSelect = form ? form.querySelector("select") : null;
+    var fromAccSelect = document.getElementById("fromAccount");
 
     if (fromAccSelect) {
-      /* Supports both legacy {checking:true} and new {business_0:{name:"..."}} */
       var last4_fromAccSelect = currentUser.accountNumber
         ? String(currentUser.accountNumber).slice(-4)
         : "****";
       var ddOpts = '<option value="">Select Account</option>';
-      ddOpts +=
-        '<option value="checking">Checking Account ••••' +
-        last4_fromAccSelect +
-        "</option>";
-      ddOpts +=
-        '<option value="savings">Savings Account ••••' +
-        last4_fromAccSelect +
-        "</option>";
 
-      /* Add business accounts — from Supabase accounts field */
-      var ddAccts = {};
-      if (currentUser.accounts && typeof currentUser.accounts === "object") {
-        ddAccts = currentUser.accounts;
-      }
-      /* Also check data field for legacy format */
-      if (currentUser.data && currentUser.data.accounts) {
-        Object.assign(ddAccts, currentUser.data.accounts);
-      }
-      Object.keys(ddAccts).forEach(function (k) {
-        if (k === "checking" || k === "savings") return;
-        var v = ddAccts[k];
-        if (!v) return;
-        var lbl =
-          typeof v === "object" && v.name
-            ? v.name
-            : currentUser.businessName || "Business Account";
+      /* Use shared module for account keys + labels */
+      var acctKeys = window.icuAccountKeys
+        ? window.icuAccountKeys(currentUser)
+        : ["checking", "savings"];
+      acctKeys.forEach(function (k) {
+        var lbl = window.icuAccountLabel
+          ? window.icuAccountLabel(currentUser, k)
+          : k;
+        var suffix =
+          k === "checking" ? " Account" : k === "savings" ? " Account" : "";
         ddOpts +=
           '<option value="' +
           k +
           '">' +
           lbl +
-          " ••••" +
+          suffix +
+          " \u2022\u2022\u2022\u2022" +
           last4_fromAccSelect +
           "</option>";
       });
-      /* If admin set businessName but no business key, add a generic one */
-      if (
-        currentUser.businessName &&
-        Object.keys(ddAccts).filter(function (k) {
-          return k !== "checking" && k !== "savings";
-        }).length === 0
-      ) {
-        ddOpts +=
-          '<option value="business">' +
-          currentUser.businessName +
-          " ••••" +
-          last4_fromAccSelect +
-          "</option>";
-      }
       fromAccSelect.innerHTML = ddOpts;
 
       /* Live balance tag */
@@ -213,6 +184,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
       function calcBalance(accountType) {
         var primary = (currentUser.accountType || "checking").toLowerCase();
+        /* Use shared balance function */
+        if (window.icuBalance)
+          return window.icuBalance(
+            getLogs().filter(function (l) {
+              return String(l.userId) === String(currentUser.id);
+            }),
+            accountType,
+            primary,
+          );
         var bal = 0;
         getLogs().forEach(function (l) {
           if (String(l.userId) !== String(session.id) || l.amount == null)

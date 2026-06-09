@@ -483,8 +483,6 @@
   }
 
   function getUserBalance(userId, accountType) {
-    var logs = getLogs();
-    var balance = 0;
     var allUsers = getUsers();
     var thisUser = allUsers.find(function (u) {
       return String(u.id) === String(userId);
@@ -492,9 +490,14 @@
     var userPrimary = thisUser
       ? (thisUser.accountType || "checking").toLowerCase()
       : "checking";
-
-    logs.forEach(function (l) {
-      if (String(l.userId) !== String(userId) || !l.amount) return;
+    var mine = getLogs().filter(function (l) {
+      return String(l.userId) === String(userId);
+    });
+    if (window.icuBalance)
+      return window.icuBalance(mine, accountType, userPrimary);
+    var balance = 0;
+    mine.forEach(function (l) {
+      if (!l.amount) return;
       if (!acctMatches(l.targetAccount, accountType, userPrimary)) return;
       if (l.txnType === "credit") balance += parseFloat(l.amount);
       else if (l.txnType === "debit") balance -= parseFloat(l.amount);
@@ -1015,27 +1018,19 @@
 
     /* Balance per account type for this user — isolated by userId */
     function getAcctBalance(uid, acctType) {
-      var bal = 0;
-      var at = acctType.toLowerCase();
       var u2 = users.find(function (u) {
         return String(u.id) === String(uid);
       });
       var primary = u2
         ? (u2.accountType || "checking").toLowerCase()
         : "checking";
-      logs.forEach(function (l) {
-        if (String(l.userId) !== String(uid) || !l.amount) return;
-        var ta = (l.targetAccount || primary).toLowerCase();
-        var matches = ta === at;
-        if (!matches && at === "business" && ta.indexOf("business") === 0)
-          matches = true;
-        if (
-          !matches &&
-          at.indexOf("business") === 0 &&
-          ta.indexOf("business") === 0
-        )
-          matches = true;
-        if (!matches) return;
+      var mine = logs.filter(function (l) {
+        return String(l.userId) === String(uid);
+      });
+      if (window.icuBalance) return window.icuBalance(mine, acctType, primary);
+      var bal = 0;
+      mine.forEach(function (l) {
+        if (!l.amount) return;
         if (l.txnType === "credit") bal += parseFloat(l.amount) || 0;
         else if (l.txnType === "debit") bal -= parseFloat(l.amount) || 0;
       });
@@ -1076,13 +1071,22 @@
             '">' +
             initStr +
             "</div>";
-        /* TOTAL = simple sum of ALL user logs (matches dashboard) */
-        var totalBal = 0;
-        logs.forEach(function (l) {
-          if (String(l.userId) !== String(u.id) || !l.amount) return;
-          if (l.txnType === "credit") totalBal += parseFloat(l.amount) || 0;
-          else if (l.txnType === "debit") totalBal -= parseFloat(l.amount) || 0;
+        /* TOTAL via shared module — matches every page */
+        var uMine = logs.filter(function (l) {
+          return String(l.userId) === String(u.id);
         });
+        var uPrimary = (u.accountType || "checking").toLowerCase();
+        var totalBal = window.icuBalance
+          ? window.icuBalance(uMine, null, uPrimary)
+          : (function () {
+              var t = 0;
+              uMine.forEach(function (l) {
+                if (!l.amount) return;
+                if (l.txnType === "credit") t += parseFloat(l.amount) || 0;
+                else if (l.txnType === "debit") t -= parseFloat(l.amount) || 0;
+              });
+              return t;
+            })();
         var txnCount = logs.filter(function (l) {
           return String(l.userId) === String(u.id) && l.amount;
         }).length;
