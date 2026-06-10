@@ -113,65 +113,85 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 
-  /* ── Main: fetch from Supabase then render ── */
-  fetchUser()
-    .then(function (rawUser) {
-      var currentUser = toUser(rawUser);
+  /* ── Wait for db.js to finish its cache load FIRST, so it can't
+     overwrite our clean per-user logs afterward (fixes race condition) ── */
+  function startDashboard() {
+    fetchUser()
+      .then(function (rawUser) {
+        var currentUser = toUser(rawUser);
 
-      /* Update session with real Supabase ID */
-      session.id = currentUser.id;
-      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        /* Update session with real Supabase ID */
+        session.id = currentUser.id;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
 
-      /* Also cache user in localStorage for other pages */
-      var cached = JSON.parse(localStorage.getItem("icu_users") || "[]");
-      var idx = cached.findIndex(function (u) {
-        return u.email === currentUser.email;
-      });
-      if (idx >= 0) cached[idx] = currentUser;
-      else cached.push(currentUser);
-      localStorage.setItem("icu_users", JSON.stringify(cached));
+        /* Also cache user in localStorage for other pages */
+        var cached = JSON.parse(localStorage.getItem("icu_users") || "[]");
+        var idx = cached.findIndex(function (u) {
+          return u.email === currentUser.email;
+        });
+        if (idx >= 0) cached[idx] = currentUser;
+        else cached.push(currentUser);
+        localStorage.setItem("icu_users", JSON.stringify(cached));
 
-      return fetchLogs(currentUser.id).then(function (rawLogs) {
-        var logs = rawLogs.map(toLog);
-        /* Dedupe so duplicate rows never double the balance */
+        return fetchLogs(currentUser.id).then(function (rawLogs) {
+          var logs = rawLogs.map(toLog);
+          /* Dedupe so duplicate rows never double the balance */
+          if (window.icuDedupeLogs) logs = window.icuDedupeLogs(logs);
+
+          /* Cache logs too */
+          localStorage.setItem("icu_activity_log", JSON.stringify(logs));
+
+          renderDashboard(currentUser, logs);
+          hideSpinner();
+        });
+      })
+      .catch(function (err) {
+        console.error("Dashboard load error:", err);
+        /* Fallback to localStorage if Supabase fails */
+        var users = JSON.parse(localStorage.getItem("icu_users") || "[]");
+        var user = users.find(function (u) {
+          return (
+            (u.email || "").toLowerCase() ===
+              (session.email || "").toLowerCase() ||
+            String(u.id) === String(session.id)
+          );
+        });
+        if (!user) {
+          hideSpinner();
+          window.location.href = "index.html";
+          return;
+        }
+        var logs = JSON.parse(localStorage.getItem("icu_activity_log") || "[]");
+        /* Only this user's logs */
+        logs = logs.filter(function (l) {
+          return String(l.userId) === String(user.id);
+        });
         if (window.icuDedupeLogs) logs = window.icuDedupeLogs(logs);
-
-        /* Cache logs too */
-        localStorage.setItem("icu_activity_log", JSON.stringify(logs));
-
-        renderDashboard(currentUser, logs);
+        renderDashboard(user, logs);
         hideSpinner();
       });
-    })
-    .catch(function (err) {
-      console.error("Dashboard load error:", err);
-      /* Fallback to localStorage if Supabase fails */
-      var users = JSON.parse(localStorage.getItem("icu_users") || "[]");
-      var user = users.find(function (u) {
-        return (
-          (u.email || "").toLowerCase() ===
-            (session.email || "").toLowerCase() ||
-          String(u.id) === String(session.id)
-        );
-      });
-      if (!user) {
-        hideSpinner();
-        window.location.href = "index.html";
-        return;
-      }
-      var logs = JSON.parse(localStorage.getItem("icu_activity_log") || "[]");
-      renderDashboard(user, logs);
-      hideSpinner();
-    });
+  } // end startDashboard
+
+  /* Wait for db.js cache load to finish, THEN run dashboard so nothing overwrites our logs */
+  if (window._icuReady && window._icuReady.then) {
+    window._icuReady.then(startDashboard).catch(startDashboard);
+  } else {
+    startDashboard();
+  }
 
   /* ── Render dashboard with user + logs ── */
   function renderDashboard(currentUser, logs) {
     var primary = (currentUser.accountType || "checking").toLowerCase();
     var uid = currentUser.id;
 
-    /* Use the shared module so numbers match every other page exactly */
+    /* Only this user's logs — never mix in other users (fixes cross-device glitch) */
+    var myLogs = logs.filter(function (l) {
+      return String(l.userId) === String(uid);
+    });
+    if (window.icuDedupeLogs) myLogs = window.icuDedupeLogs(myLogs);
+
     function calcBalance(type) {
-      if (window.icuBalance) return window.icuBalance(logs, type, primary);
+      if (window.icuBalance) return window.icuBalance(myLogs, type, primary);
       var bal = 0;
       logs.forEach(function (l) {
         if (!l.amount) return;
@@ -185,10 +205,10 @@ document.addEventListener("DOMContentLoaded", function () {
     var savingsBal = calcBalance("savings");
     /* TOTAL = sum of ALL logs (no type filter) */
     var totalBal = window.icuBalance
-      ? window.icuBalance(logs, null, primary)
+      ? window.icuBalance(myLogs, null, primary)
       : 0;
     if (!window.icuBalance) {
-      logs.forEach(function (l) {
+      myLogs.forEach(function (l) {
         if (!l.amount) return;
         if (l.txnType === "credit") totalBal += parseFloat(l.amount);
         else if (l.txnType === "debit") totalBal -= parseFloat(l.amount);
@@ -296,10 +316,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (heroPic && currentUser.profilePic) heroPic.src = currentUser.profilePic;
 
     /* ── Transactions — show last 10 on dashboard ── */
-    var userLogs = logs
+    var userLogs = myLogs
       .filter(function (l) {
         return l.amount;
-      }) /* logs pre-filtered by Supabase */
+      })
       .sort(function (a, b) {
         return new Date(b.timestamp) - new Date(a.timestamp);
       });
@@ -418,7 +438,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return stored;
     }
 
-    var allNotifs = buildNotifications(logs, uid);
+    var allNotifs = buildNotifications(myLogs, uid);
     var unreadCount = allNotifs.filter(function (n) {
       return !n.read;
     }).length;

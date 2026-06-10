@@ -328,25 +328,56 @@
     _resolveReady = resolve;
   });
 
+  /* Load ALL users + logs into cache (used by admin) */
+  window._icuLoadCacheUsersOnly = function () {
+    return window
+      ._dbGetUsers()
+      .then(function (u) {
+        window._icuCache.users = u;
+        localStorage.setItem("icu_users", JSON.stringify(u));
+      })
+      .catch(function () {});
+  };
+
   /* Auto-load on every page */
   document.addEventListener("DOMContentLoaded", function () {
     var isLoginPage = !!document.getElementById("loginBtn");
-    var isAdminPage = !!document.getElementById("adminPanel");
+    var isAdminPage =
+      !!document.getElementById("adminPanel") ||
+      /admin/i.test(location.pathname);
 
-    if (!isLoginPage && !isAdminPage) {
-      showSyncOverlay();
+    if (isLoginPage) {
+      _resolveReady();
+      return;
     }
 
-    window
-      ._icuLoadCache()
-      .then(function () {
-        hideSyncOverlay();
-        _resolveReady();
-      })
-      .catch(function () {
-        hideSyncOverlay();
-        _resolveReady(); // resolve anyway so pages don't hang
-      });
+    if (isAdminPage) {
+      /* Admin needs ALL users + ALL logs */
+      window
+        ._icuLoadCache()
+        .then(function () {
+          hideSyncOverlay();
+          _resolveReady();
+        })
+        .catch(function () {
+          hideSyncOverlay();
+          _resolveReady();
+        });
+    } else {
+      /* User pages: load ONLY users list, NOT all logs.
+         Each page fetches its own user's logs — prevents mixing balances. */
+      showSyncOverlay();
+      window
+        ._icuLoadCacheUsersOnly()
+        .then(function () {
+          hideSyncOverlay();
+          _resolveReady();
+        })
+        .catch(function () {
+          hideSyncOverlay();
+          _resolveReady();
+        });
+    }
   });
 
   console.log("ICU DB: Supabase layer loaded");

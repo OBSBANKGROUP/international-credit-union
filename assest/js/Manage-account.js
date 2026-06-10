@@ -90,6 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (ci >= 0) cached[ci] = user;
           else cached.push(user);
           localStorage.setItem(USERS_KEY, JSON.stringify(cached));
+          if (window.icuDedupeLogs) allLogs = window.icuDedupeLogs(allLogs);
           localStorage.setItem(LOG_KEY, JSON.stringify(allLogs));
 
           document.body.style.opacity = "1";
@@ -112,6 +113,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
       var allLogs = JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
+      allLogs = allLogs.filter(function (l) {
+        return String(l.userId) === String(user.id);
+      });
+      if (window.icuDedupeLogs) allLogs = window.icuDedupeLogs(allLogs);
       runPage(user, allLogs);
     });
 
