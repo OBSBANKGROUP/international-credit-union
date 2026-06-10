@@ -133,6 +133,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       return fetchLogs(currentUser.id).then(function (rawLogs) {
         var logs = rawLogs.map(toLog);
+        /* Dedupe so duplicate rows never double the balance */
+        if (window.icuDedupeLogs) logs = window.icuDedupeLogs(logs);
 
         /* Cache logs too */
         localStorage.setItem("icu_activity_log", JSON.stringify(logs));

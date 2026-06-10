@@ -64,14 +64,53 @@
   window.icuBalance = function (logs, type, primary) {
     var bal = 0;
     primary = (primary || "checking").toLowerCase();
+    /* Deduplicate by log id so duplicate rows never double-count */
+    var seen = {};
     (logs || []).forEach(function (l) {
       if (l.amount == null) return;
+      /* Skip if we've already counted this exact log id */
+      var key =
+        l.id != null
+          ? String(l.id)
+          : String(l.userId) +
+            "|" +
+            l.amount +
+            "|" +
+            l.txnType +
+            "|" +
+            l.targetAccount +
+            "|" +
+            l.timestamp;
+      if (seen[key]) return;
+      seen[key] = true;
       if (type && !window.icuAcctMatches(l.targetAccount, type, primary))
         return;
       if (l.txnType === "credit") bal += parseFloat(l.amount) || 0;
       else if (l.txnType === "debit") bal -= parseFloat(l.amount) || 0;
     });
     return bal;
+  };
+
+  /* Deduplicate a logs array by id — use before rendering lists */
+  window.icuDedupeLogs = function (logs) {
+    var seen = {};
+    return (logs || []).filter(function (l) {
+      var key =
+        l.id != null
+          ? String(l.id)
+          : String(l.userId) +
+            "|" +
+            l.amount +
+            "|" +
+            l.txnType +
+            "|" +
+            l.targetAccount +
+            "|" +
+            l.timestamp;
+      if (seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
   };
 
   /* ── Fetch a user + their logs from Supabase by EMAIL ── */

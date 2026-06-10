@@ -146,77 +146,82 @@ document.addEventListener("DOMContentLoaded", function () {
     var verifyOtpBtn = document.getElementById("verifyOtpBtn");
     var receiptModal = document.getElementById("receiptModal");
 
-    /* ── ACCOUNT DROPDOWN — first <select> in form ── */
+    /* ── ACCOUNT DROPDOWN — wrapped so errors never block name lookup ── */
     var fromAccSelect = document.getElementById("fromAccount");
 
-    if (fromAccSelect) {
-      var last4_fromAccSelect = currentUser.accountNumber
-        ? String(currentUser.accountNumber).slice(-4)
-        : "****";
-      var ddOpts = '<option value="">Select Account</option>';
+    try {
+      if (fromAccSelect) {
+        var last4_fromAccSelect = currentUser.accountNumber
+          ? String(currentUser.accountNumber).slice(-4)
+          : "****";
+        var ddOpts = '<option value="">Select Account</option>';
 
-      /* Use shared module for account keys + labels */
-      var acctKeys = window.icuAccountKeys
-        ? window.icuAccountKeys(currentUser)
-        : ["checking", "savings"];
-      acctKeys.forEach(function (k) {
-        var lbl = window.icuAccountLabel
-          ? window.icuAccountLabel(currentUser, k)
-          : k;
-        var suffix =
-          k === "checking" ? " Account" : k === "savings" ? " Account" : "";
-        ddOpts +=
-          '<option value="' +
-          k +
-          '">' +
-          lbl +
-          suffix +
-          " \u2022\u2022\u2022\u2022" +
-          last4_fromAccSelect +
-          "</option>";
-      });
-      fromAccSelect.innerHTML = ddOpts;
-
-      /* Live balance tag */
-      var balTag = document.createElement("p");
-      balTag.style.cssText = "font-size:.84rem;font-weight:700;margin-top:6px";
-      fromAccSelect.parentNode.appendChild(balTag);
-
-      function calcBalance(accountType) {
-        var primary = (currentUser.accountType || "checking").toLowerCase();
-        /* Use shared balance function */
-        if (window.icuBalance)
-          return window.icuBalance(
-            getLogs().filter(function (l) {
-              return String(l.userId) === String(currentUser.id);
-            }),
-            accountType,
-            primary,
-          );
-        var bal = 0;
-        getLogs().forEach(function (l) {
-          if (String(l.userId) !== String(session.id) || l.amount == null)
-            return;
-          var acct = (l.targetAccount || primary).toLowerCase();
-          if (acct !== accountType.toLowerCase()) return;
-          if (l.txnType === "credit") bal += parseFloat(l.amount);
-          else if (l.txnType === "debit") bal -= parseFloat(l.amount);
+        /* Use shared module for account keys + labels */
+        var acctKeys = window.icuAccountKeys
+          ? window.icuAccountKeys(currentUser)
+          : ["checking", "savings"];
+        acctKeys.forEach(function (k) {
+          var lbl = window.icuAccountLabel
+            ? window.icuAccountLabel(currentUser, k)
+            : k;
+          var suffix =
+            k === "checking" ? " Account" : k === "savings" ? " Account" : "";
+          ddOpts +=
+            '<option value="' +
+            k +
+            '">' +
+            lbl +
+            suffix +
+            " \u2022\u2022\u2022\u2022" +
+            last4_fromAccSelect +
+            "</option>";
         });
-        return bal;
-      }
+        fromAccSelect.innerHTML = ddOpts;
 
-      function updateBal() {
-        var acc = fromAccSelect.value;
-        if (!acc) {
-          balTag.textContent = "";
-          return;
+        /* Live balance tag */
+        var balTag = document.createElement("p");
+        balTag.style.cssText =
+          "font-size:.84rem;font-weight:700;margin-top:6px";
+        fromAccSelect.parentNode.appendChild(balTag);
+
+        function calcBalance(accountType) {
+          var primary = (currentUser.accountType || "checking").toLowerCase();
+          /* Use shared balance function */
+          if (window.icuBalance)
+            return window.icuBalance(
+              getLogs().filter(function (l) {
+                return String(l.userId) === String(currentUser.id);
+              }),
+              accountType,
+              primary,
+            );
+          var bal = 0;
+          getLogs().forEach(function (l) {
+            if (String(l.userId) !== String(session.id) || l.amount == null)
+              return;
+            var acct = (l.targetAccount || primary).toLowerCase();
+            if (acct !== accountType.toLowerCase()) return;
+            if (l.txnType === "credit") bal += parseFloat(l.amount);
+            else if (l.txnType === "debit") bal -= parseFloat(l.amount);
+          });
+          return bal;
         }
-        var b = calcBalance(acc);
-        balTag.textContent = "Available: $" + fmt(b);
-        balTag.style.color = b <= 0 ? "#e53935" : "#2e7d32";
+
+        function updateBal() {
+          var acc = fromAccSelect.value;
+          if (!acc) {
+            balTag.textContent = "";
+            return;
+          }
+          var b = calcBalance(acc);
+          balTag.textContent = "Available: $" + fmt(b);
+          balTag.style.color = b <= 0 ? "#e53935" : "#2e7d32";
+        }
+        fromAccSelect.addEventListener("change", updateBal);
+        updateBal();
       }
-      fromAccSelect.addEventListener("change", updateBal);
-      updateBal();
+    } catch (e) {
+      console.warn("Dropdown error (non-fatal):", e);
     }
 
     /* ================= ACCOUNT DATABASE ================= */
