@@ -130,6 +130,55 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
   function initPage(currentUser) {
+    /* Internal users list for beneficiary lookup (ICU members) */
+    var users = getUsers();
+    if (
+      currentUser &&
+      !users.some(function (u) {
+        return String(u.id) === String(currentUser.id);
+      })
+    ) {
+      users.push(currentUser);
+    }
+
+    /* Also fetch ALL ICU members from Supabase so transfers to other members auto-name */
+    (function () {
+      var SU = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+      var SK =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+      fetch(
+        SU +
+          "/rest/v1/users?select=id,first_name,last_name,account_number,routing_number",
+        {
+          headers: { apikey: SK, Authorization: "Bearer " + SK },
+        },
+      )
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (rows) {
+          if (!Array.isArray(rows)) return;
+          rows.forEach(function (row) {
+            if (
+              !users.some(function (u) {
+                return String(u.id) === String(row.id);
+              })
+            ) {
+              users.push({
+                id: row.id,
+                firstName: row.first_name,
+                lastName: row.last_name,
+                accountNumber: row.account_number,
+                routingNumber: row.routing_number,
+              });
+            }
+          });
+        })
+        .catch(function () {
+          /* lookup still works for external + cached */
+        });
+    })();
+
     /* ── Elements ── */
     var form = document.getElementById("wireForm");
     var bankSelect = document.getElementById("bankSelect");
