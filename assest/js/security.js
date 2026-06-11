@@ -30,12 +30,11 @@
     csp.httpEquiv = "Content-Security-Policy";
     csp.content = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://translate.google.com https://translate.googleapis.com https://www.gstatic.com",
+      "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://embed.tawk.to https://translate.google.com https://translate.googleapis.com https://www.gstatic.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https:",
-      "connect-src 'self' https://api.emailjs.com https://translate.googleapis.com",
-      "frame-ancestors 'none'",
+      "connect-src 'self' https://api.emailjs.com https://translate.googleapis.com https://fyuuzoldfzcybgwlbofp.supabase.co https://*.supabase.co https://*.tawk.to wss://*.tawk.to",
     ].join("; ");
     document.head.appendChild(csp);
   }
