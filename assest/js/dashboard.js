@@ -1,3 +1,7 @@
+console.log(
+  "%c✅ DASHBOARD v4 LOADED — balance fix active",
+  "color:#00c896;font-weight:bold;font-size:14px",
+);
 document.addEventListener("DOMContentLoaded", function () {
   var SESSION_KEY = "icu_session";
   var SUPABASE_URL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
@@ -93,6 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
       status: row.status || "active",
       transactionPin: row.transaction_pin,
       businessName: row.business_name,
+      profilePic: row.profile_pic,
     };
     if (row.data && typeof row.data === "object") Object.assign(u, row.data);
     return u;
@@ -251,6 +256,16 @@ document.addEventListener("DOMContentLoaded", function () {
     /* Always show the business box */
     var bizBox = document.getElementById("acctBox_business");
     if (bizBox) bizBox.style.display = "";
+
+    /* Show "Switch Account" button only if user has a business account */
+    var hasBusiness = false;
+    var accs = currentUser.accounts || {};
+    Object.keys(accs).forEach(function (k) {
+      if (k !== "checking" && k !== "savings" && accs[k]) hasBusiness = true;
+    });
+    if (currentUser.businessName) hasBusiness = true;
+    var switchAccBtn = document.getElementById("switchAccountBtn");
+    if (switchAccBtn) switchAccBtn.style.display = hasBusiness ? "" : "none";
 
     /* Generic account boxes fallback */
     var boxes = document.querySelectorAll(".account-balance,.acct-bal");

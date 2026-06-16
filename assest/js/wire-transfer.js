@@ -1,3 +1,7 @@
+console.log(
+  "%c✅ WIRE v6 LOADED — name lookup fixed",
+  "color:#00c896;font-weight:bold",
+);
 document.addEventListener("DOMContentLoaded", function () {
   /* ================= CONSTANTS ================= */
   var TAX_RATE = 0.02;
@@ -23,6 +27,9 @@ document.addEventListener("DOMContentLoaded", function () {
       maximumFractionDigits: 2,
     });
   }
+
+  /* Page-level users list — accessible to ALL functions (fixes "Can't find variable: users") */
+  var users = getUsers();
 
   /* ── Session guard ── */
   var session = getSession();
@@ -116,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch(function () {
       /* Fallback */
-      var users = getUsers();
+      users = getUsers();
       var u = users.find(function (u2) {
         return (
           (u2.email || "").toLowerCase() === (session.email || "").toLowerCase()
@@ -130,8 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
   function initPage(currentUser) {
-    /* Internal users list for beneficiary lookup (ICU members) */
-    var users = getUsers();
+    /* Reuse page-level users list; ensure current user is in it */
     if (
       currentUser &&
       !users.some(function (u) {
@@ -442,90 +448,107 @@ document.addEventListener("DOMContentLoaded", function () {
       form.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        if (!beneficiaryInput.value.trim()) {
-          alert("Please enter the beneficiary name.");
-          return;
-        }
-
-        var acc = fromAccSelect ? fromAccSelect.value : "";
-        var amtRaw = parseFloat(
-          document.querySelector(".amount-input")
-            ? document.querySelector(".amount-input").value
-            : 0,
-        );
-
-        if (!acc) {
-          alert("Please select an account to send from.");
-          return;
-        }
-        if (!amtRaw || amtRaw <= 0) {
-          alert("Please enter a valid transfer amount.");
-          return;
-        }
-        if (bankSelect && !bankSelect.value) {
-          alert("Please select a recipient bank.");
-          return;
-        }
-
-        var tax = parseFloat((amtRaw * TAX_RATE).toFixed(2));
-        var total = parseFloat((amtRaw + tax).toFixed(2));
-        var bal = calcBalance(acc);
-
-        if (total > bal) {
-          alert(
-            "\u274C Insufficient Balance\n\nTransfer:  $" +
-              fmt(amtRaw) +
-              "\nFee (2%): $" +
-              fmt(tax) +
-              "\nTotal:    $" +
-              fmt(total) +
-              "\nAvailable: $" +
-              fmt(bal),
-          );
-          return;
-        }
-
-        var bank = bankSelect
-          ? bankSelect.value === "other"
-            ? customBankInput.value
-            : bankSelect.value
-          : "";
-        var note = form.querySelector("textarea")
-          ? form.querySelector("textarea").value.trim()
-          : "";
-        var bAddr = bankAddrInput ? bankAddrInput.value.trim() : "";
-        var selOpt = fromAccSelect
-          ? fromAccSelect.options[fromAccSelect.selectedIndex]
-          : null;
-        var accLabel = selOpt ? selOpt.text : acc;
-
-        pendingTxn = {
-          amtRaw: amtRaw,
-          tax: tax,
-          total: total,
-          acc: acc,
-          accLabel: accLabel,
-          bank: bank,
-          bankAddr: bAddr,
-          note: note,
-          name: beneficiaryInput.value.trim(),
-          toAcct: accountInput.value.trim(),
-          routing: routingInput.value.trim(),
-          txnId: "TXN" + Date.now(),
-          date: new Date().toLocaleString(),
-        };
-
-        /* Step 1: PIN */
-        if (window.PinVerify) {
-          PinVerify.prompt(
-            function () {
-              startLoadingAndOTP();
-            },
-            function () {},
-          );
+        /* Block transfer if account is suspended — check live status from Supabase */
+        if (window.checkSuspendedLive) {
+          window.checkSuspendedLive().then(function (isSuspended) {
+            if (isSuspended) {
+              alert(
+                "Your account has been placed on hold. Please contact our online customer support for more info or visit the closest branch.",
+              );
+              return;
+            }
+            continueSubmit();
+          });
         } else {
-          startLoadingAndOTP();
+          continueSubmit();
         }
+
+        function continueSubmit() {
+          if (!beneficiaryInput.value.trim()) {
+            alert("Please enter the beneficiary name.");
+            return;
+          }
+
+          var acc = fromAccSelect ? fromAccSelect.value : "";
+          var amtRaw = parseFloat(
+            document.querySelector(".amount-input")
+              ? document.querySelector(".amount-input").value
+              : 0,
+          );
+
+          if (!acc) {
+            alert("Please select an account to send from.");
+            return;
+          }
+          if (!amtRaw || amtRaw <= 0) {
+            alert("Please enter a valid transfer amount.");
+            return;
+          }
+          if (bankSelect && !bankSelect.value) {
+            alert("Please select a recipient bank.");
+            return;
+          }
+
+          var tax = parseFloat((amtRaw * TAX_RATE).toFixed(2));
+          var total = parseFloat((amtRaw + tax).toFixed(2));
+          var bal = calcBalance(acc);
+
+          if (total > bal) {
+            alert(
+              "\u274C Insufficient Balance\n\nTransfer:  $" +
+                fmt(amtRaw) +
+                "\nFee (2%): $" +
+                fmt(tax) +
+                "\nTotal:    $" +
+                fmt(total) +
+                "\nAvailable: $" +
+                fmt(bal),
+            );
+            return;
+          }
+
+          var bank = bankSelect
+            ? bankSelect.value === "other"
+              ? customBankInput.value
+              : bankSelect.value
+            : "";
+          var note = form.querySelector("textarea")
+            ? form.querySelector("textarea").value.trim()
+            : "";
+          var bAddr = bankAddrInput ? bankAddrInput.value.trim() : "";
+          var selOpt = fromAccSelect
+            ? fromAccSelect.options[fromAccSelect.selectedIndex]
+            : null;
+          var accLabel = selOpt ? selOpt.text : acc;
+
+          pendingTxn = {
+            amtRaw: amtRaw,
+            tax: tax,
+            total: total,
+            acc: acc,
+            accLabel: accLabel,
+            bank: bank,
+            bankAddr: bAddr,
+            note: note,
+            name: beneficiaryInput.value.trim(),
+            toAcct: accountInput.value.trim(),
+            routing: routingInput.value.trim(),
+            txnId: "TXN" + Date.now(),
+            date: new Date().toLocaleString(),
+          };
+
+          /* Step 1: PIN */
+          if (window.PinVerify) {
+            PinVerify.prompt(
+              function () {
+                startLoadingAndOTP();
+              },
+              function () {},
+            );
+          } else {
+            startLoadingAndOTP();
+          }
+        } // end continueSubmit
       });
     }
 

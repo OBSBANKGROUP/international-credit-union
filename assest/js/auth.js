@@ -253,15 +253,95 @@
   window.checkSuspended = function () {
     const session = getSession();
     if (!session) return false;
+
+    /* First check cached status for instant response */
     const users = getUsers();
     const user = users.find(function (u) {
-      return u.id === session.id;
+      return String(u.id) === String(session.id);
     });
-    if (user && user.status === "suspended") {
+    if (
+      user &&
+      (user.status === "suspended" ||
+        user.status === "hold" ||
+        user.status === "frozen")
+    ) {
       window.showSuspendedOverlay();
       return true;
     }
+
+    /* Also verify LIVE status from Supabase (in case admin just suspended) */
+    if (session.email) {
+      var SU = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+      var SK =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+      fetch(
+        SU +
+          "/rest/v1/users?email=eq." +
+          encodeURIComponent(session.email.toLowerCase().trim()) +
+          "&select=status",
+        {
+          headers: { apikey: SK, Authorization: "Bearer " + SK },
+        },
+      )
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (rows) {
+          if (rows && rows[0]) {
+            var st = (rows[0].status || "active").toLowerCase();
+            /* Update cache */
+            try {
+              var cu = getUsers();
+              var ix = cu.findIndex(function (u) {
+                return String(u.id) === String(session.id);
+              });
+              if (ix >= 0) {
+                cu[ix].status = st;
+                localStorage.setItem("icu_users", JSON.stringify(cu));
+              }
+            } catch (e) {}
+            if (st === "suspended" || st === "hold" || st === "frozen") {
+              window.showSuspendedOverlay();
+            }
+          }
+        })
+        .catch(function () {});
+    }
     return false;
+  };
+
+  /* Live async check that returns a promise — use to BLOCK transactions */
+  window.checkSuspendedLive = function () {
+    const session = getSession();
+    if (!session || !session.email) return Promise.resolve(false);
+    var SU = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+    var SK =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+    return fetch(
+      SU +
+        "/rest/v1/users?email=eq." +
+        encodeURIComponent(session.email.toLowerCase().trim()) +
+        "&select=status",
+      {
+        headers: { apikey: SK, Authorization: "Bearer " + SK },
+      },
+    )
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (rows) {
+        if (rows && rows[0]) {
+          var st = (rows[0].status || "active").toLowerCase();
+          if (st === "suspended" || st === "hold" || st === "frozen") {
+            window.showSuspendedOverlay();
+            return true;
+          }
+        }
+        return false;
+      })
+      .catch(function () {
+        return false;
+      });
   };
 
   /* ══════════════════════════════════════════════════════════════

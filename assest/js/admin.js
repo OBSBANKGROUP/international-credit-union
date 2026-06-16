@@ -1959,10 +1959,15 @@
 
   /* Suspend user */
   window._adminSuspendUser = function (id) {
-    if (!confirm("Suspend this user?")) return;
+    if (
+      !confirm(
+        "Suspend this user? They will be blocked from making transactions.",
+      )
+    )
+      return;
     var users = getUsers();
     var u = users.find(function (x) {
-      return x.id === id;
+      return String(x.id) === String(id);
     });
     if (u) {
       u.status = "suspended";
@@ -1973,6 +1978,7 @@
         "Account Suspended",
         "Admin suspended account",
       );
+      _adminSyncStatus(u.email, "suspended");
       refreshCurrentPage();
     }
   };
@@ -1981,7 +1987,7 @@
   window._adminActivateUser = function (id) {
     var users = getUsers();
     var u = users.find(function (x) {
-      return x.id === id;
+      return String(x.id) === String(id);
     });
     if (u) {
       u.status = "active";
@@ -1992,9 +1998,39 @@
         "Account Activated",
         "Admin activated account",
       );
+      _adminSyncStatus(u.email, "active");
       refreshCurrentPage();
     }
   };
+
+  /* Sync a user's status to Supabase by email so their device sees it */
+  function _adminSyncStatus(email, status) {
+    if (!email) return;
+    var SU = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+    var SK =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+    fetch(
+      SU +
+        "/rest/v1/users?email=eq." +
+        encodeURIComponent(email.toLowerCase().trim()),
+      {
+        method: "PATCH",
+        headers: {
+          apikey: SK,
+          Authorization: "Bearer " + SK,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({ status: status }),
+      },
+    )
+      .then(function () {
+        console.log("Status synced to Supabase:", email, status);
+      })
+      .catch(function (e) {
+        console.warn("Status sync failed:", e);
+      });
+  }
 
   /* Approve user (from review) */
   window._adminApproveUser = function (id) {
