@@ -2574,7 +2574,7 @@
             };
             users.push(newUser);
             saveUsers(users);
-            /* Sync new user to Supabase */
+            /* Sync new user to Supabase, THEN clone history (after user exists in DB) */
             if (window._dbCreateUser) {
               window
                 ._dbCreateUser(newUser)
@@ -2585,14 +2585,21 @@
                     saveUsers(users);
                   }
                   console.log("User saved to database:", newUser.email);
+                  /* Now that the user exists in Supabase, apply the clone */
+                  if (window._applyCloneAfterCreate)
+                    window._applyCloneAfterCreate(newUser.id);
                 })
                 .catch(function (e) {
                   console.warn("DB sync failed:", e);
+                  /* Try clone anyway in case user partially saved */
+                  if (window._applyCloneAfterCreate)
+                    window._applyCloneAfterCreate(newUser.id);
                 });
+            } else {
+              /* No DB layer — clone against whatever exists */
+              if (window._applyCloneAfterCreate)
+                window._applyCloneAfterCreate(newUser.id);
             }
-            /* If a history clone is pending, apply it now */
-            if (window._applyCloneAfterCreate)
-              window._applyCloneAfterCreate(newUser.id);
 
             addLog(
               newUser.id,
@@ -3336,6 +3343,83 @@
     var banner = document.getElementById("cloneBanner");
     if (banner) banner.remove();
 
+    /* ALWAYS fetch the source user's logs fresh from Supabase
+       (localStorage may be stale or missing on the admin device) */
+    var SURL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+    var SKEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+    var H = { apikey: SKEY, Authorization: "Bearer " + SKEY };
+
+    var users = getUsers();
+    var srcUser = users.find(function (u) {
+      return String(u.id) === String(srcId);
+    });
+    if (!srcUser || !srcUser.email) {
+      alert("Source user not found.");
+      return;
+    }
+
+    fetch(
+      SURL +
+        "/rest/v1/users?email=eq." +
+        encodeURIComponent(srcUser.email.toLowerCase().trim()) +
+        "&select=id",
+      { headers: H },
+    )
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (rows) {
+        if (!rows || !rows[0]) {
+          alert("Source user not found in the database.");
+          return;
+        }
+        var realSrcId = rows[0].id;
+        return fetch(
+          SURL + "/rest/v1/logs?user_id=eq." + realSrcId + "&select=*",
+          { headers: H },
+        );
+      })
+      .then(function (r) {
+        if (!r) return null;
+        return r.json();
+      })
+      .then(function (rows) {
+        if (!rows || rows.length === 0) {
+          alert("No transactions found on the source account to clone.");
+          return;
+        }
+        var supaLogs = rows.map(function (row) {
+          return {
+            id: row.id,
+            userId: row.user_id,
+            action: row.action,
+            details: row.details,
+            amount: row.amount,
+            txnType: row.txn_type,
+            targetAccount: row.target_account,
+            timestamp: row.timestamp,
+            status: row.status,
+            txnId: row.txn_id,
+            reason: row.reason,
+          };
+        });
+        _doClone(supaLogs, newUserId);
+      })
+      .catch(function (e) {
+        console.warn("Clone source fetch failed:", e);
+        alert("Could not fetch source transactions to clone.");
+      });
+  }
+
+  function _applyCloneAfterCreate_OLD_UNUSED(newUserId) {
+    if (!_pendingCloneSourceId) return;
+    var srcId = _pendingCloneSourceId;
+    _pendingCloneSourceId = null;
+
+    var banner = document.getElementById("cloneBanner");
+    if (banner) banner.remove();
+
     var logs = getLogs();
 
     /* Fix 1: use String() comparison so number/string IDs both match */
@@ -3438,24 +3522,40 @@
       return;
     }
 
-    fetch(
-      SURL +
-        "/rest/v1/users?email=eq." +
-        encodeURIComponent(newUser.email.toLowerCase()) +
-        "&select=id",
-      { headers: H },
-    )
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (rows) {
-        if (!rows || !rows[0]) {
+    /* Look up the new user in Supabase — retry up to 4 times in case the
+       INSERT hasn't committed yet (avoids the race that left clones empty) */
+    function findNewUserId(attempt) {
+      return fetch(
+        SURL +
+          "/rest/v1/users?email=eq." +
+          encodeURIComponent(newUser.email.toLowerCase().trim()) +
+          "&select=id",
+        { headers: H },
+      )
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (rows) {
+          if (rows && rows[0]) return rows[0].id;
+          if (attempt < 4) {
+            return new Promise(function (res) {
+              setTimeout(res, 700);
+            }).then(function () {
+              return findNewUserId(attempt + 1);
+            });
+          }
+          return null;
+        });
+    }
+
+    findNewUserId(0)
+      .then(function (realNewId) {
+        if (!realNewId) {
           alert(
-            "New user not found in Supabase — make sure the user was created successfully.",
+            "Clone failed: the new user could not be found in the database. Please try cloning again from the user's History.",
           );
           return;
         }
-        var realNewId = rows[0].id;
 
         /* Build cloned rows for Supabase */
         var clonedRows = srcLogs.map(function (l) {
@@ -3479,29 +3579,29 @@
           method: "POST",
           headers: H,
           body: JSON.stringify(clonedRows),
-        });
-      })
-      .then(function (r) {
-        if (r && !r.ok)
-          return r.text().then(function (t) {
-            console.warn("Clone insert error:", t);
+        }).then(function (r) {
+          if (r && !r.ok)
+            return r.text().then(function (t) {
+              console.warn("Clone insert error:", t);
+              alert("Clone failed while saving transactions. Check console.");
+            });
+          /* Also save to localStorage with the real id */
+          var localLogs = getLogs();
+          srcLogs.forEach(function (l) {
+            var newLog = JSON.parse(JSON.stringify(l));
+            newLog.id = Date.now() + Math.floor(Math.random() * 10000);
+            newLog.userId = realNewId;
+            newLog.userName = newName;
+            localLogs.push(newLog);
           });
-        /* Also save to localStorage */
-        var localLogs = getLogs();
-        srcLogs.forEach(function (l) {
-          var newLog = JSON.parse(JSON.stringify(l));
-          newLog.id = Date.now() + Math.floor(Math.random() * 10000);
-          newLog.userId = newUserId;
-          newLog.userName = newName;
-          localLogs.push(newLog);
+          saveLogs(localLogs);
+          alert(
+            "Transaction history cloned successfully! (" +
+              srcLogs.length +
+              " transactions copied to the new account)",
+          );
+          refreshCurrentPage();
         });
-        saveLogs(localLogs);
-        alert(
-          "Transaction history cloned successfully! (" +
-            srcLogs.length +
-            " transactions copied to new account)",
-        );
-        refreshCurrentPage();
       })
       .catch(function (e) {
         console.warn("Clone failed:", e);
