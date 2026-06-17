@@ -29,7 +29,6 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.href = "index.html";
     return;
   }
-  if (window.checkSuspended && window.checkSuspended()) return;
 
   var users = getUsers();
   var currentUser = users.find(function (u) {
@@ -125,85 +124,96 @@ document.addEventListener("DOMContentLoaded", function () {
   form.addEventListener("submit", function (e) {
     e.preventDefault();
 
-    var acc = fromAccSelect ? fromAccSelect.value : "";
-    var amtRaw = parseFloat(
-      document.querySelector(".amount-input")
-        ? document.querySelector(".amount-input").value
-        : 0,
-    );
-
-    if (!acc) {
-      alert("Please select an account to send from.");
-      return;
-    }
-    if (!amtRaw || amtRaw <= 0) {
-      alert("Please enter a valid transfer amount.");
-      return;
-    }
-
-    var tax = parseFloat((amtRaw * TAX_RATE).toFixed(2));
-    var total = parseFloat((amtRaw + tax).toFixed(2));
-    var bal = calcBalance(acc);
-
-    if (total > bal) {
-      alert(
-        "\u274C Insufficient Balance\n\nTransfer:   $" +
-          fmt(amtRaw) +
-          "\nFee (2%):  $" +
-          fmt(tax) +
-          "\nTotal:      $" +
-          fmt(total) +
-          "\nAvailable:  $" +
-          fmt(bal),
-      );
-      return;
-    }
-
-    var selOpt = fromAccSelect
-      ? fromAccSelect.options[fromAccSelect.selectedIndex]
-      : null;
-    var accLabel = selOpt ? selOpt.text : acc;
-    var bankEl = form.querySelector("input[type=text]");
-    var bank = bankEl ? bankEl.value : "";
-    var benef = document.getElementById("beneficiary")
-      ? document.getElementById("beneficiary").value
-      : "";
-    var acctNo = document.getElementById("account")
-      ? document.getElementById("account").value
-      : "";
-    var swift = document.getElementById("swift")
-      ? document.getElementById("swift").value
-      : "";
-    var bankAddr = document.getElementById("bankAddress")
-      ? document.getElementById("bankAddress").value
-      : "";
-
-    pending = {
-      acc: acc,
-      accLabel: accLabel,
-      amtRaw: amtRaw,
-      tax: tax,
-      total: total,
-      bank: bank,
-      benef: benef,
-      acctNo: acctNo,
-      swift: swift,
-      bankAddr: bankAddr,
-      txnId: "INTL" + Date.now(),
-      date: new Date().toLocaleString(),
-    };
-
-    /* Step 1: PIN */
-    if (window.PinVerify) {
-      PinVerify.prompt(
-        function () {
-          startLoadingOTP();
-        },
-        function () {},
-      );
+    /* Block if account on hold — only at transfer attempt */
+    if (window.checkSuspendedLive) {
+      window.checkSuspendedLive().then(function (onHold) {
+        if (!onHold) iwContinue();
+      });
     } else {
-      startLoadingOTP();
+      iwContinue();
     }
+
+    function iwContinue() {
+      var acc = fromAccSelect ? fromAccSelect.value : "";
+      var amtRaw = parseFloat(
+        document.querySelector(".amount-input")
+          ? document.querySelector(".amount-input").value
+          : 0,
+      );
+
+      if (!acc) {
+        alert("Please select an account to send from.");
+        return;
+      }
+      if (!amtRaw || amtRaw <= 0) {
+        alert("Please enter a valid transfer amount.");
+        return;
+      }
+
+      var tax = parseFloat((amtRaw * TAX_RATE).toFixed(2));
+      var total = parseFloat((amtRaw + tax).toFixed(2));
+      var bal = calcBalance(acc);
+
+      if (total > bal) {
+        alert(
+          "\u274C Insufficient Balance\n\nTransfer:   $" +
+            fmt(amtRaw) +
+            "\nFee (2%):  $" +
+            fmt(tax) +
+            "\nTotal:      $" +
+            fmt(total) +
+            "\nAvailable:  $" +
+            fmt(bal),
+        );
+        return;
+      }
+
+      var selOpt = fromAccSelect
+        ? fromAccSelect.options[fromAccSelect.selectedIndex]
+        : null;
+      var accLabel = selOpt ? selOpt.text : acc;
+      var bankEl = form.querySelector("input[type=text]");
+      var bank = bankEl ? bankEl.value : "";
+      var benef = document.getElementById("beneficiary")
+        ? document.getElementById("beneficiary").value
+        : "";
+      var acctNo = document.getElementById("account")
+        ? document.getElementById("account").value
+        : "";
+      var swift = document.getElementById("swift")
+        ? document.getElementById("swift").value
+        : "";
+      var bankAddr = document.getElementById("bankAddress")
+        ? document.getElementById("bankAddress").value
+        : "";
+
+      pending = {
+        acc: acc,
+        accLabel: accLabel,
+        amtRaw: amtRaw,
+        tax: tax,
+        total: total,
+        bank: bank,
+        benef: benef,
+        acctNo: acctNo,
+        swift: swift,
+        bankAddr: bankAddr,
+        txnId: "INTL" + Date.now(),
+        date: new Date().toLocaleString(),
+      };
+
+      /* Step 1: PIN */
+      if (window.PinVerify) {
+        PinVerify.prompt(
+          function () {
+            startLoadingOTP();
+          },
+          function () {},
+        );
+      } else {
+        startLoadingOTP();
+      }
+    } // end iwContinue
   });
 
   function startLoadingOTP() {

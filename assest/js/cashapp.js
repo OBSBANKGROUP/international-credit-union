@@ -31,7 +31,6 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.href = "index.html";
     return;
   }
-  if (window.checkSuspended && window.checkSuspended()) return;
   var users = getUsers();
   var user = users.find(function (u) {
     return String(u.id) === String(session.id);
@@ -110,6 +109,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* ── Review button ── */
   document.getElementById("reviewBtn").addEventListener("click", function () {
+    /* Block if account on hold — only checked at transfer attempt */
+    if (window.checkSuspendedLive) {
+      window.checkSuspendedLive().then(function (onHold) {
+        if (!onHold) cashappReview();
+      });
+    } else {
+      cashappReview();
+    }
+  });
+
+  function cashappReview() {
     var tag = document.getElementById("cashtag").value.trim();
     var amtRaw = parseFloat(document.getElementById("amount").value);
     var acc = fromSelect ? fromSelect.value : user.accountType || "checking";
@@ -189,7 +199,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       showConfirmModal();
     }
-  });
+  } // end cashappReview
 
   function showConfirmModal() {
     document.getElementById("cfTo").textContent =

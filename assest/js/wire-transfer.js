@@ -1,5 +1,5 @@
 console.log(
-  "%c✅ WIRE v6 LOADED — name lookup fixed",
+  "%c✅ WIRE v11 LOADED — hold check active",
   "color:#00c896;font-weight:bold",
 );
 document.addEventListener("DOMContentLoaded", function () {
@@ -31,13 +31,64 @@ document.addEventListener("DOMContentLoaded", function () {
   /* Page-level users list — accessible to ALL functions (fixes "Can't find variable: users") */
   var users = getUsers();
 
+  /* ── Self-contained suspension overlay (no dependency on auth.js) ── */
+  function showHoldOverlay() {
+    if (document.getElementById("holdOverlay")) return;
+    var o = document.createElement("div");
+    o.id = "holdOverlay";
+    o.style.cssText =
+      "position:fixed;inset:0;background:rgba(10,15,30,.93);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);font-family:Inter,sans-serif";
+    o.innerHTML =
+      '<div style="background:#fff;border-radius:24px;padding:44px 32px;max-width:420px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.4)">' +
+      '<div style="width:78px;height:78px;background:#ffebee;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:2.3rem">&#128683;</div>' +
+      '<div style="color:#b71c1c;font-size:1.3rem;font-weight:800;margin-bottom:10px">Account On Hold</div>' +
+      '<div style="width:48px;height:3px;background:#e53935;border-radius:2px;margin:0 auto 18px"></div>' +
+      '<p style="color:#555;font-size:.92rem;line-height:1.7;margin-bottom:24px">Your account has been placed on hold. Please contact our customer service for more info or support.</p>' +
+      '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:18px">' +
+      '<a href="Contact.html" style="padding:12px 24px;background:#c62828;color:#fff;border-radius:24px;text-decoration:none;font-size:.86rem;font-weight:700">Contact Support</a>' +
+      '<a href="dashboard.html" style="padding:12px 24px;background:#f0f2f5;color:#333;border-radius:24px;text-decoration:none;font-size:.86rem;font-weight:700">Back to Home</a>' +
+      "</div>" +
+      "</div>";
+    document.body.appendChild(o);
+  }
+
+  /* ── Self-contained live suspension check (returns a promise) ── */
+  function isOnHoldLive() {
+    var s = getSession();
+    if (!s || !s.email) return Promise.resolve(false);
+    var SU = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+    var SK =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
+    return fetch(
+      SU +
+        "/rest/v1/users?email=eq." +
+        encodeURIComponent(s.email.toLowerCase().trim()) +
+        "&select=status",
+      {
+        headers: { apikey: SK, Authorization: "Bearer " + SK },
+      },
+    )
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (rows) {
+        if (rows && rows[0]) {
+          var st = (rows[0].status || "active").toLowerCase();
+          return st === "suspended" || st === "hold" || st === "frozen";
+        }
+        return false;
+      })
+      .catch(function () {
+        return false;
+      });
+  }
+
   /* ── Session guard ── */
   var session = getSession();
   if (!session) {
     window.location.href = "index.html";
     return;
   }
-  if (window.checkSuspended && window.checkSuspended()) return;
 
   /* Always fetch fresh from Supabase so cloned/updated data is correct */
   var SURL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
@@ -81,16 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
       };
       if (row.data) Object.assign(currentUser, row.data);
 
-      /* SUSPENSION CHECK — use the fresh status straight from Supabase */
-      var liveStatus = (currentUser.status || "active").toLowerCase();
-      if (
-        liveStatus === "suspended" ||
-        liveStatus === "hold" ||
-        liveStatus === "frozen"
-      ) {
-        if (window.showSuspendedOverlay) window.showSuspendedOverlay();
-        return; /* stop — do not init the transfer page */
-      }
+      /* Note: suspension is checked at transfer SUBMIT, not on page load */
 
       /* Also fetch logs from Supabase so balance is correct */
       fetch(
@@ -459,20 +501,14 @@ document.addEventListener("DOMContentLoaded", function () {
       form.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        /* Block transfer if account is suspended — check live status from Supabase */
-        if (window.checkSuspendedLive) {
-          window.checkSuspendedLive().then(function (isSuspended) {
-            if (isSuspended) {
-              alert(
-                "Your account has been placed on hold. Please contact our online customer support for more info or visit the closest branch.",
-              );
-              return;
-            }
-            continueSubmit();
-          });
-        } else {
+        /* Block transfer if account is on hold — live check from Supabase */
+        isOnHoldLive().then(function (onHold) {
+          if (onHold) {
+            showHoldOverlay();
+            return;
+          }
           continueSubmit();
-        }
+        });
 
         function continueSubmit() {
           if (!beneficiaryInput.value.trim()) {

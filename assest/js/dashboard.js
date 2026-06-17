@@ -30,7 +30,6 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.href = "index.html";
     return;
   }
-  if (window.checkSuspended && window.checkSuspended()) return;
 
   /* ── Show loading spinner ── */
   var spinner = document.createElement("div");
