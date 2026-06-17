@@ -1969,18 +1969,30 @@
     var u = users.find(function (x) {
       return String(x.id) === String(id);
     });
-    if (u) {
-      u.status = "suspended";
-      saveUsers(users);
-      addLog(
-        id,
-        u.firstName + " " + u.lastName,
-        "Account Suspended",
-        "Admin suspended account",
-      );
-      _adminSyncStatus(u.email, "suspended");
-      refreshCurrentPage();
+    if (!u) {
+      alert("User not found.");
+      return;
     }
+    u.status = "suspended";
+    saveUsers(users);
+    addLog(
+      id,
+      u.firstName + " " + u.lastName,
+      "Account Suspended",
+      "Admin suspended account",
+    );
+    _adminSyncStatus(u.email, "suspended", function (ok) {
+      if (ok)
+        alert(
+          u.firstName +
+            "'s account has been suspended. They can no longer make transfers.",
+        );
+      else
+        alert(
+          "Saved locally, but failed to sync to the server. Please try again.",
+        );
+      refreshCurrentPage();
+    });
   };
 
   /* Activate user */
@@ -1989,23 +2001,31 @@
     var u = users.find(function (x) {
       return String(x.id) === String(id);
     });
-    if (u) {
-      u.status = "active";
-      saveUsers(users);
-      addLog(
-        id,
-        u.firstName + " " + u.lastName,
-        "Account Activated",
-        "Admin activated account",
-      );
-      _adminSyncStatus(u.email, "active");
-      refreshCurrentPage();
+    if (!u) {
+      alert("User not found.");
+      return;
     }
+    u.status = "active";
+    saveUsers(users);
+    addLog(
+      id,
+      u.firstName + " " + u.lastName,
+      "Account Activated",
+      "Admin activated account",
+    );
+    _adminSyncStatus(u.email, "active", function (ok) {
+      if (ok) alert(u.firstName + "'s account has been reactivated.");
+      refreshCurrentPage();
+    });
   };
 
-  /* Sync a user's status to Supabase by email so their device sees it */
-  function _adminSyncStatus(email, status) {
-    if (!email) return;
+  /* Sync a user's status to Supabase by email — calls back with success boolean */
+  function _adminSyncStatus(email, status, cb) {
+    cb = cb || function () {};
+    if (!email) {
+      cb(false);
+      return;
+    }
     var SU = "https://fyuuzoldfzcybgwlbofp.supabase.co";
     var SK =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
@@ -2019,16 +2039,35 @@
           apikey: SK,
           Authorization: "Bearer " + SK,
           "Content-Type": "application/json",
-          Prefer: "return=minimal",
+          Prefer: "return=representation",
         },
         body: JSON.stringify({ status: status }),
       },
     )
-      .then(function () {
-        console.log("Status synced to Supabase:", email, status);
+      .then(function (r) {
+        return r.json().then(function (body) {
+          var ok =
+            r.ok &&
+            Array.isArray(body) &&
+            body.length > 0 &&
+            body[0].status === status;
+          console.log(
+            "Status sync result:",
+            email,
+            "->",
+            status,
+            "| HTTP",
+            r.status,
+            "| confirmed:",
+            ok,
+            body,
+          );
+          cb(ok);
+        });
       })
       .catch(function (e) {
         console.warn("Status sync failed:", e);
+        cb(false);
       });
   }
 
