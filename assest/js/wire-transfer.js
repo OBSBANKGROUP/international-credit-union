@@ -81,6 +81,17 @@ document.addEventListener("DOMContentLoaded", function () {
       };
       if (row.data) Object.assign(currentUser, row.data);
 
+      /* SUSPENSION CHECK — use the fresh status straight from Supabase */
+      var liveStatus = (currentUser.status || "active").toLowerCase();
+      if (
+        liveStatus === "suspended" ||
+        liveStatus === "hold" ||
+        liveStatus === "frozen"
+      ) {
+        if (window.showSuspendedOverlay) window.showSuspendedOverlay();
+        return; /* stop — do not init the transfer page */
+      }
+
       /* Also fetch logs from Supabase so balance is correct */
       fetch(
         SURL +

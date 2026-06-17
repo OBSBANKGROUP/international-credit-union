@@ -239,6 +239,13 @@ document.addEventListener("DOMContentLoaded", function () {
       bizMemberEl.textContent =
         primaryBizName + " \u2014 " + user.firstName + " " + user.lastName;
 
+    // Business ATM card name = the actual business name (uppercase)
+    var bizCardNameEl = document.getElementById("bizCardName");
+    if (bizCardNameEl)
+      bizCardNameEl.textContent = (
+        primaryBizName || user.firstName + " " + user.lastName
+      ).toUpperCase();
+
     /* ── If user has multiple business accounts, show a selector ── */
     if (bizKeys.length > 1) {
       var heroText = document.getElementById("bizMember");
