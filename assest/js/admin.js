@@ -2574,6 +2574,7 @@
             };
             users.push(newUser);
             saveUsers(users);
+
             /* Sync new user to Supabase, THEN clone history (after user exists in DB) */
             if (window._dbCreateUser) {
               window
@@ -3516,39 +3517,50 @@
       Prefer: "return=minimal",
     };
 
-    /* Find new user's real Supabase ID by email */
-    if (!newUser || !newUser.email) {
+    if (!newUser) {
       alert("New user not found.");
       return;
     }
 
-    /* Look up the new user in Supabase — retry up to 4 times in case the
-       INSERT hasn't committed yet (avoids the race that left clones empty) */
-    function findNewUserId(attempt) {
-      return fetch(
-        SURL +
-          "/rest/v1/users?email=eq." +
-          encodeURIComponent(newUser.email.toLowerCase().trim()) +
-          "&select=id",
-        { headers: H },
-      )
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (rows) {
-          if (rows && rows[0]) return rows[0].id;
-          if (attempt < 4) {
-            return new Promise(function (res) {
-              setTimeout(res, 700);
-            }).then(function () {
-              return findNewUserId(attempt + 1);
-            });
-          }
-          return null;
-        });
+    /* Use the newUserId directly — it is already the real Supabase UUID
+       passed from _dbCreateUser via the Add User submit handler.
+       Only fall back to email lookup if the ID looks like a local numeric ID. */
+    function resolveRealId() {
+      /* Supabase UUIDs contain dashes; local IDs are numeric */
+      var idStr = String(newUserId);
+      if (idStr.indexOf("-") !== -1) {
+        /* Already a UUID — use directly */
+        return Promise.resolve(newUserId);
+      }
+      /* Fallback: look up by email with retries */
+      if (!newUser.email) {
+        return Promise.resolve(newUserId);
+      }
+      function findByEmail(attempt) {
+        return fetch(
+          SURL +
+            "/rest/v1/users?email=eq." +
+            encodeURIComponent(newUser.email.toLowerCase().trim()) +
+            "&select=id",
+          { headers: H },
+        )
+          .then(function (r) { return r.json(); })
+          .then(function (rows) {
+            if (rows && rows[0]) return rows[0].id;
+            if (attempt < 5) {
+              return new Promise(function (res) {
+                setTimeout(res, 1200);
+              }).then(function () {
+                return findByEmail(attempt + 1);
+              });
+            }
+            return null;
+          });
+      }
+      return findByEmail(0);
     }
 
-    findNewUserId(0)
+    resolveRealId()
       .then(function (realNewId) {
         if (!realNewId) {
           alert(
@@ -3560,7 +3572,7 @@
         /* Build cloned rows for Supabase */
         var clonedRows = srcLogs.map(function (l) {
           return {
-            user_id: realNewId /* real Supabase ID */,
+            user_id: realNewId /* real Supabase UUID */,
             user_name: newName,
             action: l.action || "",
             details: l.details || "",
@@ -3585,13 +3597,14 @@
               console.warn("Clone insert error:", t);
               alert("Clone failed while saving transactions. Check console.");
             });
-          /* Also save to localStorage with the real id */
+          /* Also save to localStorage with the real Supabase id */
           var localLogs = getLogs();
           srcLogs.forEach(function (l) {
             var newLog = JSON.parse(JSON.stringify(l));
             newLog.id = Date.now() + Math.floor(Math.random() * 10000);
             newLog.userId = realNewId;
             newLog.userName = newName;
+            newLog.targetAccount = l.targetAccount || l.target_account || null;
             localLogs.push(newLog);
           });
           saveLogs(localLogs);
