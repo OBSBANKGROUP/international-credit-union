@@ -691,8 +691,28 @@
     // OTP Verify button
     document.addEventListener("click", function (e) {
       if (e.target.id === "loginOtpVerifyBtn") {
-        const entered = document.getElementById("loginOtpInput").value.trim();
         const errEl = document.getElementById("loginOtpErr");
+
+        // Defensive guard: if the pending user got cleared (e.g. Cancel was
+        // clicked earlier, or this modal is somehow stale), fail loudly
+        // instead of throwing on pendingLoginUser.id below — an uncaught
+        // error here would silently abort right after the OTP overlay
+        // closes, which looks exactly like "I entered the code and
+        // nothing happened."
+        if (!pendingLoginUser) {
+          errEl.textContent =
+            "Your session expired. Please enter your email and password again.";
+          document.getElementById("loginOtpOverlay").classList.remove("open");
+          return;
+        }
+
+        // Strip invisible/non-ASCII characters mobile keyboards can inject —
+        // the same cleanup already applied to the email/password fields,
+        // which this OTP field was missing.
+        const entered = document
+          .getElementById("loginOtpInput")
+          .value.replace(/[^\x20-\x7E]/g, "")
+          .trim();
 
         if (!entered || entered.length < 6) {
           errEl.textContent = "Please enter the 6-digit code.";

@@ -148,11 +148,43 @@
     });
   };
 
-  /* Create user — returns new user with id */
+  /* Create user — returns new user with id.
+     IMPORTANT: this checks the real HTTP status and REJECTS the
+     promise with the actual Supabase error if the insert failed
+     (e.g. duplicate email, constraint violation, RLS denial).
+     Previously this silently resolved to null on failure, which
+     made admin.js report "User saved to database" even when the
+     row was never created — causing new users to work on the
+     admin's own device (via local cache) but fail to log in
+     anywhere else, with no visible error. */
   window._dbCreateUser = function (user) {
     var row = userToRow(user);
-    return post("users", row).then(function (rows) {
-      return rows && rows[0] ? rowToUser(rows[0]) : null;
+    return fetch(SUPABASE_URL + "/rest/v1/users", {
+      method: "POST",
+      headers: HEADERS,
+      body: JSON.stringify(row),
+    }).then(function (r) {
+      return r.text().then(function (text) {
+        var data = null;
+        try {
+          data = text ? JSON.parse(text) : null;
+        } catch (e) {
+          data = text;
+        }
+        if (!r.ok) {
+          var msg =
+            data && data.message
+              ? data.message
+              : typeof data === "string"
+                ? data
+                : "HTTP " + r.status;
+          var err = new Error("Supabase create user failed: " + msg);
+          err.status = r.status;
+          err.body = data;
+          throw err;
+        }
+        return Array.isArray(data) && data[0] ? rowToUser(data[0]) : null;
+      });
     });
   };
 

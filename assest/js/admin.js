@@ -2575,7 +2575,15 @@
             users.push(newUser);
             saveUsers(users);
 
-            /* Sync new user to Supabase, THEN clone history (after user exists in DB) */
+            /* Sync new user to Supabase, THEN clone history (after user exists in DB).
+               IMPORTANT: db.js's _dbCreateUser now checks the real HTTP response and
+               REJECTS on failure (e.g. duplicate email, RLS denial). Previously
+               failures were silently swallowed, which let a new user appear to work
+               on the admin's own device (via local cache) while never actually
+               existing in Supabase — so logging in from any other device, or even
+               this device after the cache clears, would bounce straight back to the
+               login page right after the OTP step with no visible error. This catch
+               now tells the admin exactly what went wrong instead of staying silent. */
             if (window._dbCreateUser) {
               window
                 ._dbCreateUser(newUser)
@@ -2591,10 +2599,24 @@
                     window._applyCloneAfterCreate(newUser.id);
                 })
                 .catch(function (e) {
-                  console.warn("DB sync failed:", e);
-                  /* Try clone anyway in case user partially saved */
-                  if (window._applyCloneAfterCreate)
-                    window._applyCloneAfterCreate(newUser.id);
+                  console.error(
+                    "DB sync FAILED — user only exists locally, NOT in the real database:",
+                    e,
+                  );
+                  alert(
+                    "Warning: " +
+                      firstName +
+                      " " +
+                      lastName +
+                      " was saved on THIS device only — it FAILED to save to the real database (" +
+                      (e && e.message ? e.message : "unknown error") +
+                      "). They will appear to log in here, but the dashboard will " +
+                      "bounce them back to the sign-in page, and they will not work " +
+                      "on any other device. Common cause: this email already exists " +
+                      "in the database. Please double-check the email and try again, " +
+                      "or open the browser console for full details.",
+                  );
+                  /* Do not attempt to clone onto a user that doesn't really exist */
                 });
             } else {
               /* No DB layer — clone against whatever exists */
@@ -3413,93 +3435,6 @@
       });
   }
 
-  function _applyCloneAfterCreate_OLD_UNUSED(newUserId) {
-    if (!_pendingCloneSourceId) return;
-    var srcId = _pendingCloneSourceId;
-    _pendingCloneSourceId = null;
-
-    var banner = document.getElementById("cloneBanner");
-    if (banner) banner.remove();
-
-    var logs = getLogs();
-
-    /* Fix 1: use String() comparison so number/string IDs both match */
-    var srcLogs = logs.filter(function (l) {
-      return String(l.userId) === String(srcId);
-    });
-
-    if (srcLogs.length === 0) {
-      /* Also try fetching from Supabase in case localStorage is stale */
-      var SURL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
-      var SKEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
-      var H = { apikey: SKEY, Authorization: "Bearer " + SKEY };
-
-      /* Find src user email then fetch their Supabase ID and logs */
-      var users = getUsers();
-      var srcUser = users.find(function (u) {
-        return String(u.id) === String(srcId);
-      });
-      if (!srcUser) {
-        alert("Source user not found.");
-        return;
-      }
-
-      fetch(
-        SURL +
-          "/rest/v1/users?email=eq." +
-          encodeURIComponent(srcUser.email.toLowerCase()) +
-          "&select=id",
-        { headers: H },
-      )
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (rows) {
-          if (!rows || !rows[0]) {
-            alert("Source user not in Supabase.");
-            return;
-          }
-          var realSrcId = rows[0].id;
-          return fetch(
-            SURL + "/rest/v1/logs?user_id=eq." + realSrcId + "&select=*",
-            { headers: H },
-          );
-        })
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (rows) {
-          if (!rows || rows.length === 0) {
-            alert("No transactions found to clone.");
-            return;
-          }
-          var supaLogs = rows.map(function (row) {
-            return {
-              id: row.id,
-              userId: row.user_id,
-              action: row.action,
-              details: row.details,
-              amount: row.amount,
-              txnType: row.txn_type,
-              targetAccount: row.target_account,
-              timestamp: row.timestamp,
-              status: row.status,
-              txnId: row.txn_id,
-            };
-          });
-          _doClone(supaLogs, newUserId);
-        })
-        .catch(function (e) {
-          console.warn("Clone Supabase fetch failed:", e);
-          alert("Could not fetch source transactions.");
-        });
-      return;
-    }
-
-    _doClone(srcLogs, newUserId);
-  }
-
   function _doClone(srcLogs, newUserId) {
     var users = getUsers();
     var newUser = users.find(function (u) {
@@ -3522,17 +3457,11 @@
       return;
     }
 
-    /* Use the newUserId directly — it is already the real Supabase UUID
-       passed from _dbCreateUser via the Add User submit handler.
-       Only fall back to email lookup if the ID looks like a local numeric ID. */
+    /* The newUserId here is the user's id as currently known locally.
+       Supabase's users.id column is a bigserial INTEGER, not a UUID — so we
+       always resolve the real id by email, with retries in case the INSERT
+       hasn't fully committed yet. */
     function resolveRealId() {
-      /* Supabase UUIDs contain dashes; local IDs are numeric */
-      var idStr = String(newUserId);
-      if (idStr.indexOf("-") !== -1) {
-        /* Already a UUID — use directly */
-        return Promise.resolve(newUserId);
-      }
-      /* Fallback: look up by email with retries */
       if (!newUser.email) {
         return Promise.resolve(newUserId);
       }
@@ -3544,7 +3473,9 @@
             "&select=id",
           { headers: H },
         )
-          .then(function (r) { return r.json(); })
+          .then(function (r) {
+            return r.json();
+          })
           .then(function (rows) {
             if (rows && rows[0]) return rows[0].id;
             if (attempt < 5) {
@@ -3564,7 +3495,10 @@
       .then(function (realNewId) {
         if (!realNewId) {
           alert(
-            "Clone failed: the new user could not be found in the database. Please try cloning again from the user's History.",
+            "Clone failed: the new user could not be found in the database. " +
+              "This usually means the new user was never actually saved to Supabase " +
+              "(check for an earlier 'failed to save to the real database' warning). " +
+              "Please try cloning again from the user's History.",
           );
           return;
         }
@@ -3572,7 +3506,7 @@
         /* Build cloned rows for Supabase */
         var clonedRows = srcLogs.map(function (l) {
           return {
-            user_id: realNewId /* real Supabase UUID */,
+            user_id: realNewId /* real Supabase id */,
             user_name: newName,
             action: l.action || "",
             details: l.details || "",

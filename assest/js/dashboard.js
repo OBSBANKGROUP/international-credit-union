@@ -1,5 +1,5 @@
 console.log(
-  "%c✅ DASHBOARD v4 LOADED — balance fix active",
+  "%c✅ DASHBOARD v5 LOADED — login-failure diagnostics added",
   "color:#00c896;font-weight:bold;font-size:14px",
 );
 document.addEventListener("DOMContentLoaded", function () {
@@ -55,14 +55,36 @@ document.addEventListener("DOMContentLoaded", function () {
         encodeURIComponent(email.toLowerCase().trim()) +
         "&select=*",
       { headers: HEADERS },
-    )
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (rows) {
-        if (!rows || !rows[0]) throw new Error("User not found in database");
+    ).then(function (r) {
+      return r.text().then(function (text) {
+        var rows = [];
+        try {
+          rows = text ? JSON.parse(text) : [];
+        } catch (e) {}
+        if (!r.ok) {
+          /* Diagnostic: log the real Supabase error so a future
+             "bounced back to login" report is instantly explainable
+             instead of a silent failure. */
+          console.error(
+            "fetchUser: Supabase returned HTTP",
+            r.status,
+            "for email",
+            email,
+            "—",
+            text,
+          );
+        }
+        if (!rows || !rows[0]) {
+          console.error(
+            "fetchUser: no user found in Supabase for email:",
+            email,
+            "(this user may only exist locally — see admin.js create-user warnings)",
+          );
+          throw new Error("User not found in database");
+        }
         return rows[0];
       });
+    });
   }
 
   /* ── Fetch logs for this user from Supabase ── */
