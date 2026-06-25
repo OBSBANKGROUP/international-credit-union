@@ -209,16 +209,28 @@
         return false;
       }
 
-      /* Verify the session user actually exists */
+      /* Verify the session user actually exists.
+         IMPORTANT: this must use String() comparison, not strict ===,
+         because session.id can be a number while cached user ids are
+         sometimes strings (or vice versa) — a type mismatch here would
+         wipe a perfectly valid session. It also must tolerate the
+         cache being empty/stale (e.g. right after a brand-new user's
+         first login, before db.js has finished refreshing icu_users)
+         rather than treating "not found yet" as "doesn't exist". */
       var users = JSON.parse(localStorage.getItem("icu_users") || "[]");
-      var user = users.find(function (u) {
-        return u.id === session.id;
-      });
-      if (!user) {
-        console.warn("ICU: Session integrity check failed — user not found.");
-        localStorage.removeItem("icu_session");
-        return false;
+      if (users.length > 0) {
+        var user = users.find(function (u) {
+          return String(u.id) === String(session.id);
+        });
+        if (!user) {
+          console.warn("ICU: Session integrity check failed — user not found.");
+          localStorage.removeItem("icu_session");
+          return false;
+        }
       }
+      /* If the cache is empty, skip this check rather than failing closed —
+         dashboard.js will do its own authoritative Supabase lookup by email
+         right after this and redirect properly if the user truly doesn't exist. */
 
       return true;
     } catch (e) {
