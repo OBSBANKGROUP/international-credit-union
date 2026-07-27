@@ -12,14 +12,17 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="assest/css/admin.css?v=10" />
-    <script src="assest/js/theme.js"></script>
+    <link rel="stylesheet" href="assets/css/admin.css?v=11" />
+    <script src="assets/js/theme.js"></script>
   </head>
   <body>
     <!-- ============ SIDEBAR ============ -->
+    <!-- Mobile sidebar overlay backdrop -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
-        <img src="assest/images/logo.jpeg" alt="ICU" class="sidebar-logo" />
+        <img src="assets/images/logo.jpeg" alt="ICU" class="sidebar-logo" />
         <span class="sidebar-brand">ICU Admin</span>
         <button class="sidebar-toggle" id="sidebarToggle">
           <span class="material-icons-outlined">menu</span>
@@ -73,6 +76,10 @@
     <div class="main-wrap">
       <!-- TOP BAR -->
       <header class="topbar">
+        <!-- Mobile hamburger — hidden on desktop via CSS -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" style="display:none" aria-label="Open menu">
+          <span class="material-icons-outlined">menu</span>
+        </button>
         <div class="search-wrap">
           <span class="material-icons-outlined">search</span>
           <input type="text" placeholder="Search" id="globalSearch" />
@@ -93,7 +100,7 @@
             <span class="material-icons-outlined">settings</span>
           </button>
           <div class="admin-avatar">
-            <img src="assest/images/profile.png" alt="Admin" />
+            <img src="assets/images/profile.png" alt="Admin" />
           </div>
         </div>
       </header>
@@ -1240,9 +1247,114 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script src="assest/js/db.js?v=6"></script>
-    <script src="assest/js/icu-data.js?v=4"></script>
-    <script src="assest/js/emailjs-config.js"></script>
-    <script src="assest/js/admin.js?v=15"></script>
+    <script src="assets/js/db.js?v=6"></script>
+    <script src="assets/js/icu-data.js?v=4"></script>
+    <script src="assets/js/emailjs-config.js"></script>
+    <script src="assets/js/admin.js?v=15"></script>
+    <!-- Mobile bottom navigation bar — hidden on desktop via CSS -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav" style="display:none">
+      <a href="#" data-page="dashboard" class="active">
+        <span class="material-icons-outlined">dashboard</span>
+        <span class="label">Home</span>
+      </a>
+      <a href="#" data-page="manage">
+        <span class="material-icons-outlined">manage_accounts</span>
+        <span class="label">Users</span>
+      </a>
+      <a href="#" data-page="accounts">
+        <span class="material-icons-outlined">account_balance</span>
+        <span class="label">Accounts</span>
+      </a>
+      <a href="#" data-page="transactions">
+        <span class="material-icons-outlined">receipt_long</span>
+        <span class="label">Txns</span>
+      </a>
+      <a href="#" data-page="review">
+        <span class="material-icons-outlined">rate_review</span>
+        <span class="label">Review</span>
+      </a>
+      <a href="#" data-page="settings">
+        <span class="material-icons-outlined">settings</span>
+        <span class="label">Settings</span>
+      </a>
+    </nav>
+
+    <!-- Mobile sidebar + bottom nav behaviour (pure UI wiring, no data changes) -->
+    <script>
+    (function() {
+      var isMobile = window.matchMedia('(max-width: 600px)');
+
+      var sidebar      = document.getElementById('sidebar');
+      var overlay      = document.getElementById('sidebarOverlay');
+      var mobileBtn    = document.getElementById('mobileMenuBtn');
+      var bottomNav    = document.getElementById('mobileBottomNav');
+
+      function applyMobile(m) {
+        if (m.matches) {
+          if (mobileBtn)  mobileBtn.style.display  = 'flex';
+          if (bottomNav)  bottomNav.style.display   = 'flex';
+        } else {
+          if (mobileBtn)  mobileBtn.style.display  = 'none';
+          if (bottomNav)  bottomNav.style.display   = 'none';
+          // restore sidebar on desktop
+          if (sidebar) {
+            sidebar.classList.remove('mobile-open');
+            if (overlay) overlay.classList.remove('open');
+          }
+        }
+      }
+      applyMobile(isMobile);
+      isMobile.addEventListener('change', applyMobile);
+
+      function openSidebar() {
+        if (sidebar)  sidebar.classList.add('mobile-open');
+        if (overlay)  overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeSidebar() {
+        if (sidebar)  sidebar.classList.remove('mobile-open');
+        if (overlay)  overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      if (mobileBtn) mobileBtn.addEventListener('click', openSidebar);
+      if (overlay)   overlay.addEventListener('click', closeSidebar);
+
+      // Close sidebar when a nav link is tapped on mobile
+      document.querySelectorAll('.nav-link[data-page]').forEach(function(link) {
+        link.addEventListener('click', function() {
+          if (isMobile.matches) closeSidebar();
+        });
+      });
+
+      // Sync bottom nav active state with page switcher
+      if (bottomNav) {
+        bottomNav.querySelectorAll('a[data-page]').forEach(function(a) {
+          a.addEventListener('click', function(e) {
+            e.preventDefault();
+            bottomNav.querySelectorAll('a').forEach(function(x) { x.classList.remove('active'); });
+            a.classList.add('active');
+            // trigger the same page switch the sidebar links use
+            var page = a.getAttribute('data-page');
+            var sideLink = document.querySelector('.nav-link[data-page="' + page + '"]');
+            if (sideLink) sideLink.click();
+          });
+        });
+      }
+
+      // Also keep bottom nav in sync when sidebar links are clicked
+      document.querySelectorAll('.nav-link[data-page]').forEach(function(link) {
+        link.addEventListener('click', function() {
+          var page = link.getAttribute('data-page');
+          if (bottomNav) {
+            bottomNav.querySelectorAll('a').forEach(function(a) {
+              a.classList.toggle('active', a.getAttribute('data-page') === page);
+            });
+          }
+        });
+      });
+    })();
+    </script>
+
   </body>
 </html>
