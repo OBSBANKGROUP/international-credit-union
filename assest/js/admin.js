@@ -258,11 +258,108 @@
     }
   }
 
-  /* ---------- Auth Guard ---------- */
-  if (!localStorage.getItem(ADMIN_SESSION)) {
-    window.location.href = "admin-login.html";
-    return;
-  }
+  /* ---------- Auth Guard + Session Validation + 3-Hour Inactivity Timeout ---------- */
+  (function () {
+    var raw = localStorage.getItem(ADMIN_SESSION);
+    if (!raw) {
+      window.location.href = "admin-login.html";
+      return;
+    }
+    try {
+      var sess = JSON.parse(raw);
+      /* Check expiry */
+      if (!sess || !sess.expiresAt || Date.now() > sess.expiresAt) {
+        localStorage.removeItem(ADMIN_SESSION);
+        window.location.href = "admin-login.html";
+        return;
+      }
+      /* Refresh last activity on every load */
+      sess.lastActivity = Date.now();
+      sess.expiresAt = Date.now() + 3 * 60 * 60 * 1000; // reset 3h on activity
+      localStorage.setItem(ADMIN_SESSION, JSON.stringify(sess));
+    } catch (e) {
+      localStorage.removeItem(ADMIN_SESSION);
+      window.location.href = "admin-login.html";
+      return;
+    }
+  })();
+
+  /* ── 3-hour inactivity timer ── */
+  (function () {
+    var INACTIVITY_MS = 3 * 60 * 60 * 1000; // 3 hours
+    var WARN_MS = 5 * 60 * 1000; // warn 5 mins before
+    var warnShown = false;
+    var warnBanner = null;
+
+    function refreshSession() {
+      try {
+        var raw = localStorage.getItem(ADMIN_SESSION);
+        if (!raw) return;
+        var sess = JSON.parse(raw);
+        sess.lastActivity = Date.now();
+        sess.expiresAt = Date.now() + INACTIVITY_MS;
+        localStorage.setItem(ADMIN_SESSION, JSON.stringify(sess));
+        warnShown = false;
+        if (warnBanner) {
+          warnBanner.remove();
+          warnBanner = null;
+        }
+      } catch (e) {}
+    }
+
+    function showExpiredOverlay() {
+      localStorage.removeItem(ADMIN_SESSION);
+      var overlay = document.createElement("div");
+      overlay.style.cssText =
+        "position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;";
+      overlay.innerHTML =
+        '<div style="background:#0d1117;border:1px solid #30363d;border-radius:20px;padding:40px 32px;text-align:center;max-width:360px;color:#f0f6fc">' +
+        '<div style="font-size:2.5rem;margin-bottom:16px">&#9203;</div>' +
+        '<div style="font-size:1.2rem;font-weight:800;margin-bottom:8px">Session Expired</div>' +
+        '<p style="color:#8b949e;font-size:.88rem;margin-bottom:24px">Your admin session has expired after 3 hours of inactivity.</p>' +
+        '<a href="admin-login.html" style="display:inline-block;padding:12px 28px;background:#4b38f5;color:white;border-radius:10px;font-weight:700;text-decoration:none;">Sign In Again</a>' +
+        "</div>";
+      document.body.appendChild(overlay);
+      setTimeout(function () {
+        window.location.href = "admin-login.html";
+      }, 4000);
+    }
+
+    /* Check every 30 seconds */
+    setInterval(function () {
+      try {
+        var raw = localStorage.getItem(ADMIN_SESSION);
+        if (!raw) {
+          showExpiredOverlay();
+          return;
+        }
+        var sess = JSON.parse(raw);
+        var remaining = sess.expiresAt - Date.now();
+        if (remaining <= 0) {
+          showExpiredOverlay();
+          return;
+        }
+        /* Show 5-minute warning */
+        if (remaining <= WARN_MS && !warnShown) {
+          warnShown = true;
+          warnBanner = document.createElement("div");
+          warnBanner.style.cssText =
+            "position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#e65100,#f57c00);color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;font-family:Inter,sans-serif;font-size:.88rem;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.3)";
+          warnBanner.innerHTML =
+            "<span>&#9203; Admin session expires in 5 minutes. Click anywhere to stay signed in.</span>" +
+            '<button onclick="this.parentElement.remove()" style="background:rgba(255,255,255,.2);border:none;color:white;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:Inter,sans-serif">Dismiss</button>';
+          document.body.prepend(warnBanner);
+        }
+      } catch (e) {}
+    }, 30000);
+
+    /* Reset timer on any user activity */
+    ["click", "keydown", "mousemove", "scroll", "touchstart"].forEach(
+      function (evt) {
+        document.addEventListener(evt, refreshSession, { passive: true });
+      },
+    );
+  })();
 
   /* ---------- Data Helpers ---------- */
   function getUsers() {

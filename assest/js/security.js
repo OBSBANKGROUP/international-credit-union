@@ -2,7 +2,7 @@
  * ICU SECURITY LAYER
  * ==================
  * Drop this on every protected page AFTER auth.js:
- *   <script src="assets/js/security.js"></script>
+ *   <script src="assest/js/security.js"></script>
  *
  * Covers:
  *  1. Content Security Policy header (meta tag)
@@ -190,69 +190,46 @@
   window.ICU.checkIntegrity = function () {
     try {
       var session = JSON.parse(localStorage.getItem("icu_session") || "null");
-      if (!session) return true; // no session = ok
+      if (!session) return true; // no session = ok, not a protected page
 
       /* Session must have required fields */
-      if (!session.id || !session.expiresAt || !session.createdAt) {
-        console.warn("ICU: Session integrity check failed — missing fields.");
+      if (
+        !session.id ||
+        !session.email ||
+        !session.expiresAt ||
+        !session.createdAt
+      ) {
+        console.warn("ICU: Session missing required fields — clearing.");
         localStorage.removeItem("icu_session");
         return false;
       }
 
-      /* expiresAt must be reasonable — allow up to 2 hours + 10 min buffer.
-         Activity resets the timer so expiresAt can be up to 2h from NOW,
-         not from createdAt. We just check it is not absurdly far in the future. */
-      var maxAllowed = Date.now() + 2 * 60 * 60 * 1000 + 10 * 60 * 1000; // 2h 10m from now
+      /* expiresAt must be reasonable — not absurdly far in the future */
+      var maxAllowed = Date.now() + 2 * 60 * 60 * 1000 + 10 * 60 * 1000;
       if (session.expiresAt > maxAllowed) {
-        console.warn("ICU: Session integrity check failed — expiry tampered.");
+        console.warn("ICU: Session expiry looks tampered — clearing.");
         localStorage.removeItem("icu_session");
         return false;
       }
 
-      /* User existence check: only use localStorage cache if we have data
-         AND only fail if we can positively confirm the user is absent.
-         On mobile, Supabase fetches may not have completed yet when this
-         runs, leaving icu_users empty — we must never logout someone just
-         because the cache hasn't loaded. We also match by BOTH id and email
-         to handle cases where the session id was updated to the real DB id
-         but the local cache still has the old local id. */
-      var users = JSON.parse(localStorage.getItem("icu_users") || "[]");
-      if (users.length > 0) {
-        var user = users.find(function (u) {
-          return (
-            String(u.id) === String(session.id) ||
-            (session.email &&
-              (u.email || "").toLowerCase().trim() ===
-                session.email.toLowerCase().trim())
-          );
-        });
-        if (!user) {
-          /* Only wipe the session if the cache has multiple users and
-             none of them match — that's a real mismatch. If there's only
-             one user in cache and it doesn't match, it's probably a stale
-             cache on mobile — skip the check and let dashboard.js verify. */
-          if (users.length >= 3) {
-            console.warn(
-              "ICU: Session integrity check failed — user not found in cache of",
-              users.length,
-              "users.",
-            );
-            localStorage.removeItem("icu_session");
-            return false;
-          }
-          console.warn(
-            "ICU: User not in small cache (" +
-              users.length +
-              ") — skipping check, dashboard will verify.",
-          );
-        }
+      /* Session has expired */
+      if (session.expiresAt < Date.now()) {
+        console.warn("ICU: Session expired.");
+        localStorage.removeItem("icu_session");
+        return false;
       }
-      /* Empty cache: skip entirely — dashboard.js fetches from Supabase directly. */
+
+      /* DO NOT check icu_users cache here. On mobile, the Supabase fetch
+         that populates icu_users may not have completed yet when this runs,
+         making the cache empty or stale. Logging the user out because their
+         record isn't in a not-yet-loaded cache is wrong.
+         dashboard.js does a direct Supabase fetch by email and handles
+         the redirect authoritatively if the user truly does not exist. */
 
       return true;
     } catch (e) {
-      localStorage.removeItem("icu_session");
-      return false;
+      console.warn("ICU: Integrity check error:", e);
+      return true; // on error, let dashboard.js decide — don't auto-logout
     }
   };
 

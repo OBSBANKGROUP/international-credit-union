@@ -3,182 +3,557 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Login | International Credit Union</title>
+    <title>ICU Admin — Secure Login</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <style>
-      * {
+      *,
+      *::before,
+      *::after {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
+      html,
       body {
+        height: 100%;
         font-family: "Inter", sans-serif;
-        background: #0d1117;
+      }
+      body {
         min-height: 100vh;
+        background: linear-gradient(
+          135deg,
+          #0a1628 0%,
+          #0d1f3c 50%,
+          #091525 100%
+        );
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 20px;
       }
-      .admin-login-card {
-        background: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 16px;
-        padding: 48px 40px;
+
+      /* ── Animated background dots ── */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: radial-gradient(
+          circle,
+          rgba(75, 56, 245, 0.15) 1px,
+          transparent 1px
+        );
+        background-size: 40px 40px;
+        pointer-events: none;
+      }
+
+      .login-card {
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 44px 40px;
         width: 100%;
         max-width: 420px;
-        box-shadow: 0 16px 70px rgba(0, 0, 0, 0.45);
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.4);
+        position: relative;
       }
-      .admin-login-card .logo {
-        text-align: center;
+
+      /* ── Logo ── */
+      .login-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
         margin-bottom: 32px;
       }
-      .admin-login-card .logo img {
-        height: 50px;
-        border-radius: 8px;
-        margin-bottom: 14px;
+      .login-logo img {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        object-fit: cover;
+        box-shadow: 0 4px 16px rgba(75, 56, 245, 0.4);
       }
-      .admin-login-card .logo h2 {
+      .login-logo-text {
         color: #f0f6fc;
-        font-size: 1.25rem;
-        font-weight: 600;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
       }
-      .admin-login-card .logo p {
+      .login-logo-sub {
+        color: #8b949e;
+        font-size: 0.75rem;
+        margin-top: 2px;
+      }
+
+      /* ── Heading ── */
+      .login-heading {
+        color: #f0f6fc;
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      .login-sub {
         color: #8b949e;
         font-size: 0.85rem;
-        margin-top: 4px;
+        margin-bottom: 28px;
+        line-height: 1.5;
       }
-      .admin-login-card label {
+
+      /* ── Shield icon ── */
+      .shield-wrap {
+        width: 54px;
+        height: 54px;
+        background: rgba(75, 56, 245, 0.2);
+        border: 1px solid rgba(75, 56, 245, 0.4);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+      }
+
+      /* ── Form ── */
+      .form-group {
+        margin-bottom: 18px;
+      }
+      .form-label {
         display: block;
         color: #c9d1d9;
-        font-size: 0.85rem;
-        margin-bottom: 6px;
-        font-weight: 500;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 7px;
+        letter-spacing: 0.3px;
       }
-      .admin-login-card input {
+      .input-wrap {
+        position: relative;
+      }
+      .input-wrap .material-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8b949e;
+        font-size: 1.1rem;
+        font-family: "Material Icons Outlined";
+        font-style: normal;
+        pointer-events: none;
+      }
+      .form-input {
         width: 100%;
-        padding: 11px 14px;
-        margin-bottom: 20px;
-        border: 1px solid #30363d;
-        border-radius: 8px;
-        background: #0d1117;
+        padding: 13px 14px 13px 42px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
         color: #f0f6fc;
-        font-size: 0.92rem;
         font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
         outline: none;
-        transition: border 0.2s;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+        -webkit-appearance: none;
       }
-      .admin-login-card input:focus {
-        border-color: #58a6ff;
+      .form-input::placeholder {
+        color: #6e7681;
       }
-      .admin-login-card .login-btn {
+      .form-input:focus {
+        border-color: #4b38f5;
+        background: rgba(75, 56, 245, 0.08);
+        box-shadow: 0 0 0 3px rgba(75, 56, 245, 0.15);
+      }
+      /* Show/hide password toggle */
+      .pw-toggle {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #8b949e;
+        cursor: pointer;
+        font-family: "Material Icons Outlined";
+        font-size: 1.1rem;
+        padding: 4px;
+      }
+
+      /* ── Error message ── */
+      .login-error {
+        background: rgba(229, 57, 53, 0.15);
+        border: 1px solid rgba(229, 57, 53, 0.3);
+        color: #ff7c7c;
+        border-radius: 10px;
+        padding: 11px 14px;
+        font-size: 0.82rem;
+        margin-bottom: 18px;
+        display: none;
+        line-height: 1.5;
+      }
+
+      /* ── Lockout countdown ── */
+      .lockout-msg {
+        background: rgba(255, 152, 0, 0.12);
+        border: 1px solid rgba(255, 152, 0, 0.3);
+        color: #ffb74d;
+        border-radius: 10px;
+        padding: 11px 14px;
+        font-size: 0.82rem;
+        margin-bottom: 18px;
+        display: none;
+        line-height: 1.5;
+        text-align: center;
+      }
+
+      /* ── Submit button ── */
+      .login-btn {
         width: 100%;
-        padding: 12px;
-        background: #238636;
+        padding: 14px;
+        background: linear-gradient(135deg, #4b38f5, #6a5cff);
         color: #fff;
         border: none;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        font-weight: 600;
-        cursor: pointer;
+        border-radius: 12px;
         font-family: "Inter", sans-serif;
-        transition: background 0.2s;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s,
+          opacity 0.2s;
+        letter-spacing: 0.3px;
+        margin-top: 4px;
       }
-      .admin-login-card .login-btn:hover {
-        background: #2ea043;
+      .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(75, 56, 245, 0.4);
       }
-      #adminError {
-        color: #f85149;
-        font-size: 0.82rem;
+      .login-btn:active {
+        transform: translateY(0);
+      }
+      .login-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* ── Footer note ── */
+      .login-footer {
+        margin-top: 28px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
         text-align: center;
-        margin-bottom: 14px;
-        display: none;
+        color: #6e7681;
+        font-size: 0.75rem;
+        line-height: 1.6;
       }
-      .back-link {
-        display: block;
-        text-align: center;
-        margin-top: 22px;
-        color: #58a6ff;
-        font-size: 0.84rem;
-        text-decoration: none;
+      .login-footer strong {
+        color: #8b949e;
       }
-      .back-link:hover {
-        text-decoration: underline;
+
+      /* ── Attempt dots ── */
+      .attempt-dots {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        margin-top: 14px;
+      }
+      .attempt-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+        transition: background 0.3s;
+      }
+      .attempt-dot.used {
+        background: #e53935;
+      }
+
+      /* ── Mobile ── */
+      @media (max-width: 480px) {
+        .login-card {
+          padding: 32px 22px;
+        }
+        .login-heading {
+          font-size: 1.25rem;
+        }
       }
     </style>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <div class="admin-login-card">
-      <div class="logo">
-        <img src="assest/images/logo.jpeg" alt="ICU Logo" />
-        <h2>Admin Portal</h2>
-        <p>International Credit Union</p>
+    <div class="login-card">
+      <div class="login-logo">
+        <img
+          src="assest/images/logo.jpeg"
+          alt="ICU Logo"
+          onerror="this.style.display = 'none'"
+        />
+        <div>
+          <div class="login-logo-text">International Credit Union</div>
+          <div class="login-logo-sub">Administration Portal</div>
+        </div>
       </div>
 
-      <label>Admin Email</label>
-      <input type="email" id="adminEmail" placeholder="admin@icu.com" />
+      <div class="shield-wrap">&#128737;</div>
+      <div class="login-heading">Admin Sign In</div>
+      <div class="login-sub">
+        This area is restricted to authorized personnel only. All access is
+        logged and monitored.
+      </div>
 
-      <label>Password</label>
-      <input type="password" id="adminPassword" placeholder="••••••••" />
+      <div class="login-error" id="loginError"></div>
+      <div class="lockout-msg" id="lockoutMsg"></div>
 
-      <p id="adminError"></p>
+      <div class="form-group">
+        <label class="form-label" for="adminUser">Username</label>
+        <div class="input-wrap">
+          <span class="material-icon">person</span>
+          <input
+            type="text"
+            id="adminUser"
+            class="form-input"
+            placeholder="Admin username"
+            autocomplete="username"
+            autocapitalize="none"
+            autocorrect="off"
+            spellcheck="false"
+          />
+        </div>
+      </div>
 
-      <button class="login-btn" id="adminLoginBtn">Sign In</button>
+      <div class="form-group">
+        <label class="form-label" for="adminPass">Password</label>
+        <div class="input-wrap">
+          <span class="material-icon">lock</span>
+          <input
+            type="password"
+            id="adminPass"
+            class="form-input"
+            placeholder="Admin password"
+            autocomplete="current-password"
+          />
+          <button class="pw-toggle" id="pwToggle" type="button" tabindex="-1">
+            visibility_off
+          </button>
+        </div>
+      </div>
 
-      <a href="index.html" class="back-link">← Back to main site</a>
+      <button class="login-btn" id="adminLoginBtn">Sign In Securely</button>
+
+      <div class="attempt-dots" id="attemptDots">
+        <div class="attempt-dot" id="dot1"></div>
+        <div class="attempt-dot" id="dot2"></div>
+        <div class="attempt-dot" id="dot3"></div>
+        <div class="attempt-dot" id="dot4"></div>
+        <div class="attempt-dot" id="dot5"></div>
+      </div>
+
+      <div class="login-footer">
+        <strong>&#128274; Secure Connection</strong><br />
+        Unauthorized access attempts are recorded and reported.<br />
+        &copy; 2024 International Credit Union
+      </div>
     </div>
 
     <script>
       (function () {
-        const ADMIN_SESSION = "icu_admin_session";
-        const ADMIN_EMAIL = "admin@icu.com";
-        const ADMIN_PASS = "admin123";
+        "use strict";
 
-        /* Already logged in? */
-        if (localStorage.getItem(ADMIN_SESSION)) {
-          window.location.href = "admin.html";
-          return;
+        /* ── Credentials — change these to your actual admin username/password ── */
+        var ADMIN_USERNAME = "info@internationalcunion.com";
+        var ADMIN_PASSWORD = "Goodboy@419";
+        var ADMIN_SESSION = "icu_admin_session";
+        var MAX_ATTEMPTS = 5;
+        var LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
+
+        /* ── Already logged in? Go straight to admin panel ── */
+        var existing = localStorage.getItem(ADMIN_SESSION);
+        if (existing) {
+          try {
+            var sess = JSON.parse(existing);
+            if (sess && sess.expiresAt && Date.now() < sess.expiresAt) {
+              window.location.href = "admin.html";
+              return;
+            }
+          } catch (e) {}
+          localStorage.removeItem(ADMIN_SESSION);
         }
 
-        document
-          .getElementById("adminLoginBtn")
-          .addEventListener("click", function () {
-            const email = (document.getElementById("adminEmail").value || "")
-              .trim()
-              .toLowerCase();
-            const pass = document.getElementById("adminPassword").value || "";
-            const err = document.getElementById("adminError");
+        /* ── Elements ── */
+        var userEl = document.getElementById("adminUser");
+        var passEl = document.getElementById("adminPass");
+        var btnEl = document.getElementById("adminLoginBtn");
+        var errorEl = document.getElementById("loginError");
+        var lockoutEl = document.getElementById("lockoutMsg");
+        var pwToggle = document.getElementById("pwToggle");
 
-            err.style.display = "none";
+        /* ── Password show/hide ── */
+        pwToggle.addEventListener("click", function () {
+          if (passEl.type === "password") {
+            passEl.type = "text";
+            pwToggle.textContent = "visibility";
+          } else {
+            passEl.type = "password";
+            pwToggle.textContent = "visibility_off";
+          }
+        });
 
-            if (!email || !pass) {
-              err.textContent = "Please enter both email and password.";
-              err.style.display = "block";
-              return;
-            }
-
-            if (email !== ADMIN_EMAIL || pass !== ADMIN_PASS) {
-              err.textContent = "Invalid admin credentials.";
-              err.style.display = "block";
-              return;
-            }
-
-            localStorage.setItem(
-              ADMIN_SESSION,
-              JSON.stringify({ email: ADMIN_EMAIL, role: "admin" }),
+        /* ── Brute force protection ── */
+        function getAttempts() {
+          try {
+            return JSON.parse(
+              localStorage.getItem("icu_admin_attempts") ||
+                '{"count":0,"lockedUntil":0}',
             );
-            window.location.href = "admin.html";
-          });
+          } catch (e) {
+            return { count: 0, lockedUntil: 0 };
+          }
+        }
+        function saveAttempts(a) {
+          localStorage.setItem("icu_admin_attempts", JSON.stringify(a));
+        }
+        function clearAttempts() {
+          localStorage.removeItem("icu_admin_attempts");
+        }
 
-        /* Enter key */
-        document
-          .getElementById("adminPassword")
-          .addEventListener("keydown", function (e) {
-            if (e.key === "Enter")
-              document.getElementById("adminLoginBtn").click();
+        function updateDots(count) {
+          for (var i = 1; i <= 5; i++) {
+            var dot = document.getElementById("dot" + i);
+            if (dot) dot.classList.toggle("used", i <= count);
+          }
+        }
+
+        function isLockedOut() {
+          var a = getAttempts();
+          if (a.lockedUntil && Date.now() < a.lockedUntil) return true;
+          if (a.lockedUntil && Date.now() >= a.lockedUntil) {
+            clearAttempts();
+          }
+          return false;
+        }
+
+        function getLockoutRemaining() {
+          var a = getAttempts();
+          var ms = a.lockedUntil - Date.now();
+          var m = Math.floor(ms / 60000);
+          var s = Math.floor((ms % 60000) / 1000);
+          return m + "m " + s + "s";
+        }
+
+        function showError(msg) {
+          errorEl.textContent = msg;
+          errorEl.style.display = "block";
+          lockoutEl.style.display = "none";
+        }
+
+        function showLockout() {
+          errorEl.style.display = "none";
+          lockoutEl.style.display = "block";
+          btnEl.disabled = true;
+          var timer = setInterval(function () {
+            if (!isLockedOut()) {
+              clearInterval(timer);
+              lockoutEl.style.display = "none";
+              btnEl.disabled = false;
+              clearAttempts();
+              updateDots(0);
+              return;
+            }
+            lockoutEl.textContent =
+              "&#128274; Too many failed attempts. Try again in " +
+              getLockoutRemaining();
+          }, 1000);
+          lockoutEl.innerHTML =
+            "&#128274; Too many failed attempts. Try again in " +
+            getLockoutRemaining();
+        }
+
+        /* ── Check lockout on load ── */
+        if (isLockedOut()) {
+          showLockout();
+          updateDots(5);
+        } else {
+          updateDots(getAttempts().count || 0);
+        }
+
+        /* ── Login handler ── */
+        function attemptLogin() {
+          errorEl.style.display = "none";
+
+          if (isLockedOut()) {
+            showLockout();
+            return;
+          }
+
+          var username = (userEl.value || "").trim();
+          var password = (passEl.value || "").trim();
+
+          if (!username || !password) {
+            showError("Please enter your username and password.");
+            return;
+          }
+
+          if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+            var a = getAttempts();
+            a.count = (a.count || 0) + 1;
+            if (a.count >= MAX_ATTEMPTS) {
+              a.lockedUntil = Date.now() + LOCKOUT_MS;
+              a.count = 0;
+            }
+            saveAttempts(a);
+            updateDots(Math.min(a.count, 5));
+
+            if (isLockedOut()) {
+              showLockout();
+            } else {
+              var remaining = MAX_ATTEMPTS - (a.count || 0);
+              showError(
+                "Incorrect username or password. " +
+                  remaining +
+                  " attempt" +
+                  (remaining !== 1 ? "s" : "") +
+                  " remaining.",
+              );
+              passEl.value = "";
+              passEl.focus();
+            }
+            return;
+          }
+
+          /* ── Success ── */
+          clearAttempts();
+          /* Store session with 3-hour expiry */
+          var session = {
+            loggedIn: true,
+            createdAt: Date.now(),
+            expiresAt: Date.now() + 3 * 60 * 60 * 1000,
+            lastActivity: Date.now(),
+          };
+          localStorage.setItem(ADMIN_SESSION, JSON.stringify(session));
+
+          btnEl.textContent = "Signing in...";
+          btnEl.disabled = true;
+          setTimeout(function () {
+            window.location.href = "admin.html";
+          }, 400);
+        }
+
+        btnEl.addEventListener("click", attemptLogin);
+
+        /* Enter key on either field */
+        [userEl, passEl].forEach(function (el) {
+          el.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") attemptLogin();
           });
+        });
+
+        /* Focus username on load */
+        userEl.focus();
       })();
     </script>
   </body>

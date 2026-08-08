@@ -243,71 +243,31 @@
       '<p style="color:#555;font-size:.9rem;line-height:1.7;margin-bottom:24px">Please <strong>visit our branch</strong> or <strong>contact online support</strong> for more information and assistance.</p>' +
       '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px">' +
       '<a href="Contact.html" style="padding:11px 22px;background:#c62828;color:white;border-radius:22px;text-decoration:none;font-size:.85rem;font-weight:700">Contact Support</a>' +
-      '<a href="tel:+18005552478" style="padding:11px 22px;background:#f5f5f5;color:#333;border-radius:22px;text-decoration:none;font-size:.85rem;font-weight:700">&#128222; Call Us</a>' +
+      '<a href="tel:+13512219173" style="padding:11px 22px;background:#f5f5f5;color:#333;border-radius:22px;text-decoration:none;font-size:.85rem;font-weight:700">&#128222; Call Us</a>' +
       "</div>" +
       '<a href="index.html" style="color:#aaa;font-size:.8rem;text-decoration:none">Sign out</a>' +
       "</div>";
     document.body.appendChild(overlay);
   };
 
+  /* checkSuspended — only used at LOGIN TIME in attemptLogin below
+     to block a suspended user from getting past the password step.
+     It does NOT show the overlay on page load — the "account on hold"
+     message only appears when the user tries to make a transaction,
+     handled by checkSuspendedLive in each transfer page. */
   window.checkSuspended = function () {
     const session = getSession();
     if (!session) return false;
-
-    /* First check cached status for instant response */
     const users = getUsers();
     const user = users.find(function (u) {
       return String(u.id) === String(session.id);
     });
-    if (
+    return !!(
       user &&
       (user.status === "suspended" ||
         user.status === "hold" ||
         user.status === "frozen")
-    ) {
-      window.showSuspendedOverlay();
-      return true;
-    }
-
-    /* Also verify LIVE status from Supabase (in case admin just suspended) */
-    if (session.email) {
-      var SU = "https://fyuuzoldfzcybgwlbofp.supabase.co";
-      var SK =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
-      fetch(
-        SU +
-          "/rest/v1/users?email=eq." +
-          encodeURIComponent(session.email.toLowerCase().trim()) +
-          "&select=status",
-        {
-          headers: { apikey: SK, Authorization: "Bearer " + SK },
-        },
-      )
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (rows) {
-          if (rows && rows[0]) {
-            var st = (rows[0].status || "active").toLowerCase();
-            /* Update cache */
-            try {
-              var cu = getUsers();
-              var ix = cu.findIndex(function (u) {
-                return String(u.id) === String(session.id);
-              });
-              if (ix >= 0) {
-                cu[ix].status = st;
-                localStorage.setItem("icu_users", JSON.stringify(cu));
-              }
-            } catch (e) {}
-            if (st === "suspended" || st === "hold" || st === "frozen") {
-              window.showSuspendedOverlay();
-            }
-          }
-        })
-        .catch(function () {});
-    }
-    return false;
+    );
   };
 
   /* Live async check that returns a promise — use to BLOCK transactions */
@@ -594,10 +554,10 @@
             );
           return showLoginError("Incorrect email or password.");
         }
-        if (user.status === "suspended") {
-          window.showSuspendedOverlay && window.showSuspendedOverlay();
-          return;
-        }
+        /* Suspended users can still log in and view their account —
+           the "account on hold" message only appears when they try
+           to make a transfer (handled by checkSuspendedLive in each
+           transfer page). Do not block login here. */
         pendingLoginUser = user;
         loginOTP = Math.floor(100000 + Math.random() * 900000).toString();
         if (window._sendOTP)

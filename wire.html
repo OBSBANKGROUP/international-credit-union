@@ -3,139 +3,278 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Send & Pay | International Credit Union</title>
+    <title>Wire Transfer | International Credit Union</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="assest/css/wire.css" />
-    <script src="assets/js/theme.js"></script>
+    <link rel="stylesheet" href="assest/css/wire-transfer.css?v=10" />
   </head>
   <body>
-    <header class="wire-header">
-      <div class="hc">
-        <a href="dashboard.html" class="back-btn">&#8592; Back</a>
-        <h2>Send &amp; Pay</h2>
+    <header class="page-header">
+      <div class="container">
+        <a href="wire.html" class="back-btn">&#8592; Back</a>
+        <h2>Wire Transfer</h2>
       </div>
     </header>
-    <div class="page-body">
+
+    <main class="wire-form-page">
       <div class="container">
-        <div class="bal-bar">
-          <div>
-            <div class="bal-lbl">Available to Transfer</div>
-            <div class="bal-amt" id="availBal">$0.00</div>
-            <div class="bal-sub">Across all your accounts</div>
+        <h1>Send a Wire Transfer</h1>
+        <p class="subtitle">Complete the form below to send money securely.</p>
+
+        <form class="wire-form" id="wireForm">
+          <!-- FROM ACCOUNT — id="fromAccount", JS builds options from user.accounts -->
+          <div class="form-group">
+            <label>From Account</label>
+            <select id="fromAccount" required>
+              <option value="">Loading accounts...</option>
+            </select>
           </div>
-          <div class="bal-bar-icon">
-            <span
-              class="material-icons-outlined"
-              style="color: white; font-size: 1.6rem"
-              >swap_horiz</span
-            >
+
+          <!-- RECIPIENT BANK -->
+          <div class="form-group">
+            <label>Recipient Bank</label>
+            <input
+              type="text"
+              id="bankSelect"
+              list="bankList"
+              placeholder="Type or select a bank..."
+              autocomplete="off"
+              required
+            />
+            <datalist id="bankList">
+              <option value="JPMorgan Chase Bank"></option>
+              <option value="Bank of America"></option>
+              <option value="Wells Fargo Bank"></option>
+              <option value="Citibank"></option>
+              <option value="U.S. Bank"></option>
+              <option value="PNC Bank"></option>
+              <option value="Truist Bank"></option>
+              <option value="Capital One"></option>
+              <option value="TD Bank"></option>
+              <option value="Regions Bank"></option>
+              <option value="Fifth Third Bank"></option>
+              <option value="KeyBank"></option>
+              <option value="Huntington Bank"></option>
+              <option value="Ally Bank"></option>
+              <option value="Discover Bank"></option>
+              <option value="Charles Schwab Bank"></option>
+              <option value="Citizens Bank"></option>
+              <option value="HSBC USA"></option>
+              <option value="Navy Federal Credit Union"></option>
+              <option value="PenFed Credit Union"></option>
+              <option value="Alliant Credit Union"></option>
+              <option value="International Credit Union"></option>
+            </datalist>
+          </div>
+
+          <!-- MANUAL BANK -->
+          <div class="form-group hidden" id="customBank">
+            <label>Enter Bank Name</label>
+            <input
+              type="text"
+              id="customBankInput"
+              placeholder="Enter bank name"
+            />
+          </div>
+
+          <!-- BANK ADDRESS -->
+          <div class="form-group">
+            <label>Recipient Bank Address</label>
+            <input
+              type="text"
+              id="bankAddress"
+              autocomplete="off"
+              placeholder="e.g. 123 Main St, City, State, ZIP"
+            />
+          </div>
+
+          <!-- ROUTING NUMBER -->
+          <div class="form-group">
+            <label>Routing Number</label>
+            <input
+              type="text"
+              id="routingNumber"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="9-digit routing number"
+            />
+          </div>
+
+          <!-- ACCOUNT NUMBER -->
+          <div class="form-group">
+            <label>Account Number</label>
+            <input
+              type="text"
+              id="accountNumber"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="Recipient account number"
+            />
+          </div>
+
+          <!-- BENEFICIARY — auto-filled by JS lookup -->
+          <div class="form-group">
+            <label>Beneficiary Name</label>
+            <input
+              type="text"
+              id="beneficiaryName"
+              placeholder="Will appear automatically"
+            />
+            <small id="beneficiaryMsg" class="beneficiary-msg"></small>
+          </div>
+
+          <!-- AMOUNT -->
+          <div class="form-group amount-group">
+            <label>Transfer Amount</label>
+            <div class="amount-box">
+              <span class="dollar-sign">$</span>
+              <input
+                type="text"
+                inputmode="decimal"
+                pattern="[0-9]*[.]?[0-9]{0,2}"
+                placeholder="0.00"
+                required
+                class="amount-input"
+              />
+            </div>
+          </div>
+
+          <!-- PURPOSE -->
+          <div class="form-group full">
+            <label>Purpose / Note</label>
+            <textarea
+              rows="3"
+              id="noteInput"
+              placeholder="Reason for transfer..."
+            ></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn">Submit Transfer</button>
+        </form>
+
+        <!-- LOADING -->
+        <div class="loading-screen" id="loadingScreen">
+          <div class="loader-box">
+            <div class="spinner"></div>
+            <p>Processing transfer...</p>
           </div>
         </div>
-        <div class="section-label">Transfer Methods</div>
-        <div class="method-grid">
-          <a href="wire-transfer.html" class="method-card">
-            <div class="method-icon blue">
-              <span class="material-icons-outlined">account_balance</span>
-            </div>
-            <h3>Domestic Wire</h3>
-            <p>Send money securely to any US bank account.</p>
-            <span class="fee-tag">$2% fee</span>
-          </a>
-          <a href="international_wire.html" class="method-card">
-            <div class="method-icon orange">
-              <span class="material-icons-outlined">public</span>
-            </div>
-            <h3>International Wire</h3>
-            <p>Transfer funds to bank accounts worldwide.</p>
-            <span class="fee-tag">$45 fee</span>
-          </a>
-          <div class="method-card" id="openAppModal">
-            <div class="method-icon green">
-              <span class="material-icons-outlined">send</span>
-            </div>
-            <h3>Zelle / Cash App</h3>
-            <p>Instant peer-to-peer money transfers.</p>
-            <span class="fee-tag free">Free</span>
+
+        <!-- OTP MODAL -->
+        <div class="otp-modal" id="otpModal">
+          <div class="otp-box">
+            <h3>Email Verification</h3>
+            <p>We sent a 6-digit verification code to your registered email.</p>
+            <input
+              type="text"
+              id="otpInput"
+              placeholder="Enter OTP"
+              maxlength="6"
+            />
+            <button id="verifyOtpBtn">Verify</button>
           </div>
-          <a href="paybill.html" class="method-card">
-            <div class="method-icon teal">
-              <span class="material-icons-outlined">receipt_long</span>
-            </div>
-            <h3>Pay Bills</h3>
-            <p>Pay utilities, subscriptions and service bills.</p>
-            <span class="fee-tag free">Free</span>
-          </a>
-          <a href="deposit-check.html" class="method-card">
-            <div class="method-icon purple">
-              <span class="material-icons-outlined">add_a_photo</span>
-            </div>
-            <h3>Deposit Check</h3>
-            <p>Snap a photo to deposit your check instantly.</p>
-            <span class="fee-tag free">Free</span>
-          </a>
         </div>
-        <div class="section-label">Transfer Limits</div>
-        <div class="limits-box">
-          <h4>Your current transfer limits</h4>
-          <table class="limits-table">
-            <thead>
-              <tr>
-                <th>Transfer Type</th>
-                <th>Per Transaction</th>
-                <th>Daily Limit</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Domestic Wire</td>
-                <td>$500 – $1,500,000</td>
-                <td>$1,500,000</td>
-              </tr>
-              <tr>
-                <td>International Wire</td>
-                <td>$100 – $2,000,000</td>
-                <td>$2,000,000</td>
-              </tr>
-              <tr>
-                <td>Zelle</td>
-                <td>Up to $2,500</td>
-                <td>$5,000</td>
-              </tr>
-              <tr>
-                <td>Bill Pay</td>
-                <td>Up to $10,000</td>
-                <td>$20,000</td>
-              </tr>
-            </tbody>
-          </table>
+
+        <!-- RECEIPT MODAL -->
+        <div class="receipt-modal" id="receiptModal">
+          <div class="receipt-card-wrap">
+            <!-- Header -->
+            <div class="receipt-header">
+              <div class="receipt-logo-row">
+                <img
+                  src="assest/images/logo.jpeg"
+                  alt="ICU Logo"
+                  class="receipt-logo-img"
+                />
+              </div>
+              <div class="receipt-check receipt-check-green">&#10004;</div>
+              <div class="receipt-title">Transfer Successful</div>
+              <div class="receipt-subtitle">Wire Transfer Receipt</div>
+              <div class="receipt-amount-box">
+                <div class="receipt-amount-label">Amount Transferred</div>
+                <div class="receipt-big-amount">
+                  $<span id="receiptAmount"></span>
+                </div>
+                <div class="receipt-from-label">
+                  From: <span id="receiptFrom"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Body -->
+            <div class="receipt-body">
+              <div class="receipt-section-label">Recipient Details</div>
+              <div class="receipt-details">
+                <div class="detail-row">
+                  <span>Beneficiary Name</span
+                  ><strong id="receiptName"></strong>
+                </div>
+                <div class="detail-row">
+                  <span>Account Number</span><span id="receiptAccount"></span>
+                </div>
+                <div class="detail-row">
+                  <span>Bank</span><span id="receiptBank"></span>
+                </div>
+                <div class="detail-row">
+                  <span>Bank Address</span><span id="receiptBankAddr"></span>
+                </div>
+                <div class="detail-row">
+                  <span>Description</span><span id="receiptNote"></span>
+                </div>
+              </div>
+
+              <div class="receipt-section-label" style="margin-top: 18px">
+                Transaction Details
+              </div>
+              <div class="receipt-details">
+                <div class="detail-row">
+                  <span>Transaction ID</span
+                  ><span id="receiptId" class="receipt-mono"></span>
+                </div>
+                <div class="detail-row">
+                  <span>Date &amp; Time</span><span id="receiptDate"></span>
+                </div>
+                <div class="detail-row">
+                  <span>Status</span
+                  ><span class="receipt-status-ok">&#10003; Completed</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="receipt-footer">
+              <div class="receipt-notice">
+                A confirmation has been sent to your registered email.<br />
+                <strong>International Credit Union</strong> &bull; FDIC Insured
+              </div>
+              <div class="receipt-actions">
+                <button id="shareReceiptBtn" class="receipt-btn share">
+                  &#128257; Share Receipt
+                </button>
+                <button id="closeReceiptBtn" class="receipt-btn done">
+                  &#8592; Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="modal-overlay" id="appModal">
-      <div class="modal-box">
-        <h3>Choose Transfer App</h3>
-        <div class="app-options">
-          <div class="app-card" onclick="window.location.href = 'cashapp.html'">
-            <img src="assest/images/cashapp.jpeg" alt="Cash App" />
-            <span>Cash App</span>
-          </div>
-          <div class="app-card" onclick="window.location.href = 'zelle.html'">
-            <img src="assest/images/zelle.jpeg" alt="Zelle" />
-            <span>Zelle</span>
-          </div>
-        </div>
-        <button class="close-modal" id="closeModal">Cancel</button>
-      </div>
-    </div>
-    <script src="assest/js/db.js"></script>
-    <script src="assest/js/wire.js"></script>
-    <script src="assest/js/wire.js"></script>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="assest/js/db.js?v=7"></script>
+    <script src="assest/js/icu-data.js?v=4"></script>
+    <script src="assest/js/emailjs-config.js"></script>
+    <script src="assest/js/pin-verify.js"></script>
+    <script src="assest/js/face-verify.js"></script>
+    <script src="assest/js/auth.js?v=13"></script>
+    <script src="assest/js/wire-transfer.js?v=13"></script>
   </body>
 </html>
