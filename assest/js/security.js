@@ -159,19 +159,48 @@
         localStorage.setItem("icu_users", JSON.stringify(clean));
       }
 
-      /* Check storage usage */
+      /* Check storage usage and auto-clean if getting full */
       var total = 0;
       for (var key in localStorage) {
         if (localStorage.hasOwnProperty(key)) {
-          total += (localStorage.getItem(key) || "").length * 2; // bytes (approx)
+          total += (localStorage.getItem(key) || "").length * 2;
         }
       }
-      /* Warn if approaching 4.5MB (localStorage limit is typically 5MB) */
-      if (total > 4500000) {
+      if (total > 4000000) {
         console.warn(
-          "ICU Storage warning: " +
+          "ICU Storage: " +
             Math.round(total / 1024) +
-            "KB used. Consider archiving old logs.",
+            "KB used — auto-cleaning.",
+        );
+        /* Clear caches — Supabase is the source of truth, not these */
+        localStorage.removeItem("icu_notifications");
+        localStorage.removeItem("icu_login_attempts");
+        /* Trim activity log to last 50 entries */
+        try {
+          var logs = JSON.parse(
+            localStorage.getItem("icu_activity_log") || "[]",
+          );
+          if (logs.length > 50) {
+            localStorage.setItem(
+              "icu_activity_log",
+              JSON.stringify(logs.slice(-50)),
+            );
+          }
+        } catch (trimErr) {
+          localStorage.removeItem("icu_activity_log");
+        }
+        /* Trim users cache to 20 entries */
+        try {
+          var uArr = JSON.parse(localStorage.getItem("icu_users") || "[]");
+          if (uArr.length > 20) {
+            localStorage.setItem("icu_users", JSON.stringify(uArr.slice(-20)));
+          }
+        } catch (uErr) {}
+      } else if (total > 3000000) {
+        console.warn(
+          "ICU Storage: " +
+            Math.round(total / 1024) +
+            "KB used. Approaching limit.",
         );
       }
     } catch (e) {

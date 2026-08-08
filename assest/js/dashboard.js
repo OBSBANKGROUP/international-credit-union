@@ -141,6 +141,52 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 
+  /* ── Safe localStorage write — clears old data if storage is full ── */
+  function safeSet(key, value) {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      if (e.name === "QuotaExceededError" || e.code === 22) {
+        console.warn(
+          "ICU: localStorage full — clearing old cache to make room",
+        );
+        /* Remove the biggest items first to free space */
+        var keysToTry = [
+          "icu_notifications",
+          "icu_activity_log",
+          "icu_login_attempts",
+        ];
+        keysToTry.forEach(function (k) {
+          try {
+            localStorage.removeItem(k);
+          } catch (x) {}
+        });
+        /* Try again after clearing */
+        try {
+          localStorage.setItem(key, value);
+        } catch (e2) {
+          /* If still full, clear everything except session and try once more */
+          console.warn(
+            "ICU: Still full after clearing — doing full cache reset",
+          );
+          var sessionData = localStorage.getItem("icu_session");
+          var adminData = localStorage.getItem("icu_admin_session");
+          localStorage.clear();
+          if (sessionData) localStorage.setItem("icu_session", sessionData);
+          if (adminData) localStorage.setItem("icu_admin_session", adminData);
+          try {
+            localStorage.setItem(key, value);
+          } catch (e3) {
+            console.error(
+              "ICU: localStorage write failed even after full clear:",
+              e3,
+            );
+          }
+        }
+      }
+    }
+  }
+
   /* ── Wait for db.js to finish its cache load FIRST, so it can't
      overwrite our clean per-user logs afterward (fixes race condition) ── */
   function startDashboard() {
@@ -150,24 +196,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
         /* Update session with real Supabase ID */
         session.id = currentUser.id;
-        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        safeSet(SESSION_KEY, JSON.stringify(session));
 
-        /* Also cache user in localStorage for other pages */
-        var cached = JSON.parse(localStorage.getItem("icu_users") || "[]");
+        /* Cache user in localStorage for other pages — only store THIS user
+         to avoid filling storage with all users data */
+        var cached = [];
+        try {
+          cached = JSON.parse(localStorage.getItem("icu_users") || "[]");
+        } catch (e) {}
         var idx = cached.findIndex(function (u) {
           return u.email === currentUser.email;
         });
         if (idx >= 0) cached[idx] = currentUser;
         else cached.push(currentUser);
-        localStorage.setItem("icu_users", JSON.stringify(cached));
+        safeSet("icu_users", JSON.stringify(cached));
 
         return fetchLogs(currentUser.id).then(function (rawLogs) {
           var logs = rawLogs.map(toLog);
           /* Dedupe so duplicate rows never double the balance */
           if (window.icuDedupeLogs) logs = window.icuDedupeLogs(logs);
 
-          /* Cache logs too */
-          localStorage.setItem("icu_activity_log", JSON.stringify(logs));
+          /* Only cache the most recent 100 logs to keep storage lean.
+           Full history is always fetched fresh from Supabase on load
+           so trimming the cache does not affect what the user sees. */
+          var logsToCache = logs.slice(0, 100);
+          safeSet("icu_activity_log", JSON.stringify(logsToCache));
 
           renderDashboard(currentUser, logs);
           hideSpinner();
@@ -176,7 +229,10 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch(function (err) {
         console.error("Dashboard load error:", err);
         /* Fallback to localStorage if Supabase fails */
-        var users = JSON.parse(localStorage.getItem("icu_users") || "[]");
+        var users = [];
+        try {
+          users = JSON.parse(localStorage.getItem("icu_users") || "[]");
+        } catch (e) {}
         var user = users.find(function (u) {
           return (
             (u.email || "").toLowerCase() ===
@@ -189,7 +245,10 @@ document.addEventListener("DOMContentLoaded", function () {
           window.location.href = "index.html";
           return;
         }
-        var logs = JSON.parse(localStorage.getItem("icu_activity_log") || "[]");
+        var logs = [];
+        try {
+          logs = JSON.parse(localStorage.getItem("icu_activity_log") || "[]");
+        } catch (e) {}
         /* Only this user's logs */
         logs = logs.filter(function (l) {
           return String(l.userId) === String(user.id);
