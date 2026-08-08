@@ -22,9 +22,19 @@
   };
 
   /* ── Generic fetch helpers ── */
+  /* Build URL with apikey baked in as a query param.
+     Mobile browsers (iOS Safari ITP, Android privacy mode) strip
+     custom request headers on cross-origin fetches, so Supabase
+     never sees the apikey header and returns "No API key found".
+     Passing it in the URL bypasses header stripping entirely. */
+  function sbUrl(path) {
+    var sep = path.indexOf("?") === -1 ? "?" : "&";
+    return SUPABASE_URL + "/rest/v1/" + path + sep + "apikey=" + SUPABASE_KEY;
+  }
+
   function api(path, options) {
     return fetch(
-      SUPABASE_URL + "/rest/v1/" + path,
+      sbUrl(path),
       Object.assign({ headers: HEADERS }, options),
     ).then(function (r) {
       return r.json();

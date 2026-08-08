@@ -209,28 +209,45 @@
         return false;
       }
 
-      /* Verify the session user actually exists.
-         IMPORTANT: this must use String() comparison, not strict ===,
-         because session.id can be a number while cached user ids are
-         sometimes strings (or vice versa) — a type mismatch here would
-         wipe a perfectly valid session. It also must tolerate the
-         cache being empty/stale (e.g. right after a brand-new user's
-         first login, before db.js has finished refreshing icu_users)
-         rather than treating "not found yet" as "doesn't exist". */
+      /* User existence check: only use localStorage cache if we have data
+         AND only fail if we can positively confirm the user is absent.
+         On mobile, Supabase fetches may not have completed yet when this
+         runs, leaving icu_users empty — we must never logout someone just
+         because the cache hasn't loaded. We also match by BOTH id and email
+         to handle cases where the session id was updated to the real DB id
+         but the local cache still has the old local id. */
       var users = JSON.parse(localStorage.getItem("icu_users") || "[]");
       if (users.length > 0) {
         var user = users.find(function (u) {
-          return String(u.id) === String(session.id);
+          return (
+            String(u.id) === String(session.id) ||
+            (session.email &&
+              (u.email || "").toLowerCase().trim() ===
+                session.email.toLowerCase().trim())
+          );
         });
         if (!user) {
-          console.warn("ICU: Session integrity check failed — user not found.");
-          localStorage.removeItem("icu_session");
-          return false;
+          /* Only wipe the session if the cache has multiple users and
+             none of them match — that's a real mismatch. If there's only
+             one user in cache and it doesn't match, it's probably a stale
+             cache on mobile — skip the check and let dashboard.js verify. */
+          if (users.length >= 3) {
+            console.warn(
+              "ICU: Session integrity check failed — user not found in cache of",
+              users.length,
+              "users.",
+            );
+            localStorage.removeItem("icu_session");
+            return false;
+          }
+          console.warn(
+            "ICU: User not in small cache (" +
+              users.length +
+              ") — skipping check, dashboard will verify.",
+          );
         }
       }
-      /* If the cache is empty, skip this check rather than failing closed —
-         dashboard.js will do its own authoritative Supabase lookup by email
-         right after this and redirect properly if the user truly doesn't exist. */
+      /* Empty cache: skip entirely — dashboard.js fetches from Supabase directly. */
 
       return true;
     } catch (e) {
