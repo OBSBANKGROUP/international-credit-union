@@ -1,5 +1,5 @@
 console.log(
-  "%c✅ DASHBOARD v5 LOADED — login-failure diagnostics added",
+  "%c✅ DASHBOARD v6 LOADED — mobile fetch fix",
   "color:#00c896;font-weight:bold;font-size:14px",
 );
 document.addEventListener("DOMContentLoaded", function () {
@@ -8,11 +8,22 @@ document.addEventListener("DOMContentLoaded", function () {
   var SUPABASE_KEY =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
 
+  /* apikey is sent in BOTH headers AND as a URL query param on every
+     Supabase fetch. Some mobile browsers (iOS Safari ITP, Android
+     Chrome privacy mode) strip custom request headers on cross-origin
+     requests, causing Supabase to return "No API key found in request".
+     Passing apikey in the URL param ensures it always arrives regardless
+     of header stripping — this is what fixed the $0 balance on phones. */
   var HEADERS = {
     apikey: SUPABASE_KEY,
     Authorization: "Bearer " + SUPABASE_KEY,
     "Content-Type": "application/json",
   };
+
+  function sbUrl(path) {
+    var sep = path.indexOf("?") === -1 ? "?" : "&";
+    return SUPABASE_URL + "/rest/v1/" + path + sep + "apikey=" + SUPABASE_KEY;
+  }
 
   function formatCurrency(n) {
     return (
@@ -50,10 +61,11 @@ document.addEventListener("DOMContentLoaded", function () {
     var email = session.email || "";
     if (!email) return Promise.reject("no email in session");
     return fetch(
-      SUPABASE_URL +
-        "/rest/v1/users?email=eq." +
-        encodeURIComponent(email.toLowerCase().trim()) +
-        "&select=*",
+      sbUrl(
+        "users?email=eq." +
+          encodeURIComponent(email.toLowerCase().trim()) +
+          "&select=*",
+      ),
       { headers: HEADERS },
     ).then(function (r) {
       return r.text().then(function (text) {
@@ -62,24 +74,17 @@ document.addEventListener("DOMContentLoaded", function () {
           rows = text ? JSON.parse(text) : [];
         } catch (e) {}
         if (!r.ok) {
-          /* Diagnostic: log the real Supabase error so a future
-             "bounced back to login" report is instantly explainable
-             instead of a silent failure. */
           console.error(
-            "fetchUser: Supabase returned HTTP",
+            "fetchUser: Supabase HTTP",
             r.status,
-            "for email",
+            "email:",
             email,
-            "—",
+            "body:",
             text,
           );
         }
         if (!rows || !rows[0]) {
-          console.error(
-            "fetchUser: no user found in Supabase for email:",
-            email,
-            "(this user may only exist locally — see admin.js create-user warnings)",
-          );
+          console.error("fetchUser: no user found for email:", email);
           throw new Error("User not found in database");
         }
         return rows[0];
@@ -90,10 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
   /* ── Fetch logs for this user from Supabase ── */
   function fetchLogs(userId) {
     return fetch(
-      SUPABASE_URL +
-        "/rest/v1/logs?user_id=eq." +
-        userId +
-        "&order=timestamp.desc&select=*",
+      sbUrl("logs?user_id=eq." + userId + "&order=timestamp.desc&select=*"),
       { headers: HEADERS },
     )
       .then(function (r) {
