@@ -329,16 +329,60 @@
   window._icuCache = { users: null, logs: null };
 
   /* Preload users and logs into cache on page load */
+  /* Safe localStorage write — clears space if quota exceeded */
+  function safeLocalSet(key, value) {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      if (e.name === "QuotaExceededError" || e.code === 22) {
+        console.warn(
+          "ICU DB: localStorage full — clearing caches to make room",
+        );
+        try {
+          localStorage.removeItem("icu_notifications");
+        } catch (x) {}
+        try {
+          localStorage.removeItem("icu_login_attempts");
+        } catch (x) {}
+        try {
+          localStorage.removeItem("icu_admin_attempts");
+        } catch (x) {}
+        try {
+          localStorage.removeItem("icu_activity_log");
+        } catch (x) {}
+        /* Try again after clearing */
+        try {
+          localStorage.setItem(key, value);
+        } catch (e2) {
+          /* Still full — clear everything except sessions */
+          var s1 = localStorage.getItem("icu_session");
+          var s2 = localStorage.getItem("icu_admin_session");
+          localStorage.clear();
+          if (s1) localStorage.setItem("icu_session", s1);
+          if (s2) localStorage.setItem("icu_admin_session", s2);
+          try {
+            localStorage.setItem(key, value);
+          } catch (e3) {
+            console.error(
+              "ICU DB: cannot write to localStorage even after full clear",
+            );
+          }
+        }
+      }
+    }
+  }
+
   window._icuLoadCache = function () {
     return Promise.all([
       window._dbGetUsers().then(function (u) {
         window._icuCache.users = u;
-        localStorage.setItem("icu_users", JSON.stringify(u));
+        safeLocalSet("icu_users", JSON.stringify(u));
         console.log("ICU DB: loaded " + u.length + " users");
       }),
       window._dbGetAllLogs().then(function (l) {
         window._icuCache.logs = l;
-        localStorage.setItem("icu_activity_log", JSON.stringify(l));
+        /* Only cache last 100 logs to keep storage lean */
+        safeLocalSet("icu_activity_log", JSON.stringify(l.slice(0, 100)));
         console.log("ICU DB: loaded " + l.length + " logs");
       }),
     ]).catch(function (err) {
@@ -385,7 +429,7 @@
       ._dbGetUsers()
       .then(function (u) {
         window._icuCache.users = u;
-        localStorage.setItem("icu_users", JSON.stringify(u));
+        safeLocalSet("icu_users", JSON.stringify(u));
       })
       .catch(function () {});
   };
