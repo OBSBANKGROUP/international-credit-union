@@ -3727,17 +3727,18 @@
     renderAfterLoad();
   }
 
-  /* Force a fresh Supabase sync whenever a tab is switched,
-     then re-render the page so balances are always current.
-     This fixes the inconsistency between admin and dashboard. */
+  /* Refresh from Supabase when switching tabs — but throttled to
+     max once every 30 seconds to avoid hammering the API */
+  var _lastRefresh = 0;
   var _origSwitchPage = switchPage;
   switchPage = function (name) {
     _origSwitchPage(name);
-    if (window._icuLoadCache) {
+    var now = Date.now();
+    if (window._icuLoadCache && now - _lastRefresh > 30000) {
+      _lastRefresh = now;
       window
         ._icuLoadCache()
         .then(function () {
-          /* Re-render after fresh data arrives */
           if (pageRenderers[name]) pageRenderers[name]();
         })
         .catch(function () {});

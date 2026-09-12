@@ -282,8 +282,8 @@
   /* Get all logs for a user */
   window._dbGetLogs = function (userId) {
     var q = userId
-      ? "user_id=eq." + userId + "&order=timestamp.desc&select=*"
-      : "order=timestamp.desc&select=*";
+      ? "user_id=eq." + userId + "&order=timestamp.desc&select=*&limit=5000"
+      : "order=timestamp.desc&select=*&limit=10000";
     return get("logs", q).then(function (rows) {
       return Array.isArray(rows) ? rows.map(rowToLog) : [];
     });
@@ -291,9 +291,12 @@
 
   /* Get all logs (admin) */
   window._dbGetAllLogs = function () {
-    return get("logs", "order=timestamp.desc&select=*").then(function (rows) {
-      return Array.isArray(rows) ? rows.map(rowToLog) : [];
-    });
+    /* limit=10000 overrides Supabase default 1000-row cap */
+    return get("logs", "order=timestamp.desc&select=*&limit=10000").then(
+      function (rows) {
+        return Array.isArray(rows) ? rows.map(rowToLog) : [];
+      },
+    );
   };
 
   /* Add a single log entry */
@@ -449,20 +452,23 @@
     }
 
     if (isAdminPage) {
-      /* Admin needs ALL users + ALL logs */
+      /* Admin needs ALL users + ALL logs.
+         Always resolve _icuReady even if cache write fails —
+         admin.js waits on this promise before rendering. */
       window
         ._icuLoadCache()
         .then(function () {
           hideSyncOverlay();
           _resolveReady();
         })
-        .catch(function () {
+        .catch(function (err) {
+          console.warn("ICU DB: admin cache load failed:", err);
           hideSyncOverlay();
-          _resolveReady();
+          _resolveReady(); /* must always resolve so admin renders */
         });
     } else {
       /* User pages: load ONLY users list, NOT all logs.
-         Each page fetches its own user's logs — prevents mixing balances. */
+         Each page fetches its own user's logs directly from Supabase. */
       showSyncOverlay();
       window
         ._icuLoadCacheUsersOnly()
@@ -470,9 +476,10 @@
           hideSyncOverlay();
           _resolveReady();
         })
-        .catch(function () {
+        .catch(function (err) {
+          console.warn("ICU DB: user cache load failed:", err);
           hideSyncOverlay();
-          _resolveReady();
+          _resolveReady(); /* resolve anyway — dashboard fetches directly */
         });
     }
   });
