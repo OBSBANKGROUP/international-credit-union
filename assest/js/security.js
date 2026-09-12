@@ -166,42 +166,37 @@
           total += (localStorage.getItem(key) || "").length * 2;
         }
       }
-      if (total > 4000000) {
+      if (total > 3500000) {
         console.warn(
           "ICU Storage: " +
             Math.round(total / 1024) +
             "KB used — auto-cleaning.",
         );
-        /* Clear caches — Supabase is the source of truth, not these */
-        localStorage.removeItem("icu_notifications");
-        localStorage.removeItem("icu_login_attempts");
-        /* Trim activity log to last 50 entries */
+        /* Supabase is the source of truth — these are just caches, safe to clear */
         try {
-          var logs = JSON.parse(
-            localStorage.getItem("icu_activity_log") || "[]",
-          );
-          if (logs.length > 50) {
-            localStorage.setItem(
-              "icu_activity_log",
-              JSON.stringify(logs.slice(-50)),
-            );
-          }
-        } catch (trimErr) {
+          localStorage.removeItem("icu_notifications");
+        } catch (e) {}
+        try {
+          localStorage.removeItem("icu_login_attempts");
+        } catch (e) {}
+        try {
+          localStorage.removeItem("icu_admin_attempts");
+        } catch (e) {}
+        /* Remove activity log entirely — dashboard fetches from Supabase directly */
+        try {
           localStorage.removeItem("icu_activity_log");
-        }
-        /* Trim users cache to 20 entries */
+        } catch (e) {}
+        /* Trim users cache to just 10 entries */
         try {
           var uArr = JSON.parse(localStorage.getItem("icu_users") || "[]");
-          if (uArr.length > 20) {
-            localStorage.setItem("icu_users", JSON.stringify(uArr.slice(-20)));
+          if (uArr.length > 10) {
+            localStorage.setItem("icu_users", JSON.stringify(uArr.slice(-10)));
           }
-        } catch (uErr) {}
-      } else if (total > 3000000) {
-        console.warn(
-          "ICU Storage: " +
-            Math.round(total / 1024) +
-            "KB used. Approaching limit.",
-        );
+        } catch (uErr) {
+          try {
+            localStorage.removeItem("icu_users");
+          } catch (e) {}
+        }
       }
     } catch (e) {
       /* storage full or unavailable */

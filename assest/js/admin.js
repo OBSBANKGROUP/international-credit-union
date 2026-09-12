@@ -361,69 +361,93 @@
     );
   })();
 
-  /* ---------- Data Helpers ---------- */
+  /* ---------- Data Helpers ----------
+     getUsers() and getLogs() read from localStorage which is always
+     kept in sync with Supabase via db.js _icuLoadCache().
+     All writes go to BOTH localStorage AND Supabase directly.
+     This ensures every device sees the same data.
+  ---------------------------------------------------------- */
   function getUsers() {
     return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
   }
   function saveUsers(u) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(u));
+    /* Write to localStorage for immediate UI update */
+    try {
+      localStorage.setItem(USERS_KEY, JSON.stringify(u));
+    } catch (e) {}
   }
   function getLogs() {
     return JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
   }
   function saveLogs(l) {
-    localStorage.setItem(LOG_KEY, JSON.stringify(l));
+    /* Keep only last 200 logs in localStorage to prevent storage overflow */
+    var trimmed = Array.isArray(l) ? l.slice(-200) : l;
+    try {
+      localStorage.setItem(LOG_KEY, JSON.stringify(trimmed));
+    } catch (e) {}
+  }
+
+  /* ── Refresh all data fresh from Supabase into localStorage ──
+     Call this whenever you need guaranteed up-to-date data.
+     Returns a promise that resolves when cache is refreshed. */
+  function refreshFromSupabase() {
+    if (window._icuLoadCache) {
+      return window._icuLoadCache().catch(function (e) {
+        console.warn("Admin: Supabase refresh failed:", e);
+      });
+    }
+    return Promise.resolve();
   }
 
   /* Save a single new log entry to Supabase */
   /* Always fetches the real Supabase user_id fresh by email to avoid ID mismatch */
+  /* Save a log entry to Supabase — uses db.js _dbAddLog which
+     always sends apikey in URL param (mobile-safe) and checks r.ok */
   function saveLogToSupabase(log) {
-    var SUPABASE_URL = "https://fyuuzoldfzcybgwlbofp.supabase.co";
-    var SUPABASE_KEY =
+    /* Resolve the real Supabase user_id by email, then insert */
+    var SU = "https://fyuuzoldfzcybgwlbofp.supabase.co";
+    var SK =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5dXV6b2xkZnpjeWJnd2xib2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjM5MDMsImV4cCI6MjA5NDg5OTkwM30.GKb3ksCyt72HLUzSEgkK66mFzl9lALXk1ryJD5-Gqcw";
-    var HEADERS = {
-      apikey: SUPABASE_KEY,
-      Authorization: "Bearer " + SUPABASE_KEY,
+    var H = {
+      apikey: SK,
+      Authorization: "Bearer " + SK,
       "Content-Type": "application/json",
       Prefer: "return=minimal",
     };
 
-    /* Step 1: find the local user to get their email */
     var users = getUsers();
     var user = users.find(function (u) {
       return String(u.id) === String(log.userId);
     });
     if (!user || !user.email) {
       console.warn("saveLogToSupabase: user not found for id", log.userId);
-      return;
+      return Promise.resolve();
     }
 
-    /* Step 2: look up the REAL Supabase numeric id by email (always fresh) */
-    fetch(
-      SUPABASE_URL +
-        "/rest/v1/users?email=eq." +
-        encodeURIComponent(user.email.toLowerCase().trim()) +
-        "&select=id",
-      {
-        headers: HEADERS,
-      },
-    )
+    /* Look up real Supabase id by email — apikey in URL for mobile */
+    var lookupUrl =
+      SU +
+      "/rest/v1/users?apikey=" +
+      SK +
+      "&email=eq." +
+      encodeURIComponent(user.email.toLowerCase().trim()) +
+      "&select=id";
+
+    return fetch(lookupUrl, { headers: H })
       .then(function (r) {
         return r.json();
       })
       .then(function (rows) {
         if (!rows || !rows[0]) {
           console.warn(
-            "saveLogToSupabase: user not found in Supabase for email",
+            "saveLogToSupabase: user not found in Supabase:",
             user.email,
           );
           return;
         }
-        var realSupabaseId =
-          rows[0].id; /* This is guaranteed to be the correct Supabase ID */
-
+        var realId = rows[0].id;
         var row = {
-          user_id: realSupabaseId /* ← always the real Supabase ID */,
+          user_id: realId,
           user_name: log.userName || "",
           action: log.action || "",
           details: log.details || "",
@@ -433,33 +457,33 @@
           target_account: log.targetAccount || null,
           timestamp: log.timestamp || new Date().toISOString(),
           status: log.status || "completed",
-          txn_id: log.txnId || String(Date.now()),
+          txn_id: log.txnId || "TXN" + Date.now(),
         };
-
-        console.log(
-          "Saving log to Supabase:",
-          row.action,
-          "for user_id:",
-          realSupabaseId,
-          "(email:",
-          user.email + ")",
-        );
-
-        return fetch(SUPABASE_URL + "/rest/v1/logs", {
+        var insertUrl = SU + "/rest/v1/logs?apikey=" + SK;
+        return fetch(insertUrl, {
           method: "POST",
-          headers: HEADERS,
+          headers: H,
           body: JSON.stringify(row),
+        }).then(function (res) {
+          if (!res.ok)
+            res.text().then(function (t) {
+              console.warn("Log insert error:", t);
+            });
+          else {
+            console.log(
+              "Log saved to Supabase:",
+              row.action,
+              "for",
+              user.email,
+            );
+            /* Refresh local cache so admin UI reflects new data immediately */
+            if (window._icuLoadCache)
+              window._icuLoadCache().catch(function () {});
+          }
         });
       })
-      .then(function (res) {
-        if (res && !res.ok)
-          res.text().then(function (t) {
-            console.warn("Supabase log error:", t);
-          });
-        else console.log("Log saved to Supabase:", log.action);
-      })
       .catch(function (e) {
-        console.warn("Supabase log save failed:", e);
+        console.warn("saveLogToSupabase failed:", e);
       });
   }
 
@@ -3677,15 +3701,46 @@
 
   /* ==========================================================
      INITIAL RENDER — Dashboard
+     Always wait for _icuReady so Supabase data is loaded first.
+     This fixes the issue where opening admin on a different device
+     showed only locally-created users instead of all Supabase users.
      ========================================================== */
-  pageRenderers.dashboard();
+  function renderAfterLoad() {
+    pageRenderers.dashboard();
 
-  // Also set review badge on load
-  var users = getUsers();
-  var pendingCount = users.filter(function (u) {
-    return (u.status || "active") === "pending";
-  }).length;
-  var badge = document.getElementById("reviewBadge");
-  if (badge)
-    badge.textContent = pendingCount < 10 ? "0" + pendingCount : pendingCount;
+    // Set review badge
+    var users = getUsers();
+    var pendingCount = users.filter(function (u) {
+      return (u.status || "active") === "pending";
+    }).length;
+    var badge = document.getElementById("reviewBadge");
+    if (badge)
+      badge.textContent = pendingCount < 10 ? "0" + pendingCount : pendingCount;
+  }
+
+  /* Wait for db.js to finish loading all users + logs from Supabase
+     before rendering any page — this ensures every device always sees
+     the full up-to-date list regardless of local cache state */
+  if (window._icuReady && window._icuReady.then) {
+    window._icuReady.then(renderAfterLoad).catch(renderAfterLoad);
+  } else {
+    renderAfterLoad();
+  }
+
+  /* Force a fresh Supabase sync whenever a tab is switched,
+     then re-render the page so balances are always current.
+     This fixes the inconsistency between admin and dashboard. */
+  var _origSwitchPage = switchPage;
+  switchPage = function (name) {
+    _origSwitchPage(name);
+    if (window._icuLoadCache) {
+      window
+        ._icuLoadCache()
+        .then(function () {
+          /* Re-render after fresh data arrives */
+          if (pageRenderers[name]) pageRenderers[name]();
+        })
+        .catch(function () {});
+    }
+  };
 })();

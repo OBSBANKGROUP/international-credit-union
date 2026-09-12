@@ -590,9 +590,36 @@
         window
           ._dbGetUserByEmail(enteredEmail)
           .then(function (u) {
-            attemptLogin(u ? [u] : []);
+            if (u) {
+              /* Supabase returned the user successfully */
+              attemptLogin([u]);
+            } else {
+              /* Supabase returned null — could be 429 rate limit or user
+                 not yet in DB cache. Fall back to localStorage so new users
+                 created by admin (who exist in local cache) can still log in. */
+              console.warn(
+                "ICU Login: Supabase returned null for",
+                enteredEmail,
+                "— trying localStorage fallback",
+              );
+              var localUsers = getUsers();
+              if (localUsers.length > 0) {
+                attemptLogin(localUsers);
+              } else {
+                /* No local cache either — show a friendly retry message */
+                showLoginError(
+                  "Unable to reach the server. Please wait a moment and try again.",
+                );
+              }
+            }
           })
-          .catch(function () {
+          .catch(function (err) {
+            /* Network error or Supabase down — fall back to localStorage */
+            console.warn(
+              "ICU Login: Supabase fetch failed:",
+              err,
+              "— trying localStorage fallback",
+            );
             attemptLogin(getUsers());
           });
         return;

@@ -141,14 +141,23 @@
 
   /* Get single user by email */
   window._dbGetUserByEmail = function (email) {
-    return get(
-      "users",
-      "email=eq." +
+    var url = sbUrl(
+      "users?email=eq." +
         encodeURIComponent((email || "").toLowerCase().trim()) +
         "&select=*",
-    ).then(function (rows) {
-      return rows && rows[0] ? rowToUser(rows[0]) : null;
-    });
+    );
+    return fetch(url, { headers: HEADERS })
+      .then(function (r) {
+        if (!r.ok) {
+          /* 429 rate limit or server error — throw so .catch() fires
+             and login falls back to localStorage */
+          throw new Error("Supabase error " + r.status);
+        }
+        return r.json();
+      })
+      .then(function (rows) {
+        return rows && rows[0] ? rowToUser(rows[0]) : null;
+      });
   };
 
   /* Get single user by id */
@@ -386,6 +395,8 @@
     var isLoginPage = !!document.getElementById("loginBtn");
     var isAdminPage =
       !!document.getElementById("adminPanel") ||
+      !!document.getElementById("adminLogout") ||
+      !!document.getElementById("sidebarToggle") ||
       /admin/i.test(location.pathname);
 
     if (isLoginPage) {
