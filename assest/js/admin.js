@@ -368,23 +368,43 @@
      This ensures every device sees the same data.
   ---------------------------------------------------------- */
   function getUsers() {
+    /* Read from in-memory cache first (always up to date after _icuLoadCache),
+       fall back to localStorage only if cache not loaded yet */
+    if (
+      window._icuCache &&
+      window._icuCache.users &&
+      window._icuCache.users.length > 0
+    ) {
+      return window._icuCache.users;
+    }
     return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
   }
   function saveUsers(u) {
-    /* Write to localStorage for immediate UI update */
+    /* Update in-memory cache immediately */
+    if (window._icuCache) window._icuCache.users = u;
+    /* Also try localStorage — but don't crash if full */
     try {
       localStorage.setItem(USERS_KEY, JSON.stringify(u));
     } catch (e) {}
   }
   function getLogs() {
+    /* Read from in-memory cache — logs are NOT stored in localStorage
+       because they exceed iPhone 5MB storage limit. The in-memory cache
+       is always populated by _icuLoadCache on page load. */
+    if (
+      window._icuCache &&
+      window._icuCache.logs &&
+      window._icuCache.logs.length > 0
+    ) {
+      return window._icuCache.logs;
+    }
+    /* Fallback to localStorage only if memory cache empty */
     return JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
   }
   function saveLogs(l) {
-    /* Keep only last 200 logs in localStorage to prevent storage overflow */
-    var trimmed = Array.isArray(l) ? l.slice(-200) : l;
-    try {
-      localStorage.setItem(LOG_KEY, JSON.stringify(trimmed));
-    } catch (e) {}
+    /* Update in-memory cache */
+    if (window._icuCache) window._icuCache.logs = l;
+    /* Skip localStorage for logs — too large for iPhone */
   }
 
   /* ── Refresh all data fresh from Supabase into localStorage ──

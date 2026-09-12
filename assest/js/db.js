@@ -379,20 +379,21 @@
     return Promise.all([
       window._dbGetUsers().then(function (u) {
         window._icuCache.users = u;
+        /* Write users to localStorage — small enough to fit */
         safeLocalSet("icu_users", JSON.stringify(u));
         console.log("ICU DB: loaded " + u.length + " users");
       }),
       window._dbGetAllLogs().then(function (l) {
+        /* Store logs ONLY in memory — never in localStorage.
+           Logs are too large (1000+ entries) and exceed iPhone 5MB limit.
+           Admin page reads from window._icuCache.logs directly.
+           This permanently fixes the "cannot write to localStorage" error
+           and the empty admin page on iPhone/mobile devices. */
         window._icuCache.logs = l;
-        /* Only cache last 100 logs to keep storage lean */
-        safeLocalSet("icu_activity_log", JSON.stringify(l.slice(0, 100)));
-        console.log("ICU DB: loaded " + l.length + " logs");
+        console.log("ICU DB: loaded " + l.length + " logs (memory only)");
       }),
     ]).catch(function (err) {
-      console.warn(
-        "ICU DB: cache load failed, using localStorage fallback",
-        err,
-      );
+      console.warn("ICU DB: cache load failed", err);
     });
   };
 
